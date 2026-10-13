@@ -1,8 +1,8 @@
-/* ===== INTERIOR BANGUNAN (Tahap 8A) =====
-   Skrip klasik. Dimuat sebelum hud.js. Setiap bangunan di desa punya ruangan yang bisa dijelajahi.
-   Keadaan runtime (TIDAK disimpan): wI = {b, room, x, y} saat pemain di dalam. S.world tetap = titik di depan pintu eksterior,
-   jadi simpan/muat saat di dalam selalu pulih di pintu luar (titik aman). Aksi lewat tombol aksi (hud.js), bukan pop-up otomatis.
-   Seni: assets/world/interior.png (+interior.json) dibuat tools/build_interiors.py. Bila belum termuat dipakai kotak warna. */
+/* INTERIOR BANGUNAN 
+ Skrip klasik. Dimuat sebelum hud.js. Setiap bangunan di desa punya ruangan yang bisa dijelajahi.
+ Keadaan runtime (TIDAK disimpan): wI = {b, room, x, y} saat pemain di dalam. S.world tetap = titik di depan pintu eksterior,
+ jadi simpan/muat saat di dalam selalu pulih di pintu luar (titik aman). Aksi lewat tombol aksi (hud.js), bukan pop-up otomatis.
+ Seni: assets/world/interior.png (+interior.json) dibuat tools/build_interiors.py. Bila belum termuat dipakai kotak warna. */
 const INT_IM=new Image();INT_IM.src='assets/world/interior.png';let INT_SPR=null;
 try{fetch('assets/world/interior.json').then(r=>r.ok?r.json():null).then(j=>{if(j&&j.spr)INT_SPR=j.spr}).catch(()=>{})}catch(e){}
 let wI=null,wFade=null,intT=0;
@@ -36,8 +36,8 @@ const INT_MSG={
  hay:['Jerami kering untuk hewan ternak.','Dry hay for the livestock.'],
  pot:['Rak bahan dapur penduduk.','The resident\'s pantry shelf.']};
 /* Templat ruangan. w,h tile (32 px); y 0-1 = dinding atas; pintu = kolom dx di baris bawah.
-   o: [sprite,x,y,fw,fh,aksi,label,pesan] (jejak tabrakan fw x fh tile; kaki sprite = bawah jejak); d: dekor lantai [sprite,cx,cy];
-   hg: tempelan dinding [sprite,cx,barisAtas]; win: kolom jendela; gl: cahaya [cx,cy,r] */
+ o: [sprite,x,y,fw,fh,aksi,label,pesan] (jejak tabrakan fw x fh tile; kaki sprite = bawah jejak); d: dekor lantai [sprite,cx,cy];
+ hg: tempelan dinding [sprite,cx,barisAtas]; win: kolom jendela; gl: cahaya [cx,cy,r] */
 const INT_T={
 shop:{w:13,h:9,fl:['floor_wood_a','floor_wood_b'],wl:'wall_wood',dx:6,win:[6],
  o:[['shelf_goods',1,2,2,1],['shelf_goods2',3,2,2,1],['counter',7,3,3,1,'cashier','BELI'],['gacha',10,3,2,1,'gacha','GACHA'],['w_crates',1,6,1,1],['w_barrel',11,7,1,1],['w_sack',2,7,1,1]],

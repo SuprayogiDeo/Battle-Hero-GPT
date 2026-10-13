@@ -60,12 +60,12 @@ check('failed save rolls back completion without falsely marking done',()=>{
 });
 check('tutorial remains non-modal and never changes player position',()=>{
  const hud=fs.readFileSync(require('node:path').join(__dirname,'../js/hud.js'),'utf8');
- const a=hud.indexOf('/* ===== Tutorial persistence + highlight overlay (Stage 8H) =====');
+ const a=hud.indexOf('/* Tutorial persistence + highlight overlay */');
  const b=hud.indexOf('/* Count only successful, real player actions. Wrappers preserve the original return values. */',a);
  assert.ok(a>=0&&b>a,'tutorial UI block is present');const ui=hud.slice(a,b);
  assert.doesNotMatch(ui,/S\.world\.(?:x|y)\s*=|\bw\.(?:x|y)\s*=/,'tutorial must not teleport the player');
  assert.doesNotMatch(ui,/st\s*=\s*['"]pause['"]|freeze\s*=|spdm\s*=/,'tutorial must not pause the simulation or change game speed');
- assert.match(ui,/Pilih SIMPAN untuk menyimpan tutorial\./);assert.match(ui,/p==='lanjut'\?'SIMPAN'/,'the final continue phase exposes an explicit Save action');
+ assert.match(ui,/Pilih SIMPAN\./);assert.match(ui,/p==='lanjut'\?'SIMPAN'/,'the final continue phase exposes an explicit Save action');
 });
 check('locked requirements use short toasts and no large lock overlay',()=>{
  const hud=fs.readFileSync(require('node:path').join(__dirname,'../js/hud.js'),'utf8');
@@ -73,7 +73,7 @@ check('locked requirements use short toasts and no large lock overlay',()=>{
  const interior=fs.readFileSync(require('node:path').join(__dirname,'../js/interior.js'),'utf8');
  const life=fs.readFileSync(require('node:path').join(__dirname,'../js/life.js'),'utf8');
  assert.match(hud,/wSay\(wL\(t\.n\[0\]\+' terbuka di stage '\+unlock[^;]*,2\.5\)/);
- assert.match(hud,/Papan misi terkunci untuk sementara\.'[^;]*,2\.5\)/);
+ assert.match(hud,/Papan misi sedang terkunci. Coba lagi nanti\.'[^;]*,2\.5\)/);
  assert.match(world,/Terkunci\. Capai stage '\+WUN\[wNear\.c\][^;]*,3\)/,'world locked requirement uses a short 3 second toast');
  assert.match(interior,/function intTryEnter\(b\)\{const m=intLockMsg\(b\);if\(m\)\{wSay\(m,3\)/,'interior lock feedback remains a short 3 second toast');
  assert.match(life,/function lifeDrawLockedPlaces\(\)\{return;/,'large locked-place overlay is disabled');

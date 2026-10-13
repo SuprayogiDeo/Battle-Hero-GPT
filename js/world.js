@@ -1,8 +1,8 @@
-/* ===== DUNIA (Tahap 2A + 4: bangunan terbuka sesuai progres, musim salju, NPC di npc.js, tileset town.png opsional) =====
-   st='world'. Peta tile 40x30 (tile data 16 px, tampil x2 = 32 px), kamera mengikuti pemain,
-   joystick virtual (gaya kontrol manual), tabrakan tile, pemain = sprite hero.
-   Aset sementara: kotak berwarna. Bangunan baru penanda (belum membuka layar; itu Tahap 2B).
-   Posisi pemain: S.world={x,y} (piksel dunia, titik kaki), disimpan lewat sv(). Penyimpanan tetap via Save.*. */
+/* DUNIA (bangunan terbuka sesuai progres, musim salju, NPC di npc.js, tileset town.png opsional) 
+ st='world'. Peta tile 40x30 (tile data 16 px, tampil x2 = 32 px), kamera mengikuti pemain,
+ joystick virtual (gaya kontrol manual), tabrakan tile, pemain = sprite hero.
+ Aset sementara: kotak berwarna. Bangunan baru penanda (belum membuka layar; itu ).
+ Posisi pemain: S.world={x,y} (piksel dunia, titik kaki), disimpan lewat sv(). Penyimpanan tetap via Save.*. */
 const WT=16,WZ=2,WS=WT*WZ;let WW=40,WH=30;
 const WROWS=[
 'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
@@ -35,17 +35,17 @@ const WROWS=[
 'T..................,,................TTT',
 'TT.......T.........,,................TTT',
 'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'];
-/* legenda: . rumput  , jalan  d pintu/celah  T pohon  ~ air  S toko (rumah 4x5)  R barak (rumah 4x5)  G gerbang  Q papan misi  F pagar ladang  p petak ladang */
+/* legenda: . rumput , jalan d pintu/celah T pohon ~ air S toko (rumah 4x5) R barak (rumah 4x5) G gerbang Q papan misi F pagar ladang p petak ladang */
 const WMAP=WROWS.map(r=>r.split('')),WSOL={T:1,'~':1,S:1,R:1,G:1,Q:1,F:1,X:1},WNAME={S:'TOKO',R:'BARAK',G:'GERBANG',Q:'PAPAN MISI',F:'LADANG'},WSPAWN=[19,15];
 const WBLD=(()=>{const b={};WMAP.forEach((r,y)=>r.forEach((c,x)=>{if(!WNAME[c])return;const o=b[c]||(b[c]={c,x0:x,y0:y,x1:x,y1:y});o.x0=Math.min(o.x0,x);o.y0=Math.min(o.y0,y);o.x1=Math.max(o.x1,x);o.y1=Math.max(o.y1,y)}));return Object.values(b)})();
-const wAct=self.Anim?new Anim.Actor('avatar'):null; /* Tahap 5A: avatar Sunnyside */
-/* Tahap 5B: desa Sunnyside (Tmap). Bila village.json belum siap, peta lama tetap dipakai. */
+const wAct=self.Anim?new Anim.Actor('avatar'):null; /* avatar Sunnyside */
+/* desa Sunnyside (Tmap). Bila village.json belum siap, peta lama tetap dipakai. */
 let wVon=0;
 function wUseV(){if(wVon||!self.Tmap||!Tmap.ready())return;const V=Tmap.data();WW=V.w;WH=V.h;WMAP.length=0;V.grid.forEach(r=>WMAP.push(r.split('')));WBLD.length=0;for(const c in WBM)delete WBM[c];
 for(const c in V.bld){const b=V.bld[c],o={c,x0:b[0],y0:b[1],x1:b[2],y1:b[3]};WBLD.push(o);WBM[c]=o}
 WSPAWN[0]=V.spawn[0];WSPAWN[1]=V.spawn[1];if(typeof NPCS!='undefined')NPCS.forEach(o=>{const p=V.npcs[o.id];if(p){o.tx=p[0];o.ty=p[1]}});if(S.world&&S.world.disc==='*'&&isFinite(S.world.x)&&isFinite(S.world.y)){S.world.disc=Tmap.explore(S.world.x/WS,S.world.y/WS,'');sv()}wVon=1}
 let wjx=0,wjy=0,wjid=null,wcx=null,wcy=0,wface=1,wwalk=0,wHint=0,wFrom=0,wDlg=0,wNear=null,wPlace=null;
-/* ---- Tahap 4 ---- */
+
 let wNpc=null,wTalk=null,wMsg={t:0,s:''},wSn=0;
 const wL=(a,b)=>S.set.lang=='en'?b:a; /* teks 2 bahasa langsung di kode (tanpa kamus i18n) */
 const WUN={R:3,F:5,Q:8}; /* stage tertinggi (best) untuk membuka bangunan; tidak tercantum = selalu terbuka (Toko, Gerbang) */
@@ -55,7 +55,7 @@ function wSay(s,tm,kind){wMsg={t:tm||3,s,kind:kind||'toast'}}
 function wSnow(){const m=S.set.season|0;return m==2||(m==0&&[11,0,1].includes(new Date().getMonth()))}
 function wUnlockCheck(){const sn=S.wseen=(S.wseen&&typeof S.wseen=='object')?S.wseen:{},nw=[];for(const c in WUN)if(best>=WUN[c]&&!sn[c]){sn[c]=1;nw.push(WNAME[c])}if(nw.length){sv();wSay(wL('Bangunan baru terbuka: ','New building unlocked: ')+nw.join(', '),5);sfx('clear')}}
 /* Aset (CC0): "Adventure Awaits Asset Pack" oleh Ishtar Pixels -> assets/tiles/adv.png (tanah, rumput, air, rumah, pohon, pagar).
-   Tanaman: "16x16 RPG Tileset" oleh hilau (OpenGameArt) -> assets/tiles/plants.png. Bila gambar belum termuat/tidak ada, dunia memakai warna polos. */
+ Tanaman: "16x16 RPG Tileset" oleh hilau (OpenGameArt) -> assets/tiles/plants.png. Bila gambar belum termuat/tidak ada, dunia memakai warna polos. */
 const ADV=new Image();ADV.src='assets/tiles/adv.png';const PLT=new Image();PLT.src='assets/tiles/plants.png';
 const wArt=()=>ADV.complete&&ADV.naturalWidth>0;
 const WSP={t1:[99,16,42,54],t2:[174,21,52,49],S:[205,73,54,80],R:[68,73,54,80]}; /* x,y,w,h pada adv.png (S rumah merah, R rumah biru) */
@@ -68,7 +68,7 @@ const wBlocked=(x,y)=>wSolid(x-WFH,y-WFV)||wSolid(x+WFH,y-WFV)||wSolid(x-WFH,y)|
 function worldEnter(){wUseV();const w=S.world;if(!w||!isFinite(w.x)||!isFinite(w.y)||wBlocked(w.x,w.y))S.world={x:WSPAWN[0]*WS+WS/2,y:WSPAWN[1]*WS+WS/2+8};/* Keep exploration per save; do not reveal every tile when entering the world. */wjx=wjy=0;wjid=null;wcx=null;wHint=6;wFrom=0;wDlg=0;wTalk=null;st='world';wUnlockCheck();sv();sfx('click')}
 function worldLeave(){wjid=null;wjx=wjy=0;wFrom=0;wDlg=0;wTalk=null;st='menu';sv();sfx('click')}
 function wMove(x,y){let dx=(x-JC[0])/JR,dy=(y-JC[1])/JR;const l=Math.hypot(dx,dy);if(l>1){dx/=l;dy/=l}wjx=l<.15?0:dx;wjy=l<.15?0:dy}
-/* ---- Tahap 2B: bangunan = pintu ke layar lama. wFrom=1 berarti layar dibuka dari dunia, jadi KEMBALI -> goBack() -> dunia. ---- */
+/* bangunan = pintu ke layar lama. wFrom=1 berarti layar dibuka dari dunia, jadi KEMBALI -> goBack() -> dunia. */
 const WGO={S:'shop',R:'heroes',Q:'quests'},WGD=[['MAIN STAGE',190,104,260,30],['DUNGEON',190,142,260,30],['MENARA HARIAN',190,180,260,30],['BATAL',190,218,260,30]],WNR=22;
 function wNearB(){const w=S.world;let b=null,bd=WNR;WBLD.forEach(o=>{const dx=Math.max(o.x0*WS-w.x,0,w.x-(o.x1+1)*WS),dy=Math.max(o.y0*WS-w.y,0,w.y-(o.y1+1)*WS),d=Math.hypot(dx,dy);if(d<bd){bd=d;b=o}});return b}
 function wFindPlace(){if(!wVon||!self.Tmap||!Tmap.data())return null;const w=S.world,ps=Tmap.data().places||[];let bestP=null,bd=48;ps.forEach(p=>{const sz=p.footprint||[p.platform&&p.platform.w||p.fence&&p.fence.w||1,p.platform&&p.platform.h||p.fence&&p.fence.h||1],x0=p.x*WS,y0=p.y*WS,x1=x0+sz[0]*WS,y1=y0+sz[1]*WS,dx=Math.max(x0-w.x,0,w.x-x1),dy=Math.max(y0-w.y,0,w.y-y1),d=Math.hypot(dx,dy);if(d<bd){bd=d;bestP=p}});return bestP}
@@ -76,7 +76,7 @@ function wGo(s){wbCheck();wFrom=1;wDlg=0;wTalk=null;wjid=null;wjx=wjy=0;sv();st=
 function wInteract(){if(st!='world'||wDlg)return;if(wTalk){npcAdv();return}wjid=null;wjx=wjy=0;
 if(wNpc){npcStart(wNpc);return}if(wPlace){sfx('click');if(wPlace.type==='animal_pen')wGo('ranch');else if(wPlace.type==='market'){marketFrom='world';wGo('market')}return}if(!wNear)return;sfx('click');
 if(wLock(wNear.c)){wSay(wL('Terkunci. Capai stage '+WUN[wNear.c]+' dulu (rekormu: '+best+')','Locked. Reach stage '+WUN[wNear.c]+' first (your best: '+best+')'),3);return}
-if(wNear.c=='G'){wDlg=1;return}if(wNear.c=='F'){say(wL('Ladang ada di petak rumput terbuka. Pilih cangkul, benih, atau ember di hotbar.','The farm is on open grass plots. Select hoe, seeds, or bucket on the hotbar.'));return}if(WGO[wNear.c])wGo(WGO[wNear.c])}
+if(wNear.c=='G'){wDlg=1;return}if(wNear.c=='F'){say(wL('Ladangnya di petak rumput terbuka. Pilih cangkul, benih, atau ember di hotbar.','The field is on the open grass plots. Pick the hoe, seeds, or bucket on the hotbar.'));return}if(WGO[wNear.c])wGo(WGO[wNear.c])}
 function worldResume(){wjid=null;wjx=wjy=0;wDlg=0;wTalk=null;wHint=0;st='world';wUnlockCheck();sv()}
 function goBack(){if(wFrom)worldResume();else st='menu'}
 function worldDown(id,x,y){if(wTalk){npcAdv();return}if(wDlg){WGD.forEach((b,i)=>{if(x>=b[1]&&x<=b[1]+b[3]&&y>=b[2]&&y<=b[2]+b[4]){sfx('click');if(i==0)wGo('stages');else if(i==1)hbStartDungeon();else if(i==2)wGo('tower');else wDlg=0}});return}
@@ -88,9 +88,9 @@ if(wDlg||wTalk)dx=dy=0;let mv=0;if(dx||dy){const nx=w.x+dx*WSPEED*dt,ny=w.y+dy*W
 wwalk=mv?wwalk+dt:0;if(mv)qDirty=1;if(wAct)wAct.update(mv?dx:0,mv?dy:0);if(wVon)Tmap.update(dt);if(self.npcUpdate)npcUpdate(dt);
 const tx=Math.max(0,Math.min(WW*WS-VW,w.x-VW/2)),ty=Math.max(0,Math.min(WH*WS-360,w.y-14-180));
 if(wcx==null){wcx=tx;wcy=ty}else{const k=1-Math.exp(-10*dt);wcx+=(tx-wcx)*k;wcy+=(ty-wcy)*k}if(wVon&&Tmap.explore){const oldDisc=w.disc||'';w.disc=Tmap.explore(w.x/WS,w.y/WS,oldDisc);if(w.disc!==oldDisc)sv()}if(wHint>0)wHint-=dt;if(wMsg.t>0)wMsg.t-=dt;wNear=wNearB();wPlace=wFindPlace();wNpc=self.npcNear?npcNear(w.x,w.y):null;wFx(dt)}
-/* ---- Tahap 6C: siklus siang-malam (tint kanvas), pintu terbuka, jendela & lentera menyala (cahaya digambar di tilemap.js) ----
-   S.set.dn: 0 = siklus cepat (6 menit/hari, mulai pagi), 1 = jam perangkat, 2 = siang tetap. Jam game tidak disimpan (sengaja, tanpa ubah save). */
-const WCROP=['carrot','pumpkin','sunflower']; /* Tahap 8D: Sunnyside Crops tahap 00..05; bunga legacy memakai sprite sunflower. */
+/* siklus siang-malam (tint kanvas), pintu terbuka, jendela & lentera menyala (cahaya digambar di tilemap.js) 
+ S.set.dn: 0 = siklus cepat (6 menit/hari, mulai pagi), 1 = jam perangkat, 2 = siang tetap. Jam game tidak disimpan (sengaja, tanpa ubah save). */
+const WCROP=['carrot','pumpkin','sunflower']; /* Sunnyside Crops tahap 00..05; bunga legacy memakai sprite sunflower. */
 let wHr=9,wTn=[0,0,0,0,0];const wDoor={S:0,R:0};
 const WTK=[[0,10,16,64,.6],[5,18,24,70,.54],[6.5,255,140,70,.2],[8,255,205,150,0],[16.5,255,205,150,0],[18,255,120,50,.2],[19.5,60,40,100,.38],[21,10,16,64,.6],[24,10,16,64,.6]];
 function wTone(h){let i=1;while(i<WTK.length-1&&WTK[i][0]<h)i++;const a=WTK[i-1],b=WTK[i],k=(h-a[0])/(b[0]-a[0]),m=j=>a[j]+(b[j]-a[j])*k,al=m(4);return[m(1)|0,m(2)|0,m(3)|0,al,Math.max(0,Math.min(1,(al-.1)/.25))]}

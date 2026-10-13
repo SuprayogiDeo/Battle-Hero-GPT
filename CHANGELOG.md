@@ -1,5 +1,26 @@
 # Changelog
 
+## Batch 9A — 0.4.7-rc.1 — Jembatan kayu, pembersihan peta & HUD fokus (cache v55)
+
+- Gapura biome dihapus (`biomeGates` kosong; papan nama biome tetap). Papan biome Meadow dipindah dari atas jembatan ke samping jalan.
+- Penumpukan bangunan diperbaiki: Pasar Desa digeser ke x=30 dan Kasir Pasar ke x=34 sehingga kios tidak saling menimpa dan tidak menimpa bangku. Tes baru memeriksa semua sprite bangunan/kios bertubuh >= 30 px tidak bertumpuk.
+- Jembatan timur diganti jembatan kayu: papan berlapis dengan pagar, tiang, balok ujung, tiang berlapis di atas air, dan bayangan di air. Tile baru id 128-143 (`tools/build_bridge_tiles.py`, `assets/world/bridge_tiles.json`; sheet tiles.png jadi 5 baris); `build_world.py` memakai `style: plank`.
+- Minimap langsung terbuka penuh sejak awal (tanpa penemuan wilayah); penemuan biome hanya memicu banner.
+- Panel FOKUS pindah ke bawah minimap (mengikuti skala UI) dan bisa diminimalkan dengan ketuk; status `S.journal.fmin` tersimpan.
+- Batas bertani dan memancing: sudah dihapus sejak 8J, diverifikasi tidak ada sisa batas harian pada panen/memancing. Tidak ada popup "E / KETUK" atau "MEMANCING/GIGITAN" dekat air (tes memeriksa seluruh js/ kecuali kamus i18n; entri kamus lama tak terpakai tetap ada).
+- Urutan pembangunan ulang dunia: `build_bridge_tiles.py` -> `build_world.py` -> `build_lights.py`. Patch kode: `tools/patch_9a.py`. Tes: `tools/test_stage_9a.js`.
+
+## Batch 8J — 0.4.6-rc.1 — Pembersihan pasca-audit (cache v54)
+
+- Menghapus batas harian panen ladang dan memancing; panen selalu memberi hasil penuh dan tetap memerlukan alat terpilih.
+- Memancing tanpa popup: tombol "E / KETUK" dan kotak "GIGITAN!" dihapus; tarik hanya lewat ikon tangan kanan-bawah dan sesi menutup otomatis setelah tangkapan.
+- Benih awal mengikuti kapasitas tas dan diberikan bertahap bila tas penuh; key benih bernilai nol dibersihkan.
+- Menghapus layar ladang lama (`drawFarm`, `farmTap`, `farmClick`) beserta kait di `screens.js` dan `input.js`.
+- Menulis ulang teks dunia (NPC, toast ladang/pancing/tas/bengkel) dengan nada hangat, ringkas, santai, dan menenangkan; deskripsi aplikasi disamakan.
+- Menghapus tutorial awal: layar Cara Bermain tidak lagi muncul otomatis saat Main pertama (tetap bisa dibuka dari menu) dan petunjuk sekali-tampil di pertempuran dihapus.
+- Menyeragamkan teks sistem (peternakan, toko, misi, kehidupan desa, tutorial milestone) ke gaya ringkas tanpa seruan dan kata baku berlebihan.
+- Merapikan komentar kode dari label proses internal, menaikkan cache service worker ke `v54`.
+
 ## Batch 8H+8I — 0.4.6-rc.1 — Tutorial milestone persisten, audit konsistensi & profiler (cache v53)
 
 - Menambahkan status tutorial per topik `belum/berjalan/selesai` melalui `Save.*`, pemulihan fase setelah reload, dan pencegahan kemunculan ulang setelah selesai. Urutan milestone: Stage 2 toko/gacha, Stage 5 bertani, Stage 6 memancing, lalu kebun buah, kumpul, dan masak. Fase LANJUT/SIMPAN perlu konfirmasi eksplisit; jika Save gagal, tutorial tidak ditandai selesai.

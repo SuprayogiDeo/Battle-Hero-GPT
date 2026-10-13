@@ -1,9 +1,9 @@
-/* ===== HUD DUNIA (Tahap 8A) =====
-   Dimuat TERAKHIR sebelum input.js. Minimap kiri-atas (tanpa judul), hotbar 8 slot tengah-bawah (geser horizontal = halaman),
-   satu tombol aksi kontekstual (ikon tangan) kanan-bawah, dan pembungkus updWorld/drawWorld/worldDown/wInteract/worldEnter
-   agar interior (interior.js) berjalan di st='world'. Jam digital digambar life.js (hudClock). Posisi/ukuran: joystick JC=[66,258],
-   hotbar x 174-467 y 316-350, tombol aksi pusat (592,298) r 30, minimap 6-102 x 6-78.
-   Tool terpilih disimpan di S.hb.sel (diselamatkan sv()); angka stage pembuka alat = sementara (TBD, perlu balancing). */
+/* HUD DUNIA 
+ Dimuat TERAKHIR sebelum input.js. Minimap kiri-atas (tanpa judul), hotbar 8 slot tengah-bawah (geser horizontal = halaman),
+ satu tombol aksi kontekstual (ikon tangan) kanan-bawah, dan pembungkus updWorld/drawWorld/worldDown/wInteract/worldEnter
+ agar interior (interior.js) berjalan di st='world'. Jam digital digambar life.js (hudClock). Posisi/ukuran: joystick JC=[66,258],
+ hotbar x 174-467 y 316-350, tombol aksi pusat (592,298) r 30, minimap 6-102 x 6-78.
+ Tool terpilih disimpan di S.hb.sel (diselamatkan sv()); angka stage pembuka alat = sementara (TBD, perlu balancing). */
 const HUD_IM=new Image();HUD_IM.src='assets/world/hud.png';
 const HB_TOOLS=[
  {id:'hand',i:0,n:['Tangan','Hand']},{id:'hoe',i:1,n:['Cangkul','Hoe']},{id:'can',i:2,n:['Ember','Bucket']},
@@ -23,8 +23,8 @@ function hudEnsure(){
 const hbUnlocked=t=>!!t&&best>=(HB_STARTER_TOOL_CONFIG?.unlockAt?.[t.id]??999);
 function hudTool(){const h=hudEnsure();return HB_TOOLS[h.sel]||null}
 function hudToolId(){const h=hudEnsure(),t=HB_TOOLS[h.sel];return t?t.id:(SC_MATERIALS&&SC_MATERIALS.some(m=>m.id===h.slots[h.sel])?h.slots[h.sel]:'hand')}
-function hudAssignQuickSlot(index,id){const h=hudEnsure();index=Math.floor(+index);if(index<6||index>15||!SC_MATERIALS||!SC_MATERIALS.some(m=>m.id===id)){wSay(wL('Enam alat dasar dilindungi atau bahan tidak valid.','Starter tools are protected or the item is invalid.'),2);return false;}storagecraftEnsure();if((+S.gather.items[id]||0)<1){wSay(wL('Bahan tidak tersedia di tas.','Material is not available in the bag.'),2);return false;}h.slots[index]=id;sv();hudNameT=0;wSay(wL('Slot '+(index+1)+' diatur: '+(SC_MATERIALS.find(m=>m.id===id)?.name||id)+'.','Slot '+(index+1)+' set: '+(SC_MATERIALS.find(m=>m.id===id)?.en||id)+'.'),2);sfx('click');return true}
-function hudClearQuickSlot(index){const h=hudEnsure();index=Math.floor(+index);if(index<6||index>15){wSay(wL('Enam alat dasar dilindungi.','The six starter tools are protected.'),2);return false;}if(!h.slots[index])return true;delete h.slots[index];sv();sfx('click');return true}
+function hudAssignQuickSlot(index,id){const h=hudEnsure();index=Math.floor(+index);if(index<6||index>15||!SC_MATERIALS||!SC_MATERIALS.some(m=>m.id===id)){wSay(wL('Enam alat dasar tetap di tempatnya.','The six basic tools stay where they are.'),2);return false;}storagecraftEnsure();if((+S.gather.items[id]||0)<1){wSay(wL('Bahan itu tidak ada di tas.','That material is not in your bag.'),2);return false;}h.slots[index]=id;sv();hudNameT=0;wSay(wL('Slot '+(index+1)+' diatur: '+(SC_MATERIALS.find(m=>m.id===id)?.name||id)+'.','Slot '+(index+1)+' set: '+(SC_MATERIALS.find(m=>m.id===id)?.en||id)+'.'),2);sfx('click');return true}
+function hudClearQuickSlot(index){const h=hudEnsure();index=Math.floor(+index);if(index<6||index>15){wSay(wL('Enam alat dasar tetap di tempatnya.','The six basic tools stay where they are.'),2);return false;}if(!h.slots[index])return true;delete h.slots[index];sv();sfx('click');return true}
 function hudSelect(i){
  const h=hudEnsure(),t=HB_TOOLS[i];
  if(!t){h.sel=i;hudNameT=0;sv();return}
@@ -42,7 +42,7 @@ const HUD_BLD={kitchen:1,workshop:1,village_hall:1,woodcutter_hut:1};
 function hudServiceAct(service){
  if(!service)return false;
  if(service.type==='quest_board'){
-  if(wLock('Q')){wSay(wL('Papan misi terkunci untuk sementara.','The quest board is currently locked.'),2.5);return false;}
+  if(wLock('Q')){wSay(wL('Papan misi sedang terkunci. Coba lagi nanti.','The quest board is locked for now. Try again later.'),2.5);return false;}
   wGo('quests');return true;
  }
  if(service.type==='market_cashier'){marketFrom='world';wGo('market');return true;}
@@ -51,7 +51,7 @@ function hudServiceAct(service){
 }
 function hudCtx(){
  if(st!=='world'||wDlg||wTalk||wFade)return null;
- if(self.lifeFish&&lifeFish.active){const f=lifeFish;if(f.phase==='bite')return{l:wL('TARIK!','REEL!'),on:1,f:()=>lifeFishTap()};if(f.phase==='caught'||f.phase==='miss')return{l:wL('LANJUT','CONTINUE'),on:1,f:()=>lifeFishTap()};return{l:wL('TUNGGU','WAIT'),on:0,f:()=>{}};}
+ if(self.lifeFish&&lifeFish.active){const f=lifeFish;if(f.phase==='bite')return{l:wL('TARIK!','REEL!'),on:1,f:()=>lifeFishTap()};return{l:wL('TUNGGU','WAIT'),on:0,f:()=>{}};}
  if(wI)return intCtx();
  const door=intDoorNear();if(door)return{l:wL('MASUK','ENTER'),on:1,f:()=>intTryEnter(door)};
  const tool=hudToolId(),drop=self.lifeNearWorldDrop?lifeNearWorldDrop():null;if(drop)return{l:wL('AMBIL','PICK UP'),on:1,f:()=>lifeTakeWorldDrop(drop.id)};
@@ -60,13 +60,13 @@ function hudCtx(){
  const r=self.lifeNearResource?lifeNearResource():null;
  if(r){const need=HB_KIND[r.kind]||'hand',lab=need=='axe'?wL('TEBANG','CHOP'):need=='pick'?wL('GALI','MINE'):wL('PETIK','PICK');
   return{l:lab,on:tool==need,f:()=>{if(tool==need)lifeDoGather(r);else{const t=HB_TOOLS.find(q=>q.id==need);wSay(wL('Pilih '+t.n[0]+' di hotbar dulu.','Select the '+t.n[1]+' on the hotbar first.'),3);sfx('click')}}}}
- if(spot){return{l:wL('LEMPAR','CAST'),on:tool=='rod',f:()=>{if(tool=='rod')lifeStartFishing(spot);else wSay(wL('Pilih Pancing di hotbar (terbuka di stage 6).','Select the Fishing rod on the hotbar (stage 6).'),3)}}}
- if(tool=='can'&&hudWaterNear()&&Math.max(0,+S.hb.water||0)<6)return{l:wL('ISI AIR','FILL'),on:1,f:()=>{S.hb.water=6;sv();wSay(wL('Ember terisi (6 siraman).','Bucket filled (6 uses).'),2);sfx('click')}};
+ if(spot){return{l:wL('LEMPAR','CAST'),on:tool=='rod',f:()=>{if(tool=='rod')lifeStartFishing(spot);else wSay(wL('Pilih Pancing di hotbar dulu (terbuka di stage 6).','Pick the fishing rod on the hotbar first (unlocks at stage 6).'),3)}}}
+ if(tool=='can'&&hudWaterNear()&&Math.max(0,+S.hb.water||0)<6)return{l:wL('ISI AIR','FILL'),on:1,f:()=>{S.hb.water=6;sv();wSay(wL('Ember terisi penuh, cukup untuk enam kali siram.','Bucket filled, enough for six waterings.'),2);sfx('click')}};
  if(wNpc)return{l:wL('BICARA','TALK'),on:1,f:()=>_hudInteract()};
  const service=self.Tmap&&Tmap.nearService&&S.world?Tmap.nearService(S.world.x/WS,S.world.y/WS):null;
  if(service){const labels={quest_board:['MISI','QUEST'],market_cashier:['KASIR','CASHIER'],animal_trough:['PAKAN','FEED']},q=labels[service.type]||['GUNAKAN','USE'];return{l:wL(q[0],q[1]),on:1,f:()=>hudServiceAct(service)}}
- if(wPlace){const t=wPlace.type;if(t==='market')return{l:wL('CARI KASIR','FIND CASHIER'),on:0,f:()=>wSay(wL('Transaksi dilakukan di kasir kios.','Use the kiosk cashier for transactions.'),2.5)};if(t==='animal_pen')return{l:wL('CARI PALUNG','FIND TROUGH'),on:0,f:()=>wSay(wL('Gunakan palung pakan di sisi kandang.','Use the feed trough beside the pen.'),2.5)};if(t==='orchard'||t==='mushroom_grove')return{l:wL('LIHAT','LOOK'),on:1,f:()=>_hudInteract()}}
- if(wNear){if(wNear.c=='G')return{l:wL('GERBANG','GATE'),on:1,f:()=>_hudInteract()};if(wNear.c=='Q')return{l:wL('PAPAN MISI','QUEST BOARD'),on:0,f:()=>wSay(wL('Gunakan papan misi fisik di dekat jalur.','Use the physical quest board near the path.'),2.5)};if(wNear.c=='F')return{l:wL('LADANG','FIELD'),on:!wLock('F'),f:()=>{if(wLock('F'))_hudInteract();else say(wL('Ladang ada di petak rumput terbuka. Pilih cangkul, benih, atau ember di hotbar.','The farm is on the open grass plots. Select hoe, seeds, or bucket on the hotbar.'))}}}
+ if(wPlace){const t=wPlace.type;if(t==='market')return{l:wL('CARI KASIR','FIND CASHIER'),on:0,f:()=>wSay(wL('Transaksi lewat kasir di kios.','Trade at the kiosk cashier.'),2.5)};if(t==='animal_pen')return{l:wL('CARI PALUNG','FIND TROUGH'),on:0,f:()=>wSay(wL('Pakan ada di palung samping kandang.','Feed is at the trough beside the pen.'),2.5)};if(t==='orchard'||t==='mushroom_grove')return{l:wL('LIHAT','LOOK'),on:1,f:()=>_hudInteract()}}
+ if(wNear){if(wNear.c=='G')return{l:wL('GERBANG','GATE'),on:1,f:()=>_hudInteract()};if(wNear.c=='Q')return{l:wL('PAPAN MISI','QUEST BOARD'),on:0,f:()=>wSay(wL('Papan misinya ada di dekat jalur.','The quest board is near the path.'),2.5)};if(wNear.c=='F')return{l:wL('LADANG','FIELD'),on:!wLock('F'),f:()=>{if(wLock('F'))_hudInteract();else say(wL('Ladangnya di petak rumput terbuka. Pilih cangkul, benih, atau ember di hotbar.','The field is on the open grass plots. Pick the hoe, seeds, or bucket on the hotbar.'))}}}
  return null;
 }
 const hudIcon=(i,x,y,z,a)=>{if(HUD_IM.complete&&HUD_IM.naturalWidth>0){g.globalAlpha=a==null?1:a;g.drawImage(HUD_IM,i*16,0,16,16,Math.round(x),Math.round(y),16*z,16*z);g.globalAlpha=1}};
@@ -115,20 +115,21 @@ function hudDown(id,x,y){
  const first=L.left+L.slot/2,last=first+7*L.step;
  if(y>=L.centerY-L.hit/2&&y<=L.centerY+L.hit/2&&x>=first-L.hit/2&&x<=last+L.hit/2){const slot=Math.max(0,Math.min(7,Math.round((x-first)/L.step)));hudSw={id:id,x0:x,slot,moved:0};return true}
  const z=hudUiScale();if(!wI&&x>=4&&x<=4+100*z&&y>=4&&y<=4+76*z){if(self.hbOpenWorldMap)hbOpenWorldMap();return true}
+ if(!wI&&self.jrFocusRect){const f=jrFocusRect();if(x>=f.x&&x<=f.x+f.w&&y>=f.y-2&&y<=f.y+f.h+2){jrToggleFocus();sfx('click');return true}}
  return false;
 }
 const hudPtr=e=>{const r=cv.getBoundingClientRect();return(e.clientX-r.left)*VW/r.width-OX};
 addEventListener('pointermove',e=>{if(!hudSw||e.pointerId!==hudSw.id)return;if(!hudSw.moved&&Math.abs(hudPtr(e)-hudSw.x0)>28){hudSw.moved=1;const h=hudEnsure();h.pg=h.pg?0:1;sv();sfx('click')}});
 const hudUp=e=>{if(!hudSw||e.pointerId!==hudSw.id)return;const s=hudSw;hudSw=null;if(!s.moved)hudSelect(hudEnsure().pg*8+s.slot)};
 addEventListener('pointerup',hudUp);addEventListener('pointercancel',()=>{hudSw=null});
-/* ---- pembungkus (dimuat terakhir; urutan rantai: world.js -> life.js -> storagecraft/journal/adventure -> hud.js) ---- */
+/* pembungkus (dimuat terakhir; urutan rantai: world.js -> life.js -> storagecraft/journal/adventure -> hud.js) */
 const _hudInteract=wInteract,_hudUpd=updWorld,_hudDraw=drawWorld,_hudDown=worldDown,_hudEnter=worldEnter;
 wInteract=function(){
  if(st!=='world'||wDlg||wTalk||wFade){_hudInteract();return}
  if(self.lifeWorldQuick)return;
  const c=hudCtx();if(c){c.f();return}
- if(!wI&&wPlace&&(wPlace.type==='market'||wPlace.type==='animal_pen')){wSay(wPlace.type==='market'?wL('Transaksi dilakukan di kasir kios.','Use the kiosk cashier for transactions.'):wL('Gunakan palung pakan di sisi kandang.','Use the feed trough beside the pen.'),2.5);return}
- if(!wI&&wPlace&&HUD_BLD[wPlace.type]){wSay(wL('Pintu bangunan ada di sisi depan.','The door is at the front of the building.'),2.5);return}
+ if(!wI&&wPlace&&(wPlace.type==='market'||wPlace.type==='animal_pen')){wSay(wPlace.type==='market'?wL('Transaksi lewat kasir di kios.','Trade at the kiosk cashier.'):wL('Pakan ada di palung samping kandang.','Feed is at the trough beside the pen.'),2.5);return}
+ if(!wI&&wPlace&&HUD_BLD[wPlace.type]){wSay(wL('Pintunya ada di sisi depan bangunan.','The door is on the front of the building.'),2.5);return}
  if(wI)return;_hudInteract();
 };
 updWorld=function(dt){if(wFade)intFadeStep(dt);if(wI&&!lifeWorldQuick){intUpdate(dt);return}_hudUpd(dt)};
@@ -140,7 +141,7 @@ worldDown=function(id,x,y){
 };
 worldEnter=function(){wI=null;wFade=null;hudSw=null;_hudEnter()};
 
-/* ===== Tutorial persistence + highlight overlay (Stage 8H) ===== */
+/* Tutorial persistence + highlight overlay */
 function hbTutLayout(id){
  if(id==='shop')return{x:12,y:136,w:350,h:124};
  if(id==='gacha')return{x:324,y:82,w:300,h:124};
@@ -169,10 +170,10 @@ function hbTutDraw(){
  g.save();g.fillStyle='rgba(10,14,23,.96)';g.fillRect(L.x,L.y,L.w,L.h);g.strokeStyle='#f4d36f';g.lineWidth=2;g.strokeRect(L.x+1,L.y+1,L.w-2,L.h-2);
  g.fillStyle='#f4d36f';g.beginPath();g.arc(L.x+13,L.y+17,4,0,Math.PI*2);g.fill();
  T(tr('TUTORIAL')+' · '+tr(t.title),L.x+24,L.y+20,'#ffe39a',10,'left');
- let msg='Ikuti petunjuk; posisi tidak akan dipindahkan.';
+ let msg='Ikuti petunjuknya. Posisimu tidak dipindah.';
  if(p==='instruksi'||p==='sorot'||p==='tunggu')msg=t.instruction;
- else if(p==='konfirmasi')msg='Aksi nyata tercatat.';
- else if(p==='lanjut')msg='Pilih SIMPAN untuk menyimpan tutorial.';else if(p==='simpan')msg='Menyimpan progres tutorial…';
+ else if(p==='konfirmasi')msg='Aksimu tercatat.';
+ else if(p==='lanjut')msg='Pilih SIMPAN.';else if(p==='simpan')msg='Menyimpan panduan…';
  T(tr(msg),L.x+10,L.y+43,'#eef4ff',9,'left');
  const by=L.y+74,bx=L.x+L.w-164;
  if(p==='tunggu'){

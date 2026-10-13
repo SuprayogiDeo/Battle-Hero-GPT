@@ -1,7 +1,7 @@
 {
   "name": "Hero Battle",
   "short_name": "Hero Battle",
-  "description": "Hero Battle - pertempuran dan eksplorasi dunia",
+  "description": "Hero Battle - bertempur, bertani, dan menjelajah dunia dengan santai",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

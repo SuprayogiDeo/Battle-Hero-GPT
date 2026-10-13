@@ -1,4 +1,4 @@
-/* ===== PWA ===== */
+/* PWA */
 if('serviceWorker' in navigator&&location.protocol!='file:'){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 (()=>{const box=document.getElementById('pwa');let dp=null,off=false;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e});

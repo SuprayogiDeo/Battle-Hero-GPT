@@ -1,14 +1,14 @@
-/* ===== NPC DUNIA (Tahap 4) =====
-   4 NPC berdialog di dunia. Dimuat setelah farm.js. Semua hook di world.js dijaga (self.npcXxx&&...), jadi bila file ini
-   tidak dimuat dunia tetap jalan tanpa NPC. Teks 2 bahasa langsung di kode lewat wL(id,en) (tanpa kamus i18n.js).
-   Tambah NPC: tambah entri di NPCS (h = id hero untuk sprite, tx/ty = tile rumput kosong) dan satu cabang di npcLines(). */
+/* NPC DUNIA 
+ 4 NPC berdialog di dunia. Dimuat setelah farm.js. Semua hook di world.js dijaga (self.npcXxx&&...), jadi bila file ini
+ tidak dimuat dunia tetap jalan tanpa NPC. Teks 2 bahasa langsung di kode lewat wL(id,en) (tanpa kamus i18n.js).
+ Tambah NPC: tambah entri di NPCS (h = id hero untuk sprite, tx/ty = tile rumput kosong) dan satu cabang di npcLines(). */
 const NPCS=[
 {id:'guard',h:'knight',tx:22,ty:3,n:['Penjaga Gerbang','Gate Guard']},
 {id:'merchant',h:'cleric',tx:12,ty:9,n:['Pedagang','Merchant']},
 {id:'farmer',h:'clubber',tx:13,ty:22,n:['Petani','Farmer']},
 {id:'elder',h:'oracle',tx:26,ty:12,n:['Tetua Desa','Village Elder']}];
 const NB={R:['Barak','the Barracks'],F:['Ladang','the Field'],Q:['Papan Misi','the Quest Board']};
-/* Tahap 6A: posisi runtime (px,py) = rumah (tx,ty) + berkeliling pendek. wUseV() menimpa tx,ty -> npcSync mereset posisi. */
+/* posisi runtime (px,py) = rumah (tx,ty) + berkeliling pendek. wUseV() menimpa tx,ty -> npcSync mereset posisi. */
 function npcSync(o){const k=o.tx+','+o.ty;if(o._k!==k){o._k=k;o.px=o.tx*WS+WS/2;o.py=o.ty*WS+26;o.mode='wait';o.wt=1+Math.random()*3;o.vx=o.vy=0;o.gx=o.gy=0}}
 const npcX=o=>(npcSync(o),o.px),npcY=o=>(npcSync(o),o.py);
 const NPCR=WS*2,NPCSP=28;
@@ -26,19 +26,19 @@ if(ac){ac.update(vx,vy);if(talk)ac.face(w.x-o.px,w.y-o.py)}})}
 function npcHit(x,y){for(const o of NPCS)if(Math.abs(x-npcX(o))<15&&Math.abs(y-npcY(o))<10)return true;return false}
 function npcNear(px,py){let b=null,bd=34;for(const o of NPCS){const d=Math.hypot(px-npcX(o),py-npcY(o));if(d<bd){bd=d;b=o}}return b}
 function npcLines(o){const b=best,r=[];
-if(o.id=='guard'){r.push(wL('Selamat datang, pahlawan! Lewat gerbang ini kau menuju medan perang.','Welcome, hero! This gate leads to the battlefield.'));
-r.push(b>0?wL('Rekormu stage '+b+'. Teruslah maju!','Your record is stage '+b+'. Keep going!'):wL('Kau belum bertarung? Masuk lewat gerbang dan coba Stage 1.','Have you not fought yet? Go through the gate and try Stage 1.'));
-r.push(wL('Menara Harian juga lewat sini. Aturannya berubah tiap hari.','The Daily Tower is through here too. Its rules change every day.'))}
-else if(o.id=='merchant'){r.push(wL('Selamat datang! Toko selalu buka, dan ada panggilan hero gratis tiap hari.','Welcome! The shop is always open, and there is a free hero summon every day.'));
-r.push(wL('Gear bagus ada di tab Liontin. Tapi naikkan level hero dulu sebelum menghabiskan emas.','Good gear is in the Pendant tab. But level up your heroes before spending all your gold.'));
-r.push(S.ft>0||S.fe>0?wL('Hari ini kau masih punya panggilan gratis. Jangan sampai terlewat!','You still have a free summon today. Do not miss it!'):wL('Panggilan gratismu hari ini sudah dipakai. Kembali lagi besok ya.','You used your free summon today. Come back tomorrow.'))}
+if(o.id=='guard'){r.push(wL('Halo, selamat datang. Gerbang ini menuju medan pertempuran.','Hi, welcome. This gate leads to the battlefield.'));
+r.push(b>0?wL('Rekormu stage '+b+'. Teruslah maju!','Your record is stage '+b+'. Keep going!'):wL('Belum pernah bertarung? Mulai dari Stage 1.','Not fought yet? Start from Stage 1.'));
+r.push(wL('Menara Harian juga lewat sini. Aturannya berganti tiap hari.','The Daily Tower is through here too. Its rules change every day.'))}
+else if(o.id=='merchant'){r.push(wL('Selamat datang. Tokonya buka terus, dan ada panggilan hero gratis tiap hari.','Welcome in. The shop stays open, and there is a free hero summon every day.'));
+r.push(wL('Perlengkapan bagus ada di tab Liontin. Tapi naikkan level hero dulu, baru belanja.','Good gear is in the Pendant tab. Level up your heroes first, then shop.'));
+r.push(S.ft>0||S.fe>0?wL('Panggilan gratis hari ini masih ada.','Your free summon is still available today.'):wL('Panggilan gratis hari ini sudah terpakai. Kembali besok.','Today\'s free summon is used. Come back tomorrow.'))}
 else if(o.id=='farmer'){if(b<WUN.F){r.push(wL('Ladangku belum bisa dipakai. Capai stage '+WUN.F+' dan akan kubukakan.','My field is not ready yet. Reach stage '+WUN.F+' and I will open it.'));r.push(wL('Rekormu sekarang stage '+b+'. Sedikit lagi!','Your record is stage '+b+' now. Almost there!'))}
-else{r.push(wL('Cangkul tanahnya, tanam benih, lalu tinggalkan. Tanaman tumbuh walau kau tidur.','Hoe the soil, plant seeds, then leave them. Crops grow even while you sleep.'));
-r.push(typeof farmReady=='function'&&farmReady()?wL('Eh, ada tanaman yang sudah matang! Cepat panen.','Oh, something is ripe! Go harvest it.'):wL('Panen dibatasi per hari, jadi tak perlu serakah.','The harvest is limited per day, so do not be greedy.'))}}
-else{r.push(wL('Desa ini tumbuh seiring kekuatanmu, pahlawan.','This village grows along with your strength, hero.'));
+else{r.push(wL('Gemburkan tanahnya, tanam benih, lalu tinggalkan. Tanamannya tetap tumbuh saat kamu istirahat.','Loosen the soil, plant the seeds, then leave them. Crops keep growing while you rest.'));
+r.push(typeof farmReady=='function'&&farmReady()?wL('Eh, ada yang sudah matang. Yuk panen.','Oh, something is ripe. Come harvest.'):wL('Panen sepuasnya.','Harvest as much as you like.'))}}
+else{r.push(wL('Desa ini tumbuh seiring langkahmu.','This village grows with every step you take.'));
 let nx=null;for(const c in WUN)if(WUN[c]>b&&(!nx||WUN[c]<WUN[nx]))nx=c;
-r.push(nx?wL('Capai stage '+WUN[nx]+' dan '+NB[nx][0]+' akan terbuka.','Reach stage '+WUN[nx]+' and '+NB[nx][1]+' will open.'):wL('Semua bangunan sudah terbuka. Kau sungguh hebat!','Every building is open. You are truly great!'));
-r.push(wSn?wL('Salju turun! Pakai jubah hangatmu, pahlawan.','Snow is falling! Wear something warm, hero.'):wL('Kalau musim dingin tiba, desa ini tertutup salju. Indah sekali.','When winter comes, this village is covered in snow. It is lovely.'))}
+r.push(nx?wL('Capai stage '+WUN[nx]+' dan '+NB[nx][0]+' akan terbuka.','Reach stage '+WUN[nx]+' and '+NB[nx][1]+' will open.'):wL('Semua bangunan sudah terbuka. Nikmati desanya.','Every building is open. Enjoy the village.'));
+r.push(wSn?wL('Salju turun. Hangatkan dirimu, ya.','Snow is falling. Stay warm.'):wL('Kalau musim dingin tiba, desa ini tertutup salju. Cantik sekali.','When winter comes, the village is covered in snow. It is lovely.'))}
 return r}
 function npcStart(o){wjid=null;wjx=wjy=0;wTalk={n:o.n[S.set.lang=='en'?1:0],ls:npcLines(o),i:0,o:o};const ac=npcAc(o);if(ac)ac.face(S.world.x-npcX(o),S.world.y-npcY(o));sfx('click')}
 function npcAdv(){const d=wTalk;if(!d)return;sfx('click');if(d.i<d.ls.length-1)d.i++;else wTalk=null}

@@ -33,9 +33,12 @@ run("lifeStartFishing({x:10,y:10,biome:'lake'}); lifeFish.biteAt=.5; lifeFishUpd
 assert.equal(run('S.fish.caughtToday'),1);
 assert.equal(run('S.fish.total'),1);
 assert.equal(run('Object.keys(S.fish.book).length'),1);
-run('lifeFishClose(); S.fish.caughtToday=5; lifeStartFishing({x:10,y:10,biome:"lake"});');
-assert.equal(run('lifeFish'),null,'daily fishing cap must block a new cast');
-
+run('lifeFishClose(); S.fish.caughtToday=50; lifeStartFishing({x:10,y:10,biome:"lake"});');
+assert.ok(run('lifeFish&&lifeFish.active'),'fishing has no daily cap: cast must still start');
+run("lifeFish.biteAt=.1; lifeFishUpdate(.2); lifeFishTap();");
+assert.equal(run('lifeFish.phase'),'caught');
+run('lifeFishUpdate(1.0);');
+assert.equal(run('lifeFish'),null,'after a catch the fishing state closes automatically (no CONTINUE step)');
 // Gather output and one resource action is counted once toward daily limit.
 run("S.gather.count=0; lifeDoGather({id:'test_tree',kind:'tree',x:2,y:2,respawnMs:1000});");
 assert.equal(run('S.gather.items.wood'),2);

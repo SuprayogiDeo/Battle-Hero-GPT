@@ -1,4 +1,4 @@
-/* ===== KATALOG HERO (prize pool gacha) ===== */
+/* KATALOG HERO (prize pool gacha) */
 let catSel='',catOpen=0,gcatOpen=0;const CATR=['SSR','SR','R','N'],CATP={SSR:2,SR:10,R:28,N:60};
 function catRows(){return CATR.map(r=>HEROES.filter(h=>h.rar==r))}
 function drawCat(){catRows().forEach((L,r)=>{const y=70+r*54,rar=CATR[r];g.fillStyle='rgba(20,16,40,.78)';g.fillRect(10,y,620,50);g.fillStyle=RC[rar];g.fillRect(10,y,3,50);
@@ -36,7 +36,7 @@ T('Model Senjata ('+IC.w.length+')',20,278,'#fc4',10);IC.w.forEach((ic,i)=>spr(i
 T('Model Armor ('+IC.a.length+')',20,322,'#fc4',10);IC.a.forEach((ic,i)=>spr(ic,150+i*30,346,1.7,0));
 T('Model Jimat ('+IC.x.length+')',330,322,'#fc4',10);IC.x.forEach((ic,i)=>spr(ic,440+i*30,346,1.7,0));}
 
-/* ===== ANIMASI GACHA ===== */
+/* ANIMASI GACHA */
 const GA=2.6;let gDone=0;
 function drawGacha(){const p=Math.min(1,(sumT+GA)/GA),it=!!sumL[0].it,bi=sumL.reduce((m,r)=>Math.max(m,RAR.indexOf(r.it?r.it.rar:HEROES[HID[r.id]].rar)),0),col=RC[RAR[bi]],base=it?'255,160,60':'160,110,255',cx=320,cy=175;
 g.save();g.fillStyle='#07050e';g.fillRect(-OX,0,VW,360);
@@ -108,7 +108,7 @@ function ui(){
 if(inB()){T((mode=='tower'?'Lantai ':mode=='boss'?'Boss Mingguan ':mode=='arena'?'Arena':mode=='event'?'Serbuan':'Stage ')+(mode=='boss'||mode=='arena'||mode=='event'?'':stage)+(dif()?' '+['','SULIT','NERAKA'][dif()]:'')+(stage%5==0&&mode!='boss'?' BOSS':'')+'  Gel '+Math.min(wi,waves.length)+'/'+waves.length,8,18);T('Rekor '+best,8,32,'#aaa',10);T('Emas '+S.g+' (+'+(runG+stageG)+')',8,46,'#fc4',10);
 if(mode=='boss'&&st!='over')T('Sisa waktu '+Math.max(0,wbT|0)+'s   Damage '+Math.floor(wbDmg),320,44,'#fe8',11,'center');if(mode=='arena'&&st!='over')T('Sisa waktu '+Math.max(0,wbT|0)+'s   Musuh: '+es.length,320,44,'#fe8',11,'center');if(mode=='event'&&st!='over')T('Waktu '+Math.max(0,wbT|0)+'s   Skor '+evKills*10,320,44,'#fe8',11,'center');if(mode=='tower'&&st!='over')T(tmod()[0]+': '+tmod()[1],320,44,'#f9c',10,'center');drawBossHealthBar();if(st=='walk'&&wk<2.4){g.globalAlpha=Math.min(1,2.4-wk);T('STAGE '+stage+' SELESAI!',320,140,'#6f8',28,'center');g.globalAlpha=1}
 if(st=='fight'||st=='pause'){ultBar();btn(488,3,48,27,'II',0);btn(540,3,58,27,'AUTO',auto);btn(602,3,34,27,'x'+spdm,spdm>1);if(combo>=3)T('KOMBO x'+combo,320,56,'#fc4',15,'center');if(bf.t>0)T('ATK +'+Math.round((bf.m-1)*100)+'% '+bf.t.toFixed(0)+'s',320,70,'#f84',11,'center');if(banner>0){g.globalAlpha=Math.min(1,banner);T(mode=='arena'?'ARENA':mode=='event'?'SERBUAN!':mode=='boss'?'BOSS MINGGUAN':mode=='tower'?(stage%5==0?'LANTAI BOSS '+stage:'LANTAI '+stage):(stage%5==0?'BOSS STAGE '+stage:'STAGE '+stage),320,150,stage%5==0||mode=='boss'?'#f55':'#fc4',30,'center');g.globalAlpha=1}}
-coachDraw();
+
 if(cut.t>0){const al=Math.max(0,Math.min(1,cut.t*3,(1.1-cut.t)*8)),ic=cut.id!=null,w=ic?230:200;g.globalAlpha=al;g.fillStyle='rgba(0,0,0,.6)';g.fillRect(320-w/2,72,w,24);g.fillStyle=cut.c;g.fillRect(320-w/2,72,3,24);if(ic)hico(cut.id,cut.sl,320-w/2+16,84,1,1);T(cut.s,ic?332:320,89,cut.c,13,'center');g.globalAlpha=1}ultCutDraw();
 if(st=='fight'){drawCtl();btn(384,6,68,20,'KONTROL '+(MAN?'ON':'OFF'),MAN)}
 if(st=='fight'||st=='pause'){const n=hs.length,bw=Math.min(118,Math.floor(620/n)-8);hs.forEach((h,i)=>{const x=10+i*(bw+8),y=316,d=h.d;g.fillStyle=h.dead?'#222':'#2b2545';g.fillRect(x,y,bw,38);const rd=!h.dead&&h.cd<=0;g.strokeStyle=rd?RC[d.rar]:'#000';g.lineWidth=rd?3:1;g.strokeRect(x,y,bw,38);
@@ -165,7 +165,7 @@ g.globalAlpha=Math.min(1,a*1.5);T(ttl,320,180-144*e,'#f66',Math.round((ttl.lengt
 if(rt){btn(140,252,170,28,mode=='tower'?'COBA LAGI':'ULANGI STAGE '+stage,1);btn(330,252,170,28,'KE LOBI',0)}else btn(220,252,200,28,'KE LOBI',1);
 T(TIPS[stage%TIPS.length],320,312,'#9cf',11,'center');g.globalAlpha=1}
 if(st=='perk'||st=='bossres'||st=='arenares'||st=='eventres')btn(8,st=='perk'?8:330,100,24,'STATISTIK');
-if(st=='farm')drawFarm();if(st=='ranch')drawRanch();if(st=='market')drawMarket();if(st=='quests')drawQuests();if(st=='howto')drawHow();if(showStat)statOverlay();
+if(st=='ranch')drawRanch();if(st=='market')drawMarket();if(st=='quests')drawQuests();if(st=='howto')drawHow();if(showStat)statOverlay();
 if(toast.t>0)T(toast.s,320,336,'#f88',13,'center')}
 let resT=0,sumR=0,pcf=0;const resBtnHit=(x,y,yy)=>x>220&&x<420&&y>yy-12&&y<yy+16;
 function resBtn(yy){const a=Math.max(0,Math.min(1,(resT-.8)/.4));g.globalAlpha=a;btn(220,yy-12,200,28,'KEMBALI',1);g.globalAlpha=1}

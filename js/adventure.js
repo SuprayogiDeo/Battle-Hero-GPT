@@ -1,5 +1,5 @@
-/* Hero Battle — Batch 6: map navigation + checkpointed 3-room dungeon.
-   Classic-script module; extends existing world/combat flow rather than replacing the source systems. */
+/* Hero Battle — map navigation + checkpointed 3-room dungeon.
+ Classic-script module; extends existing world/combat flow rather than replacing the source systems. */
 const HB_DUNGEON_ID='forest_ruins';
 function hbEnsureAdventure(){
   if(!S.dungeons||typeof S.dungeons!=='object')S.dungeons={};

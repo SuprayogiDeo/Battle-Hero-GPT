@@ -13,7 +13,7 @@
 ## 8I — Uji, konsistensi, dan performa
 
 - Tes baru `tools/test_tutorial_progress.js` memiliki 10 kelompok regresi: status topik, milestone, tujuh fase/aksi nyata, penyelesaian sekali, restore fase, urutan prasyarat, rollback Save gagal, toast unlock, dan profiler FPS/heap opt-in. Tes profiler menjalankan fungsi dengan timestamp/heap simulasi; nilai itu bukan metrik performa game.
-- Tes ini terdaftar ke `npm test`. `tools/test_release_integrity.js` mengunci versi/changelog, bagian 13 spesifikasi, placeholder pengukuran, serta gerbang publikasi. `tools/test_7defg.py` diperbarui untuk cache `v53`.
+- Tes ini terdaftar ke `npm test`. `tools/test_release_integrity.js` mengunci versi/changelog, bagian 13 spesifikasi, placeholder pengukuran, serta gerbang publikasi. `tools/test_7defg.py` diperbarui untuk cache `v54`.
 - `?perf=1` mengaktifkan overlay dengan FPS window, FPS rata-rata dari ring buffer frame deltas, JS heap dan heap limit jika `performance.memory` diekspos browser. Normal sessions disabled. JS heap bukan keseluruhan memori proses browser.
 - **Pengukuran FPS/memori runtime belum tersedia.** Chromium headless pada lingkungan ini timeout tanpa menghasilkan DOM/screenshot, termasuk saat memuat halaman sederhana. Jangan mencatat FPS sebagai 0 atau memakai angka sintetik sebagai hasil. Gunakan `docs/RELEASE_CANDIDATE.md` untuk merekam 60 detik per skenario pada browser target; kalau heap tidak tersedia, tandai `tidak didukung`.
 

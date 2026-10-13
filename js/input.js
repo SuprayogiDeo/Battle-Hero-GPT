@@ -1,4 +1,5 @@
-/* ===== INPUT ===== */
+const inL=(a,b)=>S.set&&S.set.lang==='en'?b:a;
+/* INPUT */
 cv.addEventListener('pointerdown',ev=>{if(ev.cancelable)ev.preventDefault();au();AC.resume();const r=cv.getBoundingClientRect(),x=(ev.clientX-r.left)*VW/r.width-OX,y=(ev.clientY-r.top)*360/r.height;
 if(showStat){showStat=0;sfx('click');return}
 if(st=='worldmap'){hbWorldMapClick(x,y);return}
@@ -7,11 +8,10 @@ if(st=='storage'||st=='workshop'){lifeInputState(x,y);return}
 if(st=='world'){worldDown(ev.pointerId,x,y);return}
 if(st=='howto'){howClick(x,y);return}
 if(st=='quests'){questClick(x,y);return}
-if(st=='farm'){farmClick(x,y);return}
 if(st=='ranch'){ranchClick(x,y);return}
 if(st=='market'){marketClick(x,y);return}
 if((st=='perk'||st=='bossres'||st=='arenares'||st=='eventres')&&x>8&&x<108&&y>(st=='perk'?8:330)&&y<(st=='perk'?32:354)){showStat=1;sfx('click');return}
-if(st=='menu'){menuB().forEach(m=>{if(x>m[2]&&x<m[2]+m[4]&&y>m[3]&&y<m[3]+m[5]){sfx('click');wFrom=0;const k=m[1];if(k=='play'){if(!S.how){S.how=1;sv();howP=0;howNext='play';st='howto'}else newRun(1)}else if(k=='howto'){howP=0;howNext='menu';st='howto'}else if(k=='cont')contRun();else if(k=='daily'){if(S.day!=today()){S.day=today();S.g+=80;sv();sfx('coin');say('+80 emas!')}else say('Sudah diambil hari ini')}else if(k=='world')worldEnter();else{wbCheck();st=k}}});return}
+if(st=='menu'){menuB().forEach(m=>{if(x>m[2]&&x<m[2]+m[4]&&y>m[3]&&y<m[3]+m[5]){sfx('click');wFrom=0;const k=m[1];if(k=='play')newRun(1);else if(k=='howto'){howP=0;st='howto'}else if(k=='cont')contRun();else if(k=='daily'){if(S.day!=today()){S.day=today();S.g+=80;sv();sfx('coin');say(inL('+80 emas','+80 gold'))}else say('Sudah diambil hari ini')}else if(k=='world')worldEnter();else{wbCheck();st=k}}});return}
 if(st=='summon'){if(sumT<0){sumT=0;sumR=0;return}if(sumT<=sumL.length/8+.3){sumT=99;sumR=0;return}if(sumR>.8&&x>230&&x<410&&y>318&&y<352){st='shop';sfx('click')}return}
 if(st=='arena'){if(y<34&&x<80){st='menu';sfx('click');return}S.ar.opp.forEach((o,i)=>{const bx=20+i*205+37;if(x>bx&&x<bx+120&&y>168&&y<192)newArena(i)});if(x>230&&x<410&&y>228&&y<250){if(S.g>=20){S.g-=20;genOpps();sv();sfx('click')}else say('Emas tidak cukup')}ART.forEach((r,i)=>{const px=10+i*126;if(x>px&&x<px+120&&y>274&&y<350)claimAr(i)});return}
 if(st=='arenares'){if(resT>1.2&&resBtnHit(x,y,250)){st='arena';sfx('click')}return}
@@ -38,7 +38,7 @@ if(st=='heroes'){if(y>=36&&y<=56&&x>=400){if(x<514){const a=autoSquad(),b=autoEq
 if(x>=564&&y>=66&&y<=232){const k=Math.floor((y-66)/24);if(k>=0&&k<=6&&y-66-k*24<=22){setHF(k-1);sfx('click');return}}
 {const L=hLay();L.cols.forEach((c,k)=>{if(!c.op&&x>c.x&&x<c.x+c.w&&y>58&&y<236){setHF(k);sfx('click')}else if(c.op&&hf>=0&&x>c.x&&x<c.x+c.w&&y>58&&y<76){setHF(-1);sfx('click')}});HEROES.forEach(d=>{const q=L.pos[d.id];if(q&&x>q[0]&&x<q[0]+q[2]&&y>q[1]&&y<q[1]+q[3]){selH=d.id;sfx('click')}})}const o=S.own[selH];
 if(o&&y>328&&y<358){if(x>130&&x<248){const c=lvc(selH);if(S.g>=c&&o.lv<30){S.g-=c;o.lv++;stat('ups');sv();sfx('heal')}else say(o.lv>=30?'Level maks':'Emas tidak cukup')}
-else if(x>254&&x<372){const c=skUp(selH);if((o.sk||1)>=skcap(selH))say('Skill maks (naikkan Evolusi untuk batas lebih tinggi)');else if(S.g>=c){S.g-=c;o.sk=(o.sk||1)+1;stat('ups');sv();sfx('cast')}else say('Emas tidak cukup')}else if(x>378&&x<496){const r=evoReq(selH);if(!r)say('Evolusi maksimal');else if(evoOK(selH)){S.g-=r.g;S.es-=r.es;o.evo=(o.evo||0)+1;stat('ups');sv();sfx('limit');flash=.6;say('EVOLUSI BERHASIL! Stat dan skill naik')}else say('Butuh Lv'+r.lv+', Bintang '+r.st+', '+r.g+' emas, '+r.es+' Esensi')}else if(x>502&&x<620){const k=S.deck.indexOf(selH);if(k>=0){if(S.deck.length>1)S.deck.splice(k,1);else say('Minimal 1 pahlawan di pasukan')}else if(S.deck.length<5)S.deck.push(selH);else say('Pasukan penuh (maks 5)');sv();sfx('click')}}}
+else if(x>254&&x<372){const c=skUp(selH);if((o.sk||1)>=skcap(selH))say(inL('Skill maks. Naikkan Evolusi untuk batas lebih tinggi.','Skill maxed. Raise Evolution for a higher cap.'));else if(S.g>=c){S.g-=c;o.sk=(o.sk||1)+1;stat('ups');sv();sfx('cast')}else say('Emas tidak cukup')}else if(x>378&&x<496){const r=evoReq(selH);if(!r)say('Evolusi maksimal');else if(evoOK(selH)){S.g-=r.g;S.es-=r.es;o.evo=(o.evo||0)+1;stat('ups');sv();sfx('limit');flash=.6;say(inL('Evolusi berhasil. Stat dan skill naik.','Evolution done. Stats and skills went up.'))}else say('Butuh Lv'+r.lv+', Bintang '+r.st+', '+r.g+' emas, '+r.es+' Esensi')}else if(x>502&&x<620){const k=S.deck.indexOf(selH);if(k>=0){if(S.deck.length>1)S.deck.splice(k,1);else say('Minimal 1 pahlawan di pasukan')}else if(S.deck.length<5)S.deck.push(selH);else say('Pasukan penuh (maks 5)');sv();sfx('click')}}}
 if(st=='heroes'&&S.own[selH]&&y>262&&y<316)for(let i=0;i<3;i++){const sx=455+i*60;if(x>sx&&x<sx+54){gslot=['w','a','x'][i];gsel=null;gpage=0;gearBack='heroes';st='gear';sfx('click');return}}
 if(st=='shop'){if(y>36&&y<64)[0,1,2,3].forEach(i=>{if(x>20+i*105&&x<118+i*105){shopTab=i;sfx('click')}});if(shopTab<2&&y>64&&y<84&&x>448&&x<630){if(shopTab)gcatOpen=!gcatOpen;else catOpen=!catOpen;sfx('click');return}if(shopTab==0&&catOpen&&y>70&&y<286&&x>=110){const hr=catRows()[Math.floor((y-70)/54)],hc=hr&&hr[Math.floor((x-110)/56)];if(hc){catSel=hc.id;sfx('click')}}if(shopTab==1&&!gcatOpen&&y>298&&y<346){if(x>20&&x<205)pullE(1);else if(x>213&&x<398)pullE(10);else if(x>406&&x<620){S.ad=S.ad?0:1;sv();sfx('click')}}
 if(shopTab==0&&!catOpen&&y>190&&y<260){if(x>80&&x<300)pull(1);else if(x>340&&x<560)pull(10)}

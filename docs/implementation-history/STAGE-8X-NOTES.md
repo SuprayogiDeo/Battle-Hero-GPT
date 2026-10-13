@@ -43,10 +43,10 @@
 - Rilis: `0.4.5-rc.1`, service worker `v52`. `npm test` dijalankan pada batch ini; tes Chromium headless timeout/tidak menghasilkan DOM dan HP fisik belum diuji. Proyek tetap privat.
 
 
-## Tahap 8H+8I — 0.4.6-rc.1 / cache v53
+## Tahap 8H+8I — 0.4.6-rc.1 / cache v54
 
 - Tutorial dunia berstatus per topik `belum/berjalan/selesai` dan tersimpan lewat Save; fase tujuh langkah menunggu aksi gameplay yang benar-benar berhasil, membutuhkan pilihan LANJUT/SIMPAN eksplisit setelah konfirmasi, dan tidak memindahkan pemain. Topik berurutan Toko, Gacha, Bertani, Memancing, Kebun Buah, Kumpul, dan Masak dengan milestone Stage 2/5/6.
 - Syarat terkunci memakai toast singkat tanpa overlay gembok besar. `?perf=1` menambahkan profiler opt-in FPS dan JS heap jika dukungan browser tersedia.
 - `docs/specification/Hero_Battle_Spesifikasi_Induk_v1.md` bagian 13 sekarang mencatat matriks pemeriksaan implementasi kandidat; checklist publikasi dan release candidate diperbarui, termasuk kolom pengukuran performa yang sengaja berstatus `BELUM DIUKUR (PLACEHOLDER)`. Detail: `STAGE-8H-8I-NOTES.md`.
 - Tes `tools/test_tutorial_progress.js` memiliki 10 kelompok regresi; terdaftar ke `npm test`. Tes rilis mengunci versi/changelog, spesifikasi bagian 13, dan penghambat publikasi.
-- Kandidat `0.4.6-rc.1`, cache `v53`; `npm test` lulus. Chromium headless timeout tanpa DOM dan uji HP belum dilakukan. Angka FPS/memori runtime tidak direkayasa; gerbang lisensi dan tes perangkat memblokir deployment publik.
+- Kandidat `0.4.6-rc.1`, cache `v54`; `npm test` lulus. Chromium headless timeout tanpa DOM dan uji HP belum dilakukan. Angka FPS/memori runtime tidak direkayasa; gerbang lisensi dan tes perangkat memblokir deployment publik.

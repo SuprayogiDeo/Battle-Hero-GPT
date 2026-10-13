@@ -1,6 +1,6 @@
-/* Hero Battle - anim.js (Tahap 5A)
-   Skrip klasik. Pemuat atlas Sunnyside World + penggambar animasi + mesin keadaan idle/walk.
-   Tidak bergantung pada berkas js lain; aman dimuat sebelum world.js. */
+/* Hero Battle - anim.js
+ Skrip klasik. Pemuat atlas Sunnyside World + penggambar animasi + mesin keadaan idle/walk.
+ Tidak bergantung pada berkas js lain; aman dimuat sebelum world.js. */
 var Anim = (function () {
   var BASE = 'assets/world/';
   var atlas = null, sheets = {}, pending = 0, failed = false, started = false;
@@ -38,8 +38,8 @@ var Anim = (function () {
   }
 
   /* Gambar animasi `name` dengan titik jangkar (kaki) di (x,y) pada konteks.
-     t = ms sejak mulai, flip = cermin horizontal, sc = skala (bulat, default 1).
-     Mengembalikan true bila tergambar; false -> pemanggil pakai sprite lama. */
+ t = ms sejak mulai, flip = cermin horizontal, sc = skala (bulat, default 1).
+ Mengembalikan true bila tergambar; false -> pemanggil pakai sprite lama. */
   function draw(ctx, name, t, x, y, flip, sc) {
     if (!ready()) return false;
     var a = atlas.anims[name]; if (!a) return false;
@@ -73,11 +73,11 @@ var Anim = (function () {
   }
 
   /* Mesin keadaan: idle <-> walk (+ aksi sekali jalan via play()).
-     prefix: 'avatar' -> animasi 'avatar_idle', 'avatar_walk', 'avatar_dig'.
-     Gambar sprite menghadap KANAN; menghadap kiri = flip. Atas/bawah memakai animasi jalan
-     yang sama dan mempertahankan arah kiri/kanan terakhir. */
-  /* Tahap 6A: arah dari vektor gerak. null = samping (animasi kiri/kanan); 's','n','se','ne' = pose arah
-     (kiri = flip). Dipakai bila atlas punya <prefix>_idle_<arah>/<prefix>_walk_<arah>; kalau tidak -> samping. */
+ prefix: 'avatar' -> animasi 'avatar_idle', 'avatar_walk', 'avatar_dig'.
+ Gambar sprite menghadap KANAN; menghadap kiri = flip. Atas/bawah memakai animasi jalan
+ yang sama dan mempertahankan arah kiri/kanan terakhir. */
+  /* arah dari vektor gerak. null = samping (animasi kiri/kanan); 's','n','se','ne' = pose arah
+ (kiri = flip). Dipakai bila atlas punya <prefix>_idle_<arah>/<prefix>_walk_<arah>; kalau tidak -> samping. */
   function dirOf(dx, dy) {
     var ax = Math.abs(dx), ay = Math.abs(dy);
     if (ay < ax * 0.414) return null;

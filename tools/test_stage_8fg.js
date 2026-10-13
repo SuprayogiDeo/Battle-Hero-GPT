@@ -57,7 +57,7 @@ for(const sign of idx.biomeSigns){
   const o=idx.objects.find(q=>q.biomeSign===sign.id&&q.k==='sign');ok(!!o&&o.signName===sign.name&&o.signNameEn===sign.name_en, 'physical sign carries localized name: '+sign.id);
   const gx=sign.x,gy=sign.y;ok(!['~','T','X','S','R','G','Q','F'].includes(idx.grid[gy][gx]), 'sign stands on a passable tile: '+sign.id);
 }
-ok(idx.biomeGates.length===2 && idx.objects.filter(o=>o.k==='gate_arch').length===2, 'two major border gate arches generated');
+ok(idx.biomeGates.length===0 && idx.objects.filter(o=>o.k==='gate_arch').length===0, 'no border gate arches (removed in 9A: they faced the viewer, not the road)');
 for(const gate of idx.biomeGates){const o=idx.objects.find(q=>q.gateId===gate.id&&q.k==='gate_arch');ok(!!o, 'gate object exists: '+gate.id);ok(!['~','T','X','S','R','G','Q','F'].includes(idx.grid[gate.y][gate.x]), 'gate does not block its crossing tile: '+gate.id);}
 const expectedServices={quest_board:'board',market_cashier:'stall_red',animal_trough:'feed_trough'};
 ok(idx.serviceObjects.length===3, 'three physical service descriptors exist');

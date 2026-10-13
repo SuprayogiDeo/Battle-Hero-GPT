@@ -1,4 +1,4 @@
-/* ===== PENGATURAN ===== */
+/* PENGATURAN */
 let setBack='menu',resetArm=0,lastDevicePulse=0,setPage=0;S.set.ui=Math.max(0,Math.min(2,Math.round(Number.isFinite(+S.set.ui)?+S.set.ui:1))); /* PLACEHOLDER presets 0.9/1.0/1.1; tune after HP validation. */
 const SET_UI_IM=new Image();SET_UI_IM.src='assets/world/ui.png';
 const SET_UI_FR={panel_tl:[0,0,3,3],panel_tc:[5,0,3,3],panel_tr:[10,0,3,3],panel_lc:[0,5,3,3],panel_c:[5,5,3,3],panel_rc:[10,5,3,3],panel_bl:[0,10,3,3],panel_bc:[5,10,3,3],panel_br:[10,10,3,3],confirm:[0,18,12,11],cancel:[14,18,11,11],bar_empty:[27,18,15,7],bar_fill:[44,18,15,7],cursor:[61,18,11,19]};
@@ -7,7 +7,7 @@ function setUIPanel(x,y,w,h){g.fillStyle='rgba(9,13,22,.95)';g.fillRect(x,y,w,h)
 function hapticPulse(pattern){if(!S.set||!S.set.vib||!navigator.vibrate)return;const now=performance.now?performance.now():Date.now();if(now-lastDevicePulse<110)return;lastDevicePulse=now;try{navigator.vibrate(pattern==null?12:pattern)}catch(e){}}
 const fsEl=document.documentElement,fsOn=()=>document.fullscreenElement||document.webkitFullscreenElement,fsOK=!!(fsEl.requestFullscreen||fsEl.webkitRequestFullscreen);
 /* Fullscreen otomatis: browser hanya mengizinkan lewat sentuhan/klik, jadi diminta di sentuhan pertama
-   dan diulang di sentuhan berikutnya bila pemain keluar dari layar penuh. */
+ dan diulang di sentuhan berikutnya bila pemain keluar dari layar penuh. */
 function fsReq(){if(!fsOK||fsOn())return;try{const r=(fsEl.requestFullscreen||fsEl.webkitRequestFullscreen).call(fsEl,{navigationUI:'hide'});if(r&&r.catch)r.catch(()=>{})}catch(e){}}
 addEventListener('pointerup',fsReq,true);addEventListener('keydown',fsReq,true);
 /* Hentikan semua audio saat aplikasi ke latar belakang / layar mati, lanjut saat kembali. */

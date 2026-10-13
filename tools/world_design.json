@@ -280,7 +280,7 @@
       "name": "Pasar Desa",
       "name_en": "Village Market",
       "type": "market",
-      "x": 33,
+      "x": 30,
       "y": 25,
       "sprite": "stall_red",
       "footprint": [
@@ -500,7 +500,8 @@
         ]
       ],
       "width": 3,
-      "tile": 50
+      "tile": 50,
+      "style": "plank"
     }
   ],
   "npcs": {
@@ -621,8 +622,8 @@
   "biomeSigns": [
     {
       "id": "meadow",
-      "x": 54,
-      "y": 22,
+      "x": 52,
+      "y": 21,
       "name": "Padang & Ladang",
       "name_en": "Meadow & Farms"
     },
@@ -655,24 +656,7 @@
       "name_en": "Mountain Foothills"
     }
   ],
-  "biomeGates": [
-    {
-      "id": "meadow_forest",
-      "x": 64,
-      "y": 23,
-      "from": "meadow",
-      "to": "forest",
-      "style": "stone_wood_arch"
-    },
-    {
-      "id": "coast_mountain",
-      "x": 96,
-      "y": 78,
-      "from": "coast",
-      "to": "mountain",
-      "style": "stone_wood_arch"
-    }
-  ],
+  "biomeGates": [],
   "serviceObjects": [
     {
       "id": "quest_board",
@@ -688,7 +672,7 @@
       "id": "market_cashier",
       "type": "market_cashier",
       "sprite": "stall_red",
-      "x": 35,
+      "x": 34,
       "y": 25,
       "rangeTiles": 2.4,
       "name": "Kasir Pasar",

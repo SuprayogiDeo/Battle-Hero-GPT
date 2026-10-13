@@ -76,10 +76,10 @@ life=(ROOT/'js'/'life.js').read_text(encoding='utf-8')
 for token in ('S.fish','S.gather','S.kitchen','S.buff','S.village','S.orders','S.atmo','lifeFishingSpot','lifeDailyGrant'):
     if token not in life: fail(f'feature hook missing: {token}')
 sw=(ROOT/'sw.js').read_text(encoding='utf-8')
-if not re.search(r"const VERSION\s*=\s*'v53'", sw): fail('service-worker version not v53')
+if not re.search(r"const VERSION\s*=\s*'v55'", sw): fail('service-worker version not v55')
 if "'./js/life.js'" not in sw or "'./js/farm.js'" not in sw or "'./js/storagecraft.js'" not in sw or "'./assets/world/index.json'" not in sw or "'./assets/world/atlas.json'" not in sw or "'./assets/world/chars.png'" not in sw: fail('life/farm/storagecraft script or world assets not precached')
 for p in ('index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','icons/apple-touch-icon.png','icons/favicon-32.png','js/life.js','js/farm.js','js/storagecraft.js','assets/world/atlas.json','assets/world/chars.png'):
     if not (ROOT/p).is_file(): fail(f'precache file missing: {p}')
 
 if './js/adventure.js' not in sw: fail('adventure module missing from service-worker shell')
-print('PASS: world=128x96, chunk=32, 12 chunks <=512px, 5 biomes, 10+ places, 24 open 6x4 farm plots, reachable resource nodes, Sunnyside WATERING=5 / REELING=13 / AXE=10 / MINING=10 frames, crop stages 0..5, NPC sprites, feature/save hooks, and SW v53 with Stages 8H+8I + prior systems.')
+print('PASS: world=128x96, chunk=32, 12 chunks <=512px, 5 biomes, 10+ places, 24 open 6x4 farm plots, reachable resource nodes, Sunnyside WATERING=5 / REELING=13 / AXE=10 / MINING=10 frames, crop stages 0..5, NPC sprites, feature/save hooks, and SW v54 with Stages 8H+8I + prior systems.')

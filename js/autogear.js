@@ -1,4 +1,4 @@
-/* ===== AUTO PASANG, AUTO DEPLOY & REKOMENDASI ===== */
+/* AUTO PASANG, AUTO DEPLOY & REKOMENDASI */
 const XW={as:1,crit:.9,cd:.8,ls:1.6};
 function iScore(it,id){const v=iVal(it);if(it.slot!='x')return v;const r=id?HEROES[HID[id]].role:'';let w=XW[it.ty];if(it.ty=='ls'&&(r=='tank'||r=='healer'))w*=1.3;else if(it.ty=='cd'&&(r=='mage'||r=='healer'))w*=1.3;else if(it.ty=='crit'&&(r=='archer'||r=='assassin'||r=='fighter'))w*=1.2;return v*w}
 const hBase=(id,s)=>{const d=HEROES[HID[id]],m=mult(id);return s=='a'?d.hp*m*.2:d.dm*m};

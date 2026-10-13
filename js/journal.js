@@ -1,5 +1,5 @@
 /* Hero Battle — Journal, focus objective, biome discovery and resident bonds.
-   Safe save migration: every field is optional in older saves and is normalized here. */
+ Safe save migration: every field is optional in older saves and is normalized here. */
 let jrSubtab = 0;
 const JR_THRESHOLDS = [0, 10, 25, 45, 70, 100];
 const JR_TIER_NAMES = [
@@ -160,5 +160,11 @@ lifeUpgradeVillage=function(){const before=S.village&&S.village.level||1;jrBaseU
 const jrBaseLifeWorldUpdate=lifeWorldUpdate;
 lifeWorldUpdate=function(dt){jrBaseLifeWorldUpdate(dt);if(st==='world'&&S.world&&typeof lifeBiome==='function'){const id=lifeBiome(Math.floor(S.world.x/WS),Math.floor(S.world.y/WS));jrDiscoverBiome(id);}};
 const jrBaseDrawWorld=drawWorld;
-drawWorld=function(){jrBaseDrawWorld();if(st!=='world'||wTalk||wDlg)return;jrEnsure();const f=jrCurrentFocus(),xx=122,yy=92;g.fillStyle='rgba(8,16,24,.86)';g.fillRect(xx,yy,236,34);g.strokeStyle='#6b9db8';g.lineWidth=1;g.strokeRect(xx+.5,yy+.5,235,33);T(jrLang('FOKUS: ','FOCUS: ')+f.title.slice(0,25),xx+8,yy+13,'#fc4',10);T(f.detail.slice(0,38),xx+8,yy+26,'#cde',9);};
+/* Panel FOKUS: tepat di bawah minimap; ketuk untuk meminimalkan/membuka (S.journal.fmin disimpan). */
+function jrFocusRect(){const sc=[.9,1,1.1][Math.max(0,Math.min(2,Math.round(Number(S&&S.set&&S.set.ui)||0)))]||1,y=Math.round(4+76*sc+8),mn=!!(S.journal&&S.journal.fmin);return mn?{x:4,y:y,w:92,h:20,mn:1}:{x:4,y:y,w:236,h:34,mn:0}}
+function jrToggleFocus(){jrEnsure();S.journal.fmin=S.journal.fmin?0:1;sv()}
+function jrDrawFocus(){const f=jrCurrentFocus(),r=jrFocusRect();g.fillStyle='rgba(8,16,24,.86)';g.fillRect(r.x,r.y,r.w,r.h);g.strokeStyle='#6b9db8';g.lineWidth=1;g.strokeRect(r.x+.5,r.y+.5,r.w-1,r.h-1);
+ if(r.mn)T(jrLang('FOKUS','FOCUS')+'  ▸',r.x+8,r.y+14,'#fc4',10);
+ else{T(jrLang('FOKUS: ','FOCUS: ')+f.title.slice(0,22),r.x+8,r.y+13,'#fc4',10);T(f.detail.slice(0,38),r.x+8,r.y+26,'#cde',9);T('▾',r.x+r.w-12,r.y+13,'#9cf',10)}}
+drawWorld=function(){jrBaseDrawWorld();if(st!=='world'||wTalk||wDlg)return;jrEnsure();jrDrawFocus()};
 jrEnsure();

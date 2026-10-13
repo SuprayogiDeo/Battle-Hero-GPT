@@ -1,4 +1,4 @@
-/* ===== AI HERO CERDAS: menghindar, parry otomatis (healer/tank), healer prediktif ===== */
+/* AI HERO CERDAS: menghindar, parry otomatis (healer/tank), healer prediktif */
 let apT=0;
 const inTele=(k,x,y,pad)=>k.k=='row'?Math.abs(y-k.y)<k.r+pad:Math.hypot(x-k.x,y-k.y)<k.r+pad;
 const dgz=(k,h)=>{const r=k.rx||(k.rx={});return r[h.i]||(r[h.i]={ok:Math.random()<h.dg,at:rnd(h.rxr[0],h.rxr[1])})};
@@ -12,7 +12,7 @@ const dx=tx-h.x,dy=ty-h.y,l=Math.hypot(dx,dy);if(l<1.5)return false;const sp=Mat
 function stepH(h,tx,ty,spd,dt){const l=Math.hypot(tx-h.x,ty-h.y);if(l<.5)return;const nx=h.x+(tx-h.x)/l*spd*dt,ny=h.y+(ty-h.y)/l*spd*dt;if(h.dg!=null)for(const k of tele){if(k.dead)continue;if(dgz(k,h).ok&&inTele(k,nx,ny,2)&&!inTele(k,h.x,h.y,2))return}h.x=nx;h.y=ny}
 function healTarget(){let best=null,bs=0;for(const x of hs){if(x.dead)continue;const need=1-x.hp/x.mh,thr=tele.some(k=>!k.dead&&inTele(k,x.x,x.y,0)),sc=need+(thr?.35:0)+(x.d.role=='tank'?.1:0);if((need>.3||(thr&&need>.1))&&sc>bs){bs=sc;best=x}}return best}
 function autoParry(dt){apT=Math.max(0,apT-dt);if(apT>0||!tele.length)return;for(const k of tele){if(k.dead||k.t<.35||k.t>k.dur-.3)continue;if(!hs.some(x=>!x.dead&&inTele(k,x.x,x.y,0)))continue;const pr=k.pr||(k.pr={});for(const h of hs){if(h.dead||!h.rf||h.rfcd>0||h.stun>0||pr[h.i]||(MAN&&st=='fight'&&h===ctlH()))continue;pr[h.i]=1;if(Math.random()<h.rf){k.dead=1;h.rfcd=h.rcd;apT=3;RX(h.d.id).par++;ring(k.x,k.y,'#6f8',k.r);V('ln',h.x,h.y-14,{x2:k.x,y2:k.y,w:5,c:'#6f8',d:.3,sp:8});burst(k.x,k.y,12,'#6f8',120,.5,0,3);txt(k.x,k.y-20,'TANGKIS!','#6f8',1);sfx('parry');return}}}}
-/* ===== LIMIT BREAK: fase pengisian -> pelepasan khusus tiap hero ===== */
+/* LIMIT BREAK: fase pengisian -> pelepasan khusus tiap hero */
 function limit(h){h=h||ctlH();if(!h||h.dead||lb<100||st!='fight'||(ucut.t>0&&!ucut.fired))return;const d=h.d,k=d.sk;if(!es.some(e=>!e.dead)&&!['heal','revive','barrier','cry','wall'].includes(k))return;
 lb=0;lbLock=3.4;stat('ults');RX(d.id).ult++;const col=ultCol(d);freeze=.55;flash=Math.max(flash,.18);sfx('limit');h.glow=1.6;h.glowC=col;ucut={t:1.7,m:1.7,rel:.55,fired:0,d,h,c:col,n:ULTN[d.id]||d.skn}}
 function ultFire(h){if(!h||h.dead||st!='fight')return;const d=h.d,k=d.sk,col=ucut.c,L=es.filter(e=>!e.dead),u=UP[d.id]||{};if(!L.length&&!['heal','revive','barrier','cry','wall'].includes(k))return;
@@ -98,7 +98,7 @@ function clearStage(){
   const essBonus=tw?(stage%5===0?2:0):(stage%5===0?3:0)+(Math.random()<.2?1:0);
   essGot=mode==='main'?pendE+(firstMain?essBonus:0):(rw?pendE+essBonus:0);
   pendE=0;S.es+=essGot;
-  if(tw&&rw){S.tw.best=stage;say('Lantai '+stage+': +'+gn+' emas'+(essGot?', +'+essGot+' Esensi':''));if(stage%10===0){S.ft++;say('Lantai '+stage+'! Tiket panggil gratis +1')}}
+  if(tw&&rw){S.tw.best=stage;say('Lantai '+stage+': +'+gn+' emas'+(essGot?', +'+essGot+' Esensi':''));if(stage%10===0){S.ft++;say((S.set&&S.set.lang==='en'?'Floor '+stage+'. Free summon ticket +1':'Lantai '+stage+'. Tiket panggil gratis +1'))}}
   if(mode==='main')S.run={stage,P,R,runG,hs:hs.map(h=>({id:h.d.id,hp:h.hp,mh:h.mh})),cleared:true,defeated:false};
   if(typeof hapticPulse==='function')hapticPulse(18);sv();st='walk';wk=0;wend=0;sfx('clear');sfx('portal')
 }

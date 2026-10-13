@@ -26,7 +26,7 @@ Dengan definisi ketat “fase selesai hanya bila acceptance-nya terpenuhi”, **
 
 ## Release candidate
 
-Tahap 8F+8G menghasilkan kandidat `0.4.5-rc.1`, cache `v52`; Tahap 8H+8I memajukan kandidat menjadi `0.4.6-rc.1`, cache `v53`, dengan tutorial milestone yang disimpan dan profiler opt-in. Game tetap privat. `npm test` mencakup tes tutorial baru; Chromium headless tidak menghasilkan DOM, angka FPS/memori aktual belum diukur, dan uji visual/touch HP nyata tetap gate manual. P1 dan P2 tetap parsial sampai uji perangkat/persistence nyata selesai.
+Tahap 8F+8G menghasilkan kandidat `0.4.5-rc.1`, cache `v52`; Tahap 8H+8I memajukan kandidat menjadi `0.4.6-rc.1`, cache `v54`, dengan tutorial milestone yang disimpan dan profiler opt-in. Game tetap privat. `npm test` mencakup tes tutorial baru; Chromium headless tidak menghasilkan DOM, angka FPS/memori aktual belum diukur, dan uji visual/touch HP nyata tetap gate manual. P1 dan P2 tetap parsial sampai uji perangkat/persistence nyata selesai.
 
 Aset turunan Sunnyside World tetap mengikuti batasan di [`LICENSE_AND_ASSETS.md`](LICENSE_AND_ASSETS.md). Jangan membuat repository atau deployment menjadi publik tanpa keputusan pemilik dan peninjauan lisensi aset.
 
@@ -38,4 +38,4 @@ Kandidat `0.4.5-rc.1` / cache `v52` menambahkan cahaya jendela untuk rumah baru,
 
 ## Batch 8H+8I RC1
 
-Kandidat `0.4.6-rc.1` / cache `v53` menambahkan tujuh topik tutorial dengan status persisten, fase tujuh langkah, konfirmasi aksi nyata, milestone stage yang eksplisit, serta profiler FPS/JS heap opt-in melalui `?perf=1`. Tes kode otomatis lulus. Pengukuran numerik runtime belum tersedia karena Chromium headless timeout; uji HP dan review izin distribusi aset belum selesai. **Jangan deploy publik sampai dua gerbang tersebut lolos.**
+Kandidat `0.4.6-rc.1` / cache `v54` menambahkan tujuh topik tutorial dengan status persisten, fase tujuh langkah, konfirmasi aksi nyata, milestone stage yang eksplisit, serta profiler FPS/JS heap opt-in melalui `?perf=1`. Tes kode otomatis lulus. Pengukuran numerik runtime belum tersedia karena Chromium headless timeout; uji HP dan review izin distribusi aset belum selesai. **Jangan deploy publik sampai dua gerbang tersebut lolos.**

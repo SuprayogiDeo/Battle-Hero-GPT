@@ -1,4 +1,4 @@
-/* ===== HERO DATA ===== */
+/* HERO DATA */
 const RB={tank:[300,14,30,.9,1],fighter:[220,18,28,.7,1],assassin:[150,17,26,.5,1],archer:[135,16,200,.7,0],mage:[115,22,180,1.15,0],healer:[145,10,170,1,0]},RM={N:1,R:1.2,SR:1.45,SSR:1.8},RC={N:'#aaa',R:'#6af',SR:'#c8f',SSR:'#fc4'},RN={tank:'Penjaga',fighter:'Petarung',assassin:'Pembunuh',archer:'Pemanah',mage:'Penyihir',healer:'Penyembuh'};
 const EC={fire:'#f80',ice:'#8cf',dark:'#a4f',poison:'#7d3',holy:'#fe8'};
 // PLACEHOLDER PEMILIK: angka pembuka alat belum dibalans; jangan dianggap nilai final.

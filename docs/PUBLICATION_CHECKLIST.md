@@ -4,7 +4,7 @@ Use this checklist for the exact commit intended for upload/deployment. Automate
 
 ## Automated checks
 
-- [x] Batch 8H+8I candidate `0.4.6-rc.1` / cache `v53` ran `npm test`; tutorial/save and profiler regression groups pass.
+- [x] Batch 8H+8I candidate `0.4.6-rc.1` / cache `v54` ran `npm test`; tutorial/save and profiler regression groups pass.
 - [x] Release-integrity test checks version/service-worker consistency, entry scripts in precache, workflow safeguards and accidental file exclusions.
 - [x] Original asset-pack `.zip` files and `.aseprite` sources are not present in the repository bundle.
 - [ ] Run `npm test` again on the exact commit intended for review/publication (current worktree tests do not certify an unseen future commit).

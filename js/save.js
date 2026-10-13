@@ -1,9 +1,9 @@
-/* ===== SAVE: satu-satunya pintu ke penyimpanan data =====
-   Semua baca/tulis data pemain lewat Save.* (jangan memanggil localStorage langsung di tempat lain).
-   Nanti Firebase / login Google cukup dipasang di sini: ganti isi Store, atau tambahkan fungsi
-   ke Save.onWrite (dipanggil setiap kali data utama ditulis) tanpa menyentuh kode game. */
+/* SAVE: satu-satunya pintu ke penyimpanan data 
+ Semua baca/tulis data pemain lewat Save.* (jangan memanggil localStorage langsung di tempat lain).
+ Nanti Firebase / login Google cukup dipasang di sini: ganti isi Store, atau tambahkan fungsi
+ ke Save.onWrite (dipanggil setiap kali data utama ditulis) tanpa menyentuh kode game. */
 /* Mode DEV: buka game dengan ?dev=1 (mis. .../index.html?dev=1). Hanya dalam mode ini js/dev.js dimuat (lihat boot.js),
-   dan data disimpan di slot TERPISAH (akhiran _dev) sehingga progres asli tidak pernah tertimpa/ter-unlock. */
+ dan data disimpan di slot TERPISAH (akhiran _dev) sehingga progres asli tidak pernah tertimpa/ter-unlock. */
 const DEV=/[?&]dev=1(&|$)/.test(location.search);
 const SAVE_KEYS=DEV?{main:'hb_s4_dev',backup:'hb_s4_dev_backup',best:'hb_best_dev',man:'hb_man_dev'}:{main:'hb_s4',backup:'hb_s4_backup',best:'hb_best',man:'hb_man'};
 const Store={ // lapisan terendah: localStorage, aman bila diblokir (mode privat dsb.)

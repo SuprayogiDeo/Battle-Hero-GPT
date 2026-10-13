@@ -95,4 +95,10 @@ for (const [name, count] of [['avatar_watering',5],['avatar_reeling',13],['avata
 for (const crop of ['carrot','pumpkin','sunflower']) for(let i=0;i<6;i++) ok(!!atlas.anims[`crop_${crop}_${i}`],`crop ${crop} stage ${String(i).padStart(2,'0')}`);
 const lifeJs=fs.readFileSync(path.join(root,'js/life.js'),'utf8');
 ok(lifeJs.includes('PLACEHOLDER respawn') && lifeJs.includes('PLACEHOLDER: jendela gigitan'), 'unspecified respawn/bite timing is labelled PLACEHOLDER');
+// Perbaikan pasca-audit: tanpa batas harian, benih awal hormati tas, popup E/MEMANCING dan LANJUT hilang.
+ev("var __f=farmGet();__f.gd=100000;__f.ed=100000;__f.p[0]={s:2,c:0,t:0,w:1};");
+ok(ev('farmHarvest(0)!==null&&farmGet().p[0].s===1'), 'harvest has no daily cap and always pays out');
+const lifeSrc=fs.readFileSync(path.join(root,'js/life.js'),'utf8'), hudSrc=fs.readFileSync(path.join(root,'js/hud.js'),'utf8');
+ok(!lifeSrc.includes('E / KETUK') && !lifeSrc.includes("'GIGITAN!'"), 'no E/MEMANCING or GIGITAN popup in world');
+ok(!/phase==='caught'\|\|f\.phase==='miss'\)return\{l:wL\('LANJUT'/.test(hudSrc), 'no CONTINUE step after a catch; hand icon only reels on bite');
 console.log(`PASS: Stage 8D+8E (${n} checks): world-farm gesture, seeds/moisture, in-world fishing, protected tree/stump, bag overflow drops, respawn and animation assets.`);

@@ -1,5 +1,6 @@
-/* ===== MISI HARIAN, PENCAPAIAN, STATISTIK, TUTORIAL ===== */
-let qDirty=0,flushT=6,qTab=0,RSX={},showStat=0,howP=0,howNext='menu',coachCur=null,coachGap=0;
+const progL=(a,b)=>S.set&&S.set.lang==='en'?b:a;
+/* MISI HARIAN, PENCAPAIAN, STATISTIK, TUTORIAL */
+let qDirty=0,flushT=6,qTab=0,RSX={},showStat=0,howP=0;
 const RX=id=>RSX[id]||(RSX[id]={dmg:0,taken:0,heal:0,ult:0,par:0});
 const DQ=[{k:'kills',n:40,g:60,t:'Kalahkan 40 musuh'},{k:'ults',n:2,g:50,t:'Pakai Limit Break 2 kali'},{k:'stages',n:4,g:70,t:'Selesaikan 4 stage'},{k:'bossKills',n:1,g:90,t:'Kalahkan 1 boss'},{k:'parries',n:5,g:60,t:'Tangkis 5 serangan boss'},{k:'maxCombo',n:15,g:70,t:'Capai kombo 15'},{k:'pulls',n:1,g:50,t:'Panggil hero 1 kali di Toko'},{k:'arenaWins',n:1,g:80,e:1,t:'Menang 1 kali di Arena'},{k:'events',n:1,g:70,t:'Mainkan Event Serbuan 1 kali'},{k:'ups',n:2,g:60,t:'Naikkan level atau skill hero 2 kali'}];
 const ACH=[
@@ -26,7 +27,7 @@ const qList=()=>{dayQ();return S.q.ids.map((id,i)=>{const q=DQ[id],v=Math.min(q.
 const achT=a=>S.ac[a.id]||0;
 const qClaimable=()=>{const L=qList();return L.some(x=>x.done&&!x.cl)||(L.every(x=>x.cl)&&!S.q.bonus)||ACH.some(a=>achT(a)<3&&a.v()>=a.t[achT(a)])};
 function qClaim(i){const x=qList()[i];if(!x||!x.done||x.cl)return;S.q.cl[i]=1;S.g+=x.q.g;S.es+=x.q.e||0;sv();sfx('coin');say('+'+x.q.g+' emas'+(x.q.e?' +'+x.q.e+' esensi':''))}
-function qBonus(){const L=qList();if(!L.every(x=>x.cl)||S.q.bonus)return;S.q.bonus=1;S.g+=150;S.ft++;sv();sfx('clear');say('Bonus: +150 emas dan 1 panggilan gratis!')}
+function qBonus(){const L=qList();if(!L.every(x=>x.cl)||S.q.bonus)return;S.q.bonus=1;S.g+=150;S.ft++;sv();sfx('clear');say(progL('Bonus: +150 emas dan 1 panggilan gratis.','Bonus: +150 gold and 1 free summon.'))}
 function achClaim(i){const a=ACH[i],k=achT(a);if(k>=3||a.v()<a.t[k])return;S.ac[a.id]=k+1;S.g+=ACG[k];S.es+=ACE[k];sv();sfx('clear');say(a.n+' '+['I','II','III'][k]+': +'+ACG[k]+' emas'+(ACE[k]?' +'+ACE[k]+' esensi':''))}
 function drawQuests(){ov(.92);btn(6,5,76,28,'KEMBALI');btn(96,8,110,24,'MISI HARIAN',qTab==0);btn(212,8,120,24,'PENCAPAIAN',qTab==1);T('Emas: '+S.g+'  Esensi: '+S.es,632,24,'#fc4',12,'right');
 if(qTab==0){const L=qList(),dn=L.filter(x=>x.cl).length;T('Misi hari ini ('+dn+'/3)',320,56,'#fc4',14,'center');
@@ -41,10 +42,7 @@ function statPanel(x,y,w){const L=hs.map(h=>({h,s:RSX[h.d.id]||{dmg:0,taken:0,he
 T('HERO',x+34,y,'#9cf',9);T('DAMAGE',x+140,y,'#9cf',9);T('DITERIMA',x+w-290,y,'#9cf',9);T('PULIH',x+w-215,y,'#9cf',9);T('TANGKIS',x+w-145,y,'#9cf',9);T('LIMIT',x+w-62,y,'#9cf',9);
 L.forEach((o,i)=>{const yy=y+6+i*30,d=o.h.d,bx=x+140,bw=w-440;g.fillStyle='#2b2545';g.fillRect(x,yy,w,27);g.strokeStyle=RC[d.rar];g.lineWidth=1;g.strokeRect(x+.5,yy+.5,w-1,26);spr(d.s,x+14,yy+25,1.5,0);T(d.n.slice(0,14),x+32,yy+17,o.h.dead?'#888':'#fff',9);if(o===mv&&tot>1)T('MVP',x+114,yy+17,'#fc4',8);g.fillStyle='#111';g.fillRect(bx,yy+8,bw,11);g.fillStyle=ultCol(d);g.fillRect(bx,yy+8,bw*o.s.dmg/mx,11);T(fmtN(o.s.dmg)+' ('+Math.round(100*o.s.dmg/tot)+'%)',bx+3,yy+17,'#fff',8);T(fmtN(o.s.taken),x+w-290,yy+17,'#f88',10);T(fmtN(o.s.heal),x+w-215,yy+17,'#6f8',10);T(String(o.s.par||0),x+w-145,yy+17,'#6f8',10);hico(d.id,3,x+w-62,yy+13,1,.9);T(String(o.s.ult),x+w-44,yy+17,'#fc4',10)})}
 function statOverlay(){ov(.97);T('STATISTIK PERTEMPURAN',320,36,'#fc4',18,'center');statPanel(20,64,600);T('Statistik dihitung sejak awal run ini. Ketuk untuk menutup.',320,262,'#9cf',10,'center')}
-/* tutorial: petunjuk sekali-tampil + layar Cara Bermain */
-const COACH=[['Pertempuran berjalan otomatis. Ketuk musuh untuk memfokuskan serangan tim.',()=>true],['Ikon di kartu hero = skill (S1). Ketuk untuk memakainya, atau biarkan AUTO.',()=>hs.some(h=>!h.dead&&h.cd<=0)&&tutT>7],['Limit Break siap! Ketuk ikon emas di kartu hero (atau tombol Limit Break di atas).',()=>lb>=100],['Boss! Ketuk area merah untuk menangkis serangannya.',()=>es.some(e=>e.d.boss&&!e.dead)],['Kontrol manual: geser joystick kiri; ATK, S1, S2, Limit Break ada di kanan.',()=>MAN],['Hero yang gugur bangkit dengan HP rendah di stage berikutnya.',()=>hs.some(h=>h.dead)],['Hero AI bisa menghindari zona merah, dan healer/tank kadang menangkis otomatis. Parry-mu tetap paling andal!',()=>tele.some(k=>!k.dead)&&tutT>10]];
-function coachDraw(){if(st!='fight')return;if(!coachCur&&t>coachGap){const i=COACH.findIndex((c,j)=>!((S.coach>>j)&1)&&c[1]());if(i>=0){coachCur={i,u:t+6.5};S.coach|=1<<i;qDirty=1}}
-if(coachCur){if(t>coachCur.u){coachCur=null;coachGap=t+1.5;return}const a=Math.max(0,Math.min(1,(coachCur.u-t)*2,(t-(coachCur.u-6.5))*4));g.globalAlpha=a;g.fillStyle='rgba(0,0,0,.72)';g.fillRect(70,112,500,26);g.strokeStyle='#fc4';g.lineWidth=1;g.strokeRect(70.5,112.5,499,25);T(COACH[coachCur.i][0],320,129,'#fe8',11,'center');g.globalAlpha=1}}
+/* Layar Cara Bermain (opsional, dibuka dari menu) */
 const HOW=[['Dasar Pertempuran',[['recruit',0]],['Pertempuran berjalan otomatis.','Ketuk musuh untuk memfokuskan serangan tim.','Tombol AUTO mengaktifkan skill otomatis.','Tombol x1/x2/x3 mengatur kecepatan.']],
 ['Skill (S1)',[['recruit',1],['acolyte',1],['archmage',1],['squire',1]],['Setiap hero punya satu skill dengan ikonnya sendiri.','Ikonnya ada di kartu hero di bagian bawah layar.','Ketuk kartu untuk memakai skill, atau biarkan AUTO.']],
 ['Limit Break',[['archmage',3],['paladin',3],['stormmage',3]],['Kalahkan musuh dan bangun kombo untuk mengisi gauge Limit Break.','Saat penuh, ikon emas muncul di kartu setiap hero.','Ketuk ikon itu: tiap hero punya Limit Break dan sinematiknya sendiri.','Gauge dipakai bersama, jadi pilih hero yang tepat.']],
@@ -52,8 +50,8 @@ const HOW=[['Dasar Pertempuran',[['recruit',0]],['Pertempuran berjalan otomatis.
 ['Boss dan Tangkis',[['paladin',1],['clubber',1]],['Boss menyerang dengan area merah di tanah.','Ketuk area merah tepat waktu untuk menangkis.','Hero AI bisa menghindar; healer dan tank kadang menangkis sendiri (Refleks naik lewat bintang).','Tangkisan manualmu juga mengisi Limit Break, jadi tetap yang paling andal.']],
 ['Hero, Toko dan Gear',[['acolyte',1],['squire',1],['hunter',1]],['Panggil hero baru di Toko (ada panggilan gratis harian).','Naikkan level, skill, dan evolusi di menu Pahlawan.','Pasang equipment untuk menambah ATK dan HP.','Buka Liontin di Toko untuk gear. AUTO PASANG memilihkan yang terbaik.','Susun pasukan: penjaga, penyerang, dan penyembuh.']],
 ['Misi dan Pencapaian',[['necro',3],['valkyrie',3]],['Misi harian memberi emas dan panggilan gratis.','Pencapaian memberi hadiah emas dan Esensi.','Buka dari menu: MISI & PENCAPAIAN.']]];
-function howEnd(){if(howNext=='play'){howNext='menu';st='menu';newRun(1)}else st='menu'}
-function drawHow(){ov(.95);const h=HOW[howP],n=h[1].length;T(h[0],320,50,'#fc4',22,'center');h[1].forEach((k,i)=>{const cx=320+(i-(n-1)/2)*70;g.fillStyle='#2b2545';g.fillRect(cx-28,72,56,56);g.strokeStyle='#fc4';g.lineWidth=2;g.strokeRect(cx-28,72,56,56);hico(k[0],k[1],cx,100,3,1)});h[2].forEach((l,i)=>T(l,320,168+i*26,'#cde',12,'center'));T('Halaman '+(howP+1)+'/'+HOW.length,320,298,'#9ab',10,'center');btn(40,310,100,30,'<',0);btn(270,310,100,30,'LEWATI',0);btn(500,310,100,30,howP<HOW.length-1?'LANJUT':howNext=='play'?'MULAI MAIN':'TUTUP',1)}
+function howEnd(){st='menu'}
+function drawHow(){ov(.95);const h=HOW[howP],n=h[1].length;T(h[0],320,50,'#fc4',22,'center');h[1].forEach((k,i)=>{const cx=320+(i-(n-1)/2)*70;g.fillStyle='#2b2545';g.fillRect(cx-28,72,56,56);g.strokeStyle='#fc4';g.lineWidth=2;g.strokeRect(cx-28,72,56,56);hico(k[0],k[1],cx,100,3,1)});h[2].forEach((l,i)=>T(l,320,168+i*26,'#cde',12,'center'));T('Halaman '+(howP+1)+'/'+HOW.length,320,298,'#9ab',10,'center');btn(40,310,100,30,'<',0);btn(270,310,100,30,'LEWATI',0);btn(500,310,100,30,howP<HOW.length-1?'LANJUT':'TUTUP',1)}
 function howClick(x,y){if(y>310&&y<340){if(x>40&&x<140){if(howP>0){howP--;sfx('click')}}else if(x>270&&x<370){sfx('click');howEnd()}else if(x>500&&x<600){sfx('click');if(howP<HOW.length-1)howP++;else howEnd()}}}
 function mkItem(slot,rar){const nm=slot=='w'?WN:slot=='a'?AN:XN,it={u:S.iu++,slot,rar,ic:IC[slot][Math.random()*IC[slot].length|0],nm:nm[Math.random()*nm.length|0],lv:0};if(slot=='x')it.ty=Object.keys(XT)[Math.random()*4|0];return it}
 const iVal=it=>{const m=1+.1*it.lv;return it.slot=='w'?WB[it.rar]*m:it.slot=='a'?AB[it.rar]*m:XT[it.ty][1][RAR.indexOf(it.rar)]*m};
@@ -78,8 +76,8 @@ function overflowClick(x,y){
     if(x>=10&&x<44&&overflowPage>0){overflowPage--;overflowSel=null;sfx('click');return}
     if(x>=50&&x<84&&overflowPage+1<pages){overflowPage++;overflowSel=null;sfx('click');return}
     const it=a.find(q=>q.u===overflowSel);
-    if(x>=130&&x<238){if(!it){say('Pilih hadiah terlebih dahulu');return}if(S.items.length>=ITEM_STORAGE.bag){say('Gudang penuh. Kosongkan satu slot dahulu.');return}S.items.push(it);S.overflowItems.splice(S.overflowItems.indexOf(it),1);overflowSel=null;sv();sfx('clear');say('Hadiah dipindahkan ke gudang');return}
-    if(x>=245&&x<355){if(!it){say('Pilih hadiah terlebih dahulu');return}if(it.lk){say('Item terkunci. Buka kunci sebelum menjual.');return}const value=iSell(it);S.g+=value;S.overflowItems.splice(S.overflowItems.indexOf(it),1);overflowSel=null;sv();sfx('coin');say('Hadiah dijual manual: +'+value+' emas');return}
+    if(x>=130&&x<238){if(!it){say(progL('Pilih hadiah dulu.','Select a reward first.'));return}if(S.items.length>=ITEM_STORAGE.bag){say(progL('Gudang penuh. Kosongkan satu slot dulu.','Storage is full. Free one slot first.'));return}S.items.push(it);S.overflowItems.splice(S.overflowItems.indexOf(it),1);overflowSel=null;sv();sfx('clear');say('Hadiah dipindahkan ke gudang');return}
+    if(x>=245&&x<355){if(!it){say(progL('Pilih hadiah dulu.','Select a reward first.'));return}if(it.lk){say('Item terkunci. Buka kunci sebelum menjual.');return}const value=iSell(it);S.g+=value;S.overflowItems.splice(S.overflowItems.indexOf(it),1);overflowSel=null;sv();sfx('coin');say('Hadiah dijual manual: +'+value+' emas');return}
     if(x>=360&&x<492){if(!a.length){say('Tidak ada hadiah tertunda');return}const free=Math.max(0,ITEM_STORAGE.bag-S.items.length);if(free<a.length){say('Perlu '+a.length+' slot kosong untuk mengambil semua hadiah.');return}S.items.push(...a);S.overflowItems=[];overflowSel=null;sv();sfx('clear');say('Semua hadiah tertunda dipindahkan');return}
   }
 }
@@ -96,17 +94,17 @@ function dropItem(q){
 }
 const gearList=()=>S.items.filter(i=>i.slot==gslot).sort((a,b)=>iScore(b,selH)-iScore(a,selH)||RAR.indexOf(b.rar)-RAR.indexOf(a.rar)||b.lv-a.lv||a.u-b.u);
 
-/* ===== TUTORIAL DUNIA PERSISTEN — Stage 8H =====
-   Status/topik: belum → berjalan → selesai. Setiap fase ditulis melalui sv()/Save.*.
-   Tutorial bersifat non-modal: pemain tetap bebas bergerak dan tidak pernah dipindah paksa. */
+/* TUTORIAL DUNIA PERSISTEN — 
+ Status/topik: belum → berjalan → selesai. Setiap fase ditulis melalui sv()/Save.*.
+ Tutorial bersifat non-modal: pemain tetap bebas bergerak dan tidak pernah dipindah paksa. */
 const HB_TUTORIAL_TOPICS=[
  {id:'shop',stage:2,after:[],title:'Panduan Toko',instruction:'Buka Toko dari menu.',target:'menu_shop',trigger:'menu'},
- {id:'gacha',stage:2,after:['shop'],title:'Panduan Gacha',instruction:'Di Toko, lakukan satu panggilan jika sumber daya cukup.',target:'shop_pull',trigger:'shop'},
- {id:'farming',stage:5,after:['gacha'],title:'Panduan Bertani',instruction:'Pilih alat hotbar, lalu olah satu petak ladang.',target:'farm_tool',trigger:'world'},
+ {id:'gacha',stage:2,after:['shop'],title:'Panduan Gacha',instruction:'Di Toko, coba satu panggilan.',target:'shop_pull',trigger:'shop'},
+ {id:'farming',stage:5,after:['gacha'],title:'Panduan Bertani',instruction:'Pilih alat di hotbar, lalu olah satu petak.',target:'farm_tool',trigger:'world'},
  {id:'fishing',stage:6,after:['farming'],title:'Panduan Memancing',instruction:'Pilih pancing, hadap air, lalu lempar kail.',target:'fishing_tool',trigger:'world'},
- {id:'orchard',stage:6,after:['fishing'],title:'Panduan Kebun Buah',instruction:'Pergilah ke kebun dan kumpulkan satu buah.',target:'resource_action',trigger:'world'},
+ {id:'orchard',stage:6,after:['fishing'],title:'Panduan Kebun Buah',instruction:'Ke kebun, lalu petik satu buah.',target:'resource_action',trigger:'world'},
  {id:'gather',stage:6,after:['orchard'],title:'Panduan Mengumpulkan',instruction:'Kumpulkan satu sumber daya dari dunia.',target:'resource_action',trigger:'world'},
- {id:'cook',stage:6,after:['gather'],title:'Panduan Memasak',instruction:'Masak satu resep ketika bahan mencukupi.',target:'cook_recipe',trigger:'kitchen'}
+ {id:'cook',stage:6,after:['gather'],title:'Panduan Memasak',instruction:'Masak satu resep.',target:'cook_recipe',trigger:'kitchen'}
 ];
 const HB_TUT_PHASES=['penanda','instruksi','sorot','tunggu','konfirmasi','lanjut','simpan'];
 function hbTutorialEnsure(){

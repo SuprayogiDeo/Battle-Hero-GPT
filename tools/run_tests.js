@@ -23,6 +23,7 @@ run('Inventory + storage tests (Stage 8C)', process.execPath, ['tools/test_inven
 run('World farming + fishing + gathering tests (Stages 8D–8E)', process.execPath, ['tools/test_stage_8de.js']);
 run('Interiors, physical services, signage and safe waypoint routes (Stages 8F–8G)', process.execPath, ['tools/test_stage_8fg.js']);
 run('Persistent milestone tutorials and opt-in performance monitor (Stages 8H–8I)', process.execPath, ['tools/test_tutorial_progress.js']);
+run('Stage 9A: bridge, overlaps, focus panel, minimap', process.execPath, ['tools/test_stage_9a.js']);
 run('Release integrity checks', process.execPath, ['tools/test_release_integrity.js']);
 const isWin = process.platform === 'win32';
 run('World/data regression tests', isWin ? 'py' : 'python3', isWin ? ['-3', 'tools/test_7defg.py'] : ['tools/test_7defg.py']);

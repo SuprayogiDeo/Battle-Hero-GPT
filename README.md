@@ -2,7 +2,7 @@
 
 Hero Battle adalah game 2D pixel-art untuk browser dengan pertarungan real-time, eksplorasi dunia, farming, crafting, pengembangan desa, dan progres yang tersimpan lokal. Antarmuka mobile dirancang untuk **orientasi landscape**.
 
-> **Status rilis:** `0.4.6-rc.1` / cache `v53` — Tahap 8H+8I menambah tutorial milestone per topik yang tersimpan, menunggu aksi nyata tanpa memindahkan pemain, dan profiler FPS/JS heap opt-in (`?perf=1`). Fitur interior/layanan objek, papan biome/rute aman, farming, memancing, penebangan, dan penambangan tetap tersedia. Proyek tetap privat; deployment publik dilarang sampai gerbang lisensi dan tes HP selesai. Nilai yang belum ditetapkan bertanda `PLACEHOLDER`. `npm test` lulus, tetapi Chromium headless timeout sebelum menghasilkan DOM; angka FPS/memori runtime dan uji HP nyata belum tersedia. Izin distribusi aset pihak ketiga tetap perlu ditinjau sebelum publikasi.
+> **Status rilis:** `0.4.7-rc.1` / cache `v55` — Tahap 8H+8I menambah tutorial milestone per topik yang tersimpan, menunggu aksi nyata tanpa memindahkan pemain, dan profiler FPS/JS heap opt-in (`?perf=1`). Fitur interior/layanan objek, papan biome/rute aman, farming, memancing, penebangan, dan penambangan tetap tersedia. Proyek tetap privat; deployment publik dilarang sampai gerbang lisensi dan tes HP selesai. Nilai yang belum ditetapkan bertanda `PLACEHOLDER`. `npm test` lulus, tetapi Chromium headless timeout sebelum menghasilkan DOM; angka FPS/memori runtime dan uji HP nyata belum tersedia. Izin distribusi aset pihak ketiga tetap perlu ditinjau sebelum publikasi.
 
 ## Jalankan secara lokal
 

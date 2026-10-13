@@ -1,7 +1,8 @@
-/* ===== PETERNAKAN (Tahap 7C) =====
-   Semua data masuk ke S.ranch dan tersimpan lewat sv()/Save.*. Hewan memakai animasi atlas Sunnyside.
-   Pakan didapat sebagai bahan samping panen ladang. Produksi berdasarkan timestamp; jam mundur dijaga
-   dengan clock monoton tersimpan, pakan berlaku sampai tengah malam lokal, hasil dan penjualan dibatasi harian. */
+const ranchL=(a,b)=>S.set&&S.set.lang==='en'?b:a;
+/* PETERNAKAN 
+ Semua data masuk ke S.ranch dan tersimpan lewat sv()/Save.*. Hewan memakai animasi atlas Sunnyside.
+ Pakan didapat sebagai bahan samping panen ladang. Produksi berdasarkan timestamp; jam mundur dijaga
+ dengan clock monoton tersimpan, pakan berlaku sampai tengah malam lokal, hasil dan penjualan dibatasi harian. */
 const RANCH={buy:180,maxLevel:5,baseCap:4,perLevel:2,feedCap:99,stockCap:99,dailyOutputCap:8,dailyGoldCap:100,maxOfflineMs:24*3600e3};
 const RANIM={
  chicken:{name:'Ayam',en:'Chicken',price:60,product:'egg',interval:12*60e3,sell:8,color:'#f5d58a'},
@@ -78,28 +79,28 @@ function ranchBuyOrUpgrade(){
 }
 function ranchBuyAnimal(type){
  const r=ranchGet(),cfg=RANIM[type];if(!cfg)return;
- if(!r.level){say('Beli kandang terlebih dahulu');return}
- if(r.animals.length>=ranchCapacity(r)){say('Kandang penuh. Tingkatkan kandang dahulu');return}
+ if(!r.level){say(ranchL('Beli kandang dulu.','Buy a pen first.'));return}
+ if(r.animals.length>=ranchCapacity(r)){say(ranchL('Kandang penuh. Tingkatkan dulu.','The pen is full. Upgrade it first.'));return}
  if(S.g<cfg.price){say('Emas tidak cukup: perlu '+cfg.price);return}
  S.g-=cfg.price;const x=.15+Math.random()*.7,y=.16+Math.random()*.65;
  r.animals.push({id:'r'+ranchNow().toString(36)+Math.random().toString(36).slice(2,5),type:type,x:x,y:y,tx:.1+Math.random()*.8,ty:.1+Math.random()*.8,fedDay:'',fedUntil:0,nextAt:0,pending:0});sv();sfx('clear');say(S.set.lang==='en'?cfg.en+' bought':cfg.name+' dibeli');
 }
 function ranchFeedAll(){
- ranchSync(true);const r=ranchGet(),need=ranchNeedsFeed(r),day=r.day,now=ranchNow();if(!r.animals.length){say('Belum ada hewan');return}if(!need){say('Semua hewan masih dalam periode pakan aktif');return}if(r.feed<need){say('Pakan kurang: perlu '+need+'. Panen tanaman di Ladang untuk mendapat pakan.');return}
+ ranchSync(true);const r=ranchGet(),need=ranchNeedsFeed(r),day=r.day,now=ranchNow();if(!r.animals.length){say('Belum ada hewan');return}if(!need){say(ranchL('Semua hewan masih kenyang.','All animals are still full.'));return}if(r.feed<need){say(ranchL('Pakan kurang, perlu '+need+'. Panen di ladang untuk dapat pakan.','Not enough feed, need '+need+'. Harvest in the field to get feed.'));return}
  r.feed-=need;const until=now+24*3600e3;
- r.animals.forEach(a=>{if(a.fedUntil>now)return;a.fedDay=day;a.fedUntil=until;a.nextAt=now+RANIM[a.type].interval;});sv();sfx('heal');say('Pakan diberikan kepada '+need+' hewan. Produksi aktif hingga 24 jam.');
+ r.animals.forEach(a=>{if(a.fedUntil>now)return;a.fedDay=day;a.fedUntil=until;a.nextAt=now+RANIM[a.type].interval;});sv();sfx('heal');say(ranchL('Pakan diberikan ke '+need+' hewan. Produksi jalan 24 jam.','Fed '+need+' animals. Production runs for 24 hours.'));
 }
 function ranchCollect(){
  const r=ranchGet();ranchSync(false);let got=0;
  r.animals.forEach(a=>{const p=RANIM[a.type].product,room=RANCH.stockCap-r.stock[p],n=Math.min(a.pending,room);if(n>0){r.stock[p]+=n;a.pending-=n;got+=n;}});
- if(!got){say('Belum ada hasil siap dikumpulkan');return}sv();sfx('coin');say('Hasil dikumpulkan: '+got+' produk');
+ if(!got){say(ranchL('Belum ada hasil yang siap.','Nothing is ready yet.'));return}sv();sfx('coin');say('Hasil dikumpulkan: '+got+' produk');
 }
 function ranchOpenMarket(){ranchSync(true);marketFrom='ranch';st='market';sfx('click');}
 let marketFrom='world';
 function ranchSellAll(){
  const r=ranchGet();ranchSync(false);let gold=0,units=0,left=RANCH.dailyGoldCap-r.soldGold;
  RPRODUCT.forEach(p=>{const id=p[0],val=RANIM[({egg:'chicken',milk:'cow',truffle:'pig',wool:'sheep'})[id]].sell,n=Math.min(r.stock[id],Math.floor(left/val));if(n>0){r.stock[id]-=n;gold+=n*val;left-=n*val;units+=n;}});
- if(!gold){say(r.soldGold>=RANCH.dailyGoldCap?'Batas penjualan harian tercapai':'Belum ada hasil untuk dijual');return}
+ if(!gold){say(r.soldGold>=RANCH.dailyGoldCap?ranchL('Penjualan hari ini sudah cukup. Lanjut besok.','Enough sales for today. More tomorrow.'):'Belum ada hasil untuk dijual');return}
  r.soldGold+=gold;S.g+=gold;sv();sfx('coin');say('Terjual '+units+' produk: +'+gold+' emas');
 }
 function ranchUpdate(dt){

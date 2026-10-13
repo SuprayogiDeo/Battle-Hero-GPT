@@ -1,4 +1,4 @@
-/* ===== AUDIO ===== */
+/* AUDIO */
 let AC,MG,MB,SB,DL,muted=false,inMus=0;function applyVol(){if(MB){MB.gain.value=S.set.bgm?S.set.mv/10:0;SB.gain.value=S.set.sv/10}}const SMP={},MUS={};let curM='',mSrc=null;
 const SN=['arrow','arrowhit','fire','explode','sword','slash','spear','ice','dark','poison','heal','shield','magic','hurt','kill','portal','coin','click','hit','cast','clear','slam','parry','limit','boss'];
 function ld(n,s2,u){fetch(u).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>AC.decodeAudioData(b)).then(d=>{s2[n]=d;if(s2===MUS&&n==curM){curM='';playM(n)}}).catch(()=>{})}

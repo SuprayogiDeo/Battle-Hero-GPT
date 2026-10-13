@@ -9,6 +9,15 @@ DESIGN = ROOT / 'tools/world_design.json'
 LAYERS = ('ground', 'shadow', 'decor', 'over', 'collision')
 
 
+def bridge_tile(bridge, ids, xx, yy):
+    """Pilih tile jembatan kayu: baris (atas/tengah/bawah) x kolom (ujung kiri/kanan, papan a/b, tiang)."""
+    xs = [p[0] for p in bridge['points']]; x0, x1 = min(xs), max(xs); w = max(1, int(bridge.get('width', 1))); yc = bridge['points'][0][1]
+    top = yc - w // 2; r = yy - top; row = 'top' if r == 0 else 'bot' if r == w - 1 else 'mid'
+    mid = (x0 + x1) // 2
+    col = 'L' if xx == x0 else 'R' if xx == x1 else 'post' if (xx in (x0 + 3, mid, x1 - 3) and row != 'mid') else ('a' if (xx & 1) == 0 else 'b')
+    return ids[row + '_' + col]
+
+
 def line_points(x0, y0, x1, y1):
     n = max(abs(x1 - x0), abs(y1 - y0), 1)
     return [(round(x0 + (x1 - x0) * i / n), round(y0 + (y1 - y0) * i / n)) for i in range(n + 1)]
@@ -32,6 +41,7 @@ def main():
     ap.add_argument('--chunk', type=int)
     args = ap.parse_args()
     design = json.loads(DESIGN.read_text(encoding='utf-8'))
+    BT = json.loads((BASE / 'bridge_tiles.json').read_text(encoding='utf-8'))['ids']
     src = json.loads((BASE / 'village.json').read_text(encoding='utf-8'))
     # Preserve generated interior-house sprites/door metadata when the world is rebuilt.
     prior_path = BASE / 'index.json'
@@ -124,9 +134,18 @@ def main():
                     xx, yy = (x, y + side) if horizontal else (x + side, y)
                     if not (0 <= xx < W and 0 <= yy < H): continue
                     i = yy * W + xx
-                    layers['ground'][i] = int(bridge.get('tile', 50))
+                    layers['ground'][i] = bridge_tile(bridge, BT, xx, yy) if bridge.get('style') == 'plank' else int(bridge.get('tile', 50))
                     grid[yy][xx] = '+'
                     layers['collision'][i] = 0
+
+    # Jembatan kayu: tiang pada layer decor (di atas air sisi utara) dan bayangan di air sisi selatan.
+    for bridge in design.get('bridges', []):
+        if bridge.get('style') != 'plank': continue
+        xs = [p[0] for p in bridge['points']]; x0, x1 = min(xs), max(xs); w = max(1, int(bridge.get('width', 1))); yc = bridge['points'][0][1]
+        top, bot = yc - w // 2, yc - w // 2 + w - 1
+        for xx in range(x0, x1 + 1):
+            if grid[top - 1][xx] == '~' and xx in (x0, x1, x0 + 3, (x0 + x1) // 2, x1 - 3): layers['decor'][(top - 1) * W + xx] = BT['post_cap']
+            if grid[bot + 1][xx] == '~': layers['shadow'][(bot + 1) * W + xx] = BT['water_shadow']
 
     # Roads join the legacy village to every new region without destroying old village art.
     road_cells = set()

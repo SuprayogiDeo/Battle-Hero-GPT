@@ -1,18 +1,18 @@
-/* Hero Battle - tilemap.js (Tahap 5B)
-   Skrip klasik. Memuat assets/world/village.json (+ tiles.png, sprites.png, sea.png), mem-bake lapisan tile
-   (ground, shadow, decor) ke kanvas 1x, lalu menggambar HANYA bagian yang terlihat (blit subrect, x2).
-   Laut = pola yang bergulir; ubin buih pantai beranimasi; objek (rumah/pohon/hewan/asap/kincir) diurutkan
-   menurut posisi kaki agar pemain bisa lewat di belakang objek tinggi. Bergantung pada anim.js (opsional).
-   Bila berkas gagal dimuat, ready() tetap false dan world.js memakai peta lama. */
+/* Hero Battle - tilemap.js
+ Skrip klasik. Memuat assets/world/village.json (+ tiles.png, sprites.png, sea.png), mem-bake lapisan tile
+ (ground, shadow, decor) ke kanvas 1x, lalu menggambar HANYA bagian yang terlihat (blit subrect, x2).
+ Laut = pola yang bergulir; ubin buih pantai beranimasi; objek (rumah/pohon/hewan/asap/kincir) diurutkan
+ menurut posisi kaki agar pemain bisa lewat di belakang objek tinggi. Bergantung pada anim.js (opsional).
+ Bila berkas gagal dimuat, ready() tetap false dan world.js memakai peta lama. */
 var Tmap = (function () {
   var BASE = 'assets/world/', V = null, ti = null, si = null, sea = null, land = null, landS = null, seaP = null;
   var pend = 0, bad = false, okf = false, ANT = [], OB = [], CR = [], T = 0, VC = {};
   var CH = {}, CHL = [], CHSIZE = 32, CHMAX = 25, CHSEQ = 0, CHREQ = {}, CHFAIL = {}; // LRU cache; each baked canvas <=512x512
   var MAPC = null, MAPD = null, MAPSIZE = ''; // cached minimap raster; rebuild only when discovery changes
   var ZONE = '', ZT = 0, DISC_W = 128;
-  var FX = { n: 0, door: {} }, LT = [], GL = null, g_ = null;   /* Tahap 6C: n = tingkat malam 0..1, door = {huruf: 0..1}, LT = cahaya tampak frame ini */
+  var FX = { n: 0, door: {} }, LT = [], GL = null, g_ = null;   /* n = tingkat malam 0..1, door = {huruf: 0..1}, LT = cahaya tampak frame ini */
   function glow() { if (GL) return GL; GL = cv(64, 64); var x = GL.getContext('2d'), q = x.createRadialGradient(32, 32, 0, 32, 32, 32); q.addColorStop(0, 'rgba(255,214,120,.85)'); q.addColorStop(.35, 'rgba(255,180,80,.35)'); q.addColorStop(1, 'rgba(255,150,50,0)'); x.fillStyle = q; x.fillRect(0, 0, 64, 64); return GL; }
-  /* Tahap 6D: ladang hidup. farm(p, now, nm, FC): p = S.farm.p (12 petak, urutan = V.farm), nm = nama tanaman atlas per jenis, FC = daftar jenis (ms). Hanya MEMBACA. */
+  /* ladang hidup. farm(p, now, nm, FC): p = S.farm.p (12 petak, urutan = V.farm), nm = nama tanaman atlas per jenis, FC = daftar jenis (ms). Hanya MEMBACA. */
   var FM = null;
   function farm(p, now, nm, fc) { FM = (V && V.farm && p) ? { p: p, now: now, nm: nm, fc: fc } : null; }
   var TUF = [[-18, -14], [-8, -8], [4, -16], [14, -10], [-12, -3], [10, -2]];
@@ -104,12 +104,12 @@ var Tmap = (function () {
   }
   function hud(g, disc, px, py, OX, VW, dt) {
     if(!V)return;ZT=Math.max(0,ZT-(dt||0));var uiScale=[.9,1,1.1][Math.max(0,Math.min(2,Math.round(Number(S&&S.set&&S.set.ui)||0))) ]||1,x0=4,y0=4,w=100*uiScale,h=76*uiScale,size=V.w+'x'+V.h,discKey=disc||'';
-    /* Main biome silhouettes are visible from the start, but undiscovered tile detail stays muted.
-       Cache the raster so the phone HUD does not redraw 12k map tiles every animation frame. */
+    /* Minimap terbuka penuh sejak awal (tanpa penemuan); penemuan biome hanya memicu banner.
+ Cache the raster so the phone HUD does not redraw 12k map tiles every animation frame. */
     if(!MAPC||MAPD!==discKey||MAPSIZE!==size){
       MAPC=cv(V.w,V.h);var mg=MAPC.getContext('2d');mg.imageSmoothingEnabled=false;
       for(var ty=0;ty<V.h;ty++)for(var tx=0;tx<V.w;tx++){
-        var b=biomeAt(tx,ty),col=b&&b.color||'#6f9b58',ch=V.grid&&V.grid[ty]?V.grid[ty].charAt(tx):'.',seen=discKey==='*'||discKey.charAt(ty*V.w+tx)==='1';
+        var b=biomeAt(tx,ty),col=b&&b.color||'#6f9b58',ch=V.grid&&V.grid[ty]?V.grid[ty].charAt(tx):'.',seen=true;
         if(seen){if(ch==='~')col='#398ec0';else if(ch===',')col='#b7a071';else if(ch==='X'||ch==='T')col='#3c4c36';else if(ch==='S'||ch==='R'||ch==='G'||ch==='Q'||ch==='F'||ch==='p'||ch==='f')col='#d4bf7b';}
         mg.fillStyle=col;mg.fillRect(tx,ty,1,1);if(!seen){mg.fillStyle='rgba(18,26,29,.58)';mg.fillRect(tx,ty,1,1);}
       }
