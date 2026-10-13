@@ -1,0 +1,708 @@
+{
+  "version": 3,
+  "world": {
+    "width": 128,
+    "height": 96,
+    "chunkSize": 32
+  },
+  "biomes": [
+    {
+      "id": "meadow",
+      "name": "Padang & Ladang",
+      "name_en": "Meadow & Farms",
+      "x": 0,
+      "y": 0,
+      "w": 64,
+      "h": 64,
+      "color": "#7eb85b",
+      "groundTiles": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "vegetation": "flowers",
+      "density": 0.035
+    },
+    {
+      "id": "forest",
+      "name": "Hutan Rimbun",
+      "name_en": "Deep Forest",
+      "x": 64,
+      "y": 0,
+      "w": 64,
+      "h": 64,
+      "color": "#326d42",
+      "groundTiles": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "vegetation": "forest",
+      "density": 0.14
+    },
+    {
+      "id": "lake",
+      "name": "Tepi Sungai & Danau",
+      "name_en": "River & Lake",
+      "x": 0,
+      "y": 64,
+      "w": 32,
+      "h": 32,
+      "color": "#4e9ac0",
+      "groundTiles": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "vegetation": "shore",
+      "density": 0.035
+    },
+    {
+      "id": "coast",
+      "name": "Pantai & Dermaga",
+      "name_en": "Coast & Pier",
+      "x": 32,
+      "y": 64,
+      "w": 64,
+      "h": 32,
+      "color": "#d7c17a",
+      "groundTiles": [
+        34
+      ],
+      "vegetation": "coast",
+      "density": 0.025
+    },
+    {
+      "id": "mountain",
+      "name": "Kaki Gunung",
+      "name_en": "Mountain Foothills",
+      "x": 96,
+      "y": 64,
+      "w": 32,
+      "h": 32,
+      "color": "#8b927d",
+      "groundTiles": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "vegetation": "mountain",
+      "density": 0.065
+    }
+  ],
+  "roads": [
+    [
+      54,
+      23,
+      64,
+      23
+    ],
+    [
+      64,
+      23,
+      80,
+      22
+    ],
+    [
+      80,
+      22,
+      105,
+      27
+    ],
+    [
+      64,
+      23,
+      65,
+      50
+    ],
+    [
+      65,
+      50,
+      65,
+      62
+    ],
+    [
+      65,
+      62,
+      20,
+      57
+    ],
+    [
+      20,
+      57,
+      20,
+      64
+    ],
+    [
+      65,
+      62,
+      55,
+      71
+    ],
+    [
+      55,
+      71,
+      42,
+      76
+    ],
+    [
+      55,
+      71,
+      55,
+      81
+    ],
+    [
+      55,
+      81,
+      75,
+      82
+    ],
+    [
+      75,
+      82,
+      97,
+      77
+    ],
+    [
+      97,
+      77,
+      111,
+      84
+    ],
+    [
+      65,
+      50,
+      77,
+      45
+    ]
+  ],
+  "waterFeatures": [
+    {
+      "id": "lake_main",
+      "type": "ellipse",
+      "x": 4,
+      "y": 68,
+      "w": 24,
+      "h": 24,
+      "tileTiles": [
+        0
+      ],
+      "grid": "~",
+      "fishable": true,
+      "shoreTile": 34,
+      "shoreWidth": 1
+    },
+    {
+      "id": "lake_inlet",
+      "type": "river",
+      "points": [
+        [
+          30,
+          70
+        ],
+        [
+          33,
+          74
+        ],
+        [
+          36,
+          77
+        ]
+      ],
+      "width": 3,
+      "tileTiles": [
+        0
+      ],
+      "grid": "~",
+      "fishable": true
+    },
+    {
+      "id": "coastal_sea",
+      "type": "rect",
+      "x": 32,
+      "y": 87,
+      "w": 64,
+      "h": 9,
+      "tileTiles": [
+        0
+      ],
+      "grid": "~",
+      "fishable": true
+    },
+    {
+      "id": "mountain_stream",
+      "type": "river",
+      "points": [
+        [
+          112,
+          65
+        ],
+        [
+          111,
+          72
+        ],
+        [
+          115,
+          80
+        ],
+        [
+          113,
+          90
+        ]
+      ],
+      "width": 2,
+      "tileTiles": [
+        0
+      ],
+      "grid": "~",
+      "fishable": true
+    }
+  ],
+  "places": [
+    {
+      "id": "village_market",
+      "name": "Pasar Desa",
+      "name_en": "Village Market",
+      "type": "market",
+      "x": 33,
+      "y": 25,
+      "sprite": "stall_red",
+      "footprint": [
+        3,
+        2
+      ]
+    },
+    {
+      "id": "fishing_pier",
+      "name": "Dermaga",
+      "name_en": "Fishing Pier",
+      "type": "pier",
+      "x": 55,
+      "y": 82,
+      "platform": {
+        "w": 7,
+        "h": 7,
+        "tile": 50
+      },
+      "decor": [
+        {
+          "sprite": "fence_h",
+          "dx": -3,
+          "dy": 0
+        },
+        {
+          "sprite": "fence_h",
+          "dx": -2,
+          "dy": 0
+        },
+        {
+          "sprite": "fence_h",
+          "dx": -1,
+          "dy": 0
+        },
+        {
+          "sprite": "fence_h",
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite": "fence_h",
+          "dx": 1,
+          "dy": 0
+        },
+        {
+          "sprite": "fence_h",
+          "dx": 2,
+          "dy": 0
+        },
+        {
+          "sprite": "fence_h",
+          "dx": 3,
+          "dy": 0
+        }
+      ]
+    },
+    {
+      "id": "fisher_hut",
+      "name": "Pondok Nelayan",
+      "name_en": "Fisherman's Hut",
+      "type": "fisher_hut",
+      "x": 48,
+      "y": 74,
+      "sprite": "house_hut",
+      "footprint": [
+        3,
+        3
+      ]
+    },
+    {
+      "id": "animal_pen",
+      "name": "Kandang",
+      "name_en": "Animal Pen",
+      "type": "animal_pen",
+      "x": 20,
+      "y": 55,
+      "fence": {
+        "w": 5,
+        "h": 4
+      }
+    },
+    {
+      "id": "orchard",
+      "name": "Kebun Buah",
+      "name_en": "Orchard",
+      "type": "orchard",
+      "x": 80,
+      "y": 22,
+      "cluster": {
+        "w": 7,
+        "h": 5,
+        "sprites": [
+          "tree_1",
+          "tree_2",
+          "bush_b"
+        ]
+      }
+    },
+    {
+      "id": "mushroom_wood",
+      "name": "Hutan Jamur",
+      "name_en": "Mushroom Grove",
+      "type": "mushroom_grove",
+      "x": 105,
+      "y": 28,
+      "cluster": {
+        "w": 7,
+        "h": 6,
+        "sprites": [
+          "rock_a",
+          "rock_b",
+          "bush_c",
+          "flower_4",
+          "flower_8"
+        ]
+      }
+    },
+    {
+      "id": "village_workshop",
+      "name": "Bengkel Desa",
+      "name_en": "Village Workshop",
+      "type": "workshop",
+      "x": 63,
+      "y": 46,
+      "sprite": "house_hut",
+      "footprint": [
+        3,
+        3
+      ],
+      "unlockLevel": 2
+    },
+    {
+      "id": "village_kitchen",
+      "name": "Dapur Desa",
+      "name_en": "Village Kitchen",
+      "type": "kitchen",
+      "x": 62,
+      "y": 61,
+      "sprite": "house_hut",
+      "footprint": [
+        3,
+        3
+      ],
+      "unlockLevel": 3
+    },
+    {
+      "id": "woodcutter_hut",
+      "name": "Pondok Penebang",
+      "name_en": "Woodcutter's Hut",
+      "type": "woodcutter_hut",
+      "x": 90,
+      "y": 21,
+      "sprite": "house_hut",
+      "footprint": [
+        3,
+        3
+      ],
+      "unlockLevel": 4
+    },
+    {
+      "id": "village_hall",
+      "name": "Balai Desa",
+      "name_en": "Village Hall",
+      "type": "village_hall",
+      "x": 77,
+      "y": 44,
+      "sprite": "house_redtall",
+      "footprint": [
+        3,
+        4
+      ],
+      "unlockLevel": 5
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "foothill_rocks",
+      "type": "scatter",
+      "biome": "mountain",
+      "sprites": [
+        "rock_a",
+        "rock_b",
+        "pine_a",
+        "pine_b"
+      ],
+      "density": 0.055
+    },
+    {
+      "id": "shore_plants",
+      "type": "scatter",
+      "biome": "lake",
+      "sprites": [
+        "bush_a",
+        "bush_c",
+        "flower_2",
+        "flower_7"
+      ],
+      "density": 0.025
+    }
+  ],
+  "tags": {
+    "water": "fishing_spot",
+    "meadow": "animal_pen_area"
+  },
+  "bridges": [
+    {
+      "id": "east_village_bridge",
+      "points": [
+        [
+          53,
+          23
+        ],
+        [
+          64,
+          23
+        ]
+      ],
+      "width": 3,
+      "tile": 50
+    }
+  ],
+  "npcs": {
+    "builder": [
+      63,
+      43
+    ],
+    "cook": [
+      62,
+      58
+    ],
+    "woodcutter": [
+      87,
+      20
+    ]
+  },
+  "resources": [
+    {
+      "id": "wood_forest_1",
+      "kind": "tree",
+      "x": 67,
+      "y": 16,
+      "biome": "forest",
+      "respawnMs": 420000,
+      "amount": 2
+    },
+    {
+      "id": "wood_forest_2",
+      "kind": "tree",
+      "x": 86,
+      "y": 34,
+      "biome": "forest",
+      "respawnMs": 420000,
+      "amount": 2
+    },
+    {
+      "id": "wood_forest_3",
+      "kind": "tree",
+      "x": 73,
+      "y": 52,
+      "biome": "forest",
+      "respawnMs": 420000,
+      "amount": 2
+    },
+    {
+      "id": "stone_mountain_1",
+      "kind": "stone",
+      "x": 101,
+      "y": 77,
+      "biome": "mountain",
+      "respawnMs": 540000,
+      "amount": 2
+    },
+    {
+      "id": "stone_mountain_2",
+      "kind": "stone",
+      "x": 116,
+      "y": 71,
+      "biome": "mountain",
+      "respawnMs": 540000,
+      "amount": 2
+    },
+    {
+      "id": "mushroom_forest_1",
+      "kind": "mushroom",
+      "x": 105,
+      "y": 30,
+      "biome": "forest",
+      "respawnMs": 360000,
+      "amount": 1
+    },
+    {
+      "id": "mushroom_forest_2",
+      "kind": "mushroom",
+      "x": 111,
+      "y": 35,
+      "biome": "forest",
+      "respawnMs": 360000,
+      "amount": 1
+    },
+    {
+      "id": "herb_meadow_1",
+      "kind": "herb",
+      "x": 38,
+      "y": 35,
+      "biome": "meadow",
+      "respawnMs": 300000,
+      "amount": 1
+    },
+    {
+      "id": "herb_lakeside_2",
+      "kind": "herb",
+      "x": 27,
+      "y": 76,
+      "biome": "lake",
+      "respawnMs": 300000,
+      "amount": 1
+    },
+    {
+      "id": "fruit_orchard_1",
+      "kind": "fruit",
+      "x": 80,
+      "y": 21,
+      "biome": "forest",
+      "respawnMs": 480000,
+      "amount": 1
+    },
+    {
+      "id": "fruit_orchard_2",
+      "kind": "fruit",
+      "x": 83,
+      "y": 25,
+      "biome": "forest",
+      "respawnMs": 480000,
+      "amount": 1
+    }
+  ],
+  "biomeSigns": [
+    {
+      "id": "meadow",
+      "x": 54,
+      "y": 22,
+      "name": "Padang & Ladang",
+      "name_en": "Meadow & Farms"
+    },
+    {
+      "id": "forest",
+      "x": 67,
+      "y": 22,
+      "name": "Hutan Rimbun",
+      "name_en": "Deep Forest"
+    },
+    {
+      "id": "lake",
+      "x": 18,
+      "y": 63,
+      "name": "Tepi Sungai & Danau",
+      "name_en": "River & Lake"
+    },
+    {
+      "id": "coast",
+      "x": 67,
+      "y": 63,
+      "name": "Pantai & Dermaga",
+      "name_en": "Coast & Pier"
+    },
+    {
+      "id": "mountain",
+      "x": 99,
+      "y": 76,
+      "name": "Kaki Gunung",
+      "name_en": "Mountain Foothills"
+    }
+  ],
+  "biomeGates": [
+    {
+      "id": "meadow_forest",
+      "x": 64,
+      "y": 23,
+      "from": "meadow",
+      "to": "forest",
+      "style": "stone_wood_arch"
+    },
+    {
+      "id": "coast_mountain",
+      "x": 96,
+      "y": 78,
+      "from": "coast",
+      "to": "mountain",
+      "style": "stone_wood_arch"
+    }
+  ],
+  "serviceObjects": [
+    {
+      "id": "quest_board",
+      "type": "quest_board",
+      "sprite": "board",
+      "x": 36,
+      "y": 15,
+      "rangeTiles": 2.2,
+      "name": "Papan Misi",
+      "name_en": "Quest Board"
+    },
+    {
+      "id": "market_cashier",
+      "type": "market_cashier",
+      "sprite": "stall_red",
+      "x": 35,
+      "y": 25,
+      "rangeTiles": 2.4,
+      "name": "Kasir Pasar",
+      "name_en": "Market Cashier"
+    },
+    {
+      "id": "animal_trough",
+      "type": "animal_trough",
+      "sprite": "feed_trough",
+      "x": 20,
+      "y": 56,
+      "rangeTiles": 2.1,
+      "name": "Palung Pakan",
+      "name_en": "Feed Trough"
+    }
+  ]
+}

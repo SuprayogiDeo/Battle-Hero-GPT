@@ -1,0 +1,4 @@
+Hero Battle repository bundle: 0.4.6-rc.1
+Runtime service-worker cache: v53
+Implementation baseline: Tahap 8H+8I — tutorial milestone persisten, audit konsistensi spesifikasi bagian 13, dan profiler FPS/memori opt-in
+Release state: RC1; npm test includes tutorial milestone/save regressions and section-13 consistency gates. Performance overlay is opt-in via ?perf=1; numerical FPS/heap measurements remain unverified because Chromium headless timed out. HP real-device QA and asset-license review are blocking gates. Values not finalized remain PLACEHOLDER. Project remains private; do not deploy publicly.

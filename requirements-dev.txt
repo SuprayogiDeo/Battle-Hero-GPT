@@ -1,0 +1,2 @@
+# Required only when regenerating/processing image assets with tools/build_*.py.
+Pillow>=10.0

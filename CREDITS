@@ -1,0 +1,28 @@
+Hero Battle - Credits
+
+Art: "Sunnyside World" asset pack by Daniel Diggle (https://danieldiggle.itch.io/sunnyside).
+Used under the pack's license: modification allowed; resale, repackaging and use for
+training AI are NOT allowed. Files derived from it live in assets/world/ (avatar.png,
+props.png, atlas.json) and are produced by tools/build_assets.py (cropped / recombined only).
+Tahap 6A: assets/world/chars.png (avatar + 4 NPC, pose samping dan arah) dibuat tools/build_chars.py dari strip karakter dan file
+.aseprite paket yang sama (hanya digabung/dipotong; posisi rambut pada pose jalan arah dipetakan dari pose idle).
+
+Tahap 6D: crop memakai frame crop_* di assets/world/atlas.json/props.png (sumber Sunnyside, tahap _00 sampai _05);
+slot petak awal dibuat tools/build_farm.py. Tahap 8D mengganti lahan runtime menjadi 24 petak rumput di assets/world/index.json dan village.json, tanpa memotong data save lama.
+
+Tahap 6C: jendela/pintu pada assets/world/village.json (spr.*.win/.door) dideteksi dari sprites.png (turunan paket yang sama) oleh tools/build_lights.py;
+efek cahaya/tint digambar lewat kode (tanpa aset baru).
+
+Tahap 5B: assets/world/tiles.png, sprites.png, sea.png dan village.json diturunkan dari tileset dan contoh scene (Room1) paket yang sama
+(dipotong/digabung saja) lewat tools/build_village.py.
+
+Tahap 8A: rumah eksterior dari Houses_Sprite_Sheet.png (sumber pengguna, penggunaan pribadi); furnitur kecil dari "Tiny Wonder Farm Free";
+ikon bahan rak dari "99 ingredients"; ikon alat HUD dari UI Sunnyside World. Atlas dibuat tools/build_interiors.py (dipotong/digabung);
+properti lain (kasir, mesin gacha, tungku, rak, dll.) digambar prosedural oleh skrip yang sama. Konfirmasi lisensi publikasi tetap diperlukan sebelum rilis publik.
+
+Tahap 8C: `assets/world/items.png` adalah atlas runtime 9 ikon bahan 16×16; ikon herb, mushroom, dan tonic diambil sebagai pilihan dari 99 Ingredients (https://keifoopx.itch.io/99-various-ingredients), sedangkan simbol kayu/batu/buah/produk sederhana dihasilkan oleh `tools/build_inventory_icons.py`. Ikon alat tetap memakai atlas HUD turunan Sunnyside. Tidak ada arsip ZIP atau sumber PSD/Aseprite yang dimasukkan ke repo. Tinjau syarat distribusi setiap sumber sebelum proyek dipublikasikan.
+
+Tahap 8D+8E: `assets/world/chars.png` dan atlas diperbarui lewat `tools/build_chars.py`; avatar_watering berasal dari strip WATERING 5 frame. Avatar REELING 13 frame, AXE 10 frame, dan MINING 10 frame berasal dari pipeline animasi Aseprite Sunnyside/unggahan Human v1.0 terpisah. Catatan sumber/ketentuan file Aseprite terpisah tetap perlu dikonfirmasi sebelum distribusi publik. Crop world memakai enam tahap `crop_carrot/pumpkin/sunflower_0..5` dari tahap sumber `_00.._05`. Angka waktu gigitan/respawn bertanda PLACEHOLDER. Tidak ada ZIP pack atau Aseprite dimasukkan ke repo.
+
+
+Tahap 8F+8G: metadata jendela malam diterapkan ke sprite rumah dari asset sheet rumah yang diunggah pemilik; papan tanda memakai sprite `sign` Sunnyside yang sudah tersedia. Gapura/palung digambar prosedural oleh `js/tilemap.js`. Lima papan biome dan dua gapura ditentukan lewat `tools/world_design.json`; tidak ada aset pack mentah atau aset eksternal baru yang dimasukkan.

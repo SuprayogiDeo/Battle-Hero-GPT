@@ -1,0 +1,99 @@
+# Changelog
+
+## Batch 8H+8I — 0.4.6-rc.1 — Tutorial milestone persisten, audit konsistensi & profiler (cache v53)
+
+- Menambahkan status tutorial per topik `belum/berjalan/selesai` melalui `Save.*`, pemulihan fase setelah reload, dan pencegahan kemunculan ulang setelah selesai. Urutan milestone: Stage 2 toko/gacha, Stage 5 bertani, Stage 6 memancing, lalu kebun buah, kumpul, dan masak. Fase LANJUT/SIMPAN perlu konfirmasi eksplisit; jika Save gagal, tutorial tidak ditandai selesai.
+- Menerapkan alur tujuh fase: penanda, satu instruksi, sorot kontrol, tunggu aksi nyata, konfirmasi, lanjut, simpan. Tutorial tidak memindahkan karakter; lewati hanya melalui tindakan eksplisit pemain.
+- Menyamakan toast syarat alat terkunci menjadi 2,5 detik tanpa panel/gembok besar.
+- Menambahkan profiler opt-in `?perf=1` untuk FPS saat ini/rata-rata dan JS heap saat browser menyediakan `performance.memory`; nilai FPS/memori runtime belum direkam karena Chromium headless timeout.
+- Mengaudit bagian 13 spesifikasi, memperbarui checklist publikasi dan status release candidate, menambahkan regresi tutorial/profiler, serta menaikkan cache service worker ke `v53`.
+- `npm test` lulus pada repo kerja dan paket ekstraksi. Chromium headless visual dan tes HP fisik belum selesai; izin distribusi aset tetap menjadi gerbang. **Tidak ada deployment publik.**
+
+## Batch 8F+8G — 0.4.5-rc.1 — Lampu rumah, layanan objek, signage biome & rute peta aman (cache v52)
+
+- Memperbarui `tools/build_lights.py` agar menghasilkan metadata jendela malam untuk 14 sprite rumah `b_*`; setiap kotak jendela divalidasi di dalam sprite dan tidak boleh menimpa area pintu. Cahaya di-render oleh runtime, pintu tetap dapat dimasuki.
+- Memperluas `assets/world/interior.json` ke v2 dengan registry entry/exit untuk 15 bangunan. Kamera interior tetap adaptif; keluar memulihkan posisi pintu dan tool terpilih. Layanan tetap eksplisit: kasir untuk transaksi toko, mesin gacha khusus, dapur/barak/balai memakai objek interior, papan misi dan palung pakan adalah objek fisik; berdiri di dekat bangunan tidak otomatis membuka menu.
+- `tools/world_design.json` dan `tools/build_world.py` kini menghasilkan 5 papan nama biome di dekat jalur, 2 gapura visual untuk perbatasan besar, serta objek layanan papan misi/kasir/palung. Label biome terikat pada papan dan memudar berdasarkan jarak; tidak menambahkan collision pada papan/gapura.
+- Peta dunia tidak lagi menampilkan nama biome permanen di dalam wilayah. Waypoint kini memilih petak aman yang dapat dicapai dan memakai BFS empat-arah untuk mengarahkan kompas mengelilingi air, pohon, bangunan, dan penghalang; jalur buntu ditandai jelas dan tidak menghasilkan arah lurus menembus penghalang.
+- Menambahkan regresi Tahap 8F+8G untuk pintu bangunan, jendela/pintu, objek layanan, signage/gapura, dan routing waypoint. Cache service worker dinaikkan ke `v52`.
+- Uji Chromium headless dan HP fisik tetap gate manual; proyek tetap privat. Lisensi/distribusi aset turunan harus ditinjau ulang sebelum publikasi.
+
+## Batch 8D+8E — 0.4.4-rc.1 — Farming dunia, memancing, tebang & tambang (cache v51)
+
+- Ladang sekarang berupa petak dunia 6×4 di grass patch terbuka; save lama ditambah petaknya tanpa memotong data. Tap/swipe memproses setiap sel sekali per gesture, melewati sel yang terhalang, dan benih divalidasi sebelum dikurangi. Siklus cangkul → benih → isi ember di air → siram → panen menggunakan state moisture yang sama untuk hujan dan siram manual.
+- Crop memakai enam tahap atlas Sunnyside (`crop_*_0` sampai `_5`, bersumber dari `*_00` sampai `*_05`); avatar mendapatkan animasi WATERING 5 frame. Tombol aksi tidak lagi membuka layar farming lama.
+- Memancing tetap di dunia: aksi pertama melempar kail, pelampung/riak memberi tanda, aksi kedua saat gigitan menjalankan REELING 13 frame dan memperbarui buku/stok ikan; hasil ditampilkan sebagai toast `+1 Ikan`, tanpa popup besar.
+- Pohon tepi hutan dapat ditebang dengan AXE 10 frame, meninggalkan tunggul yang bisa dibersihkan; pohon inti/unik dilindungi. Batuan menggunakan MINING 10 frame. Sumber diberi cooldown dan muncul kembali; material berlebih menjadi world drop yang terlihat dan bisa diambil parsial ketika ruang tas tersedia.
+- Menambah `tools/test_stage_8de.js` (59 pemeriksaan); `npm test` juga memeriksa 6×4, sapuan tanpa aksi ganda, benih kurang/negatif, kelembapan bersama, urutan pancing, perlindungan pohon dan resource marker inti, tunggul, kapasitas penuh/partial drop, dan frame atlas.
+- Nilai waktu gigitan, pertumbuhan tanaman lama, dan respawn masih `PLACEHOLDER` untuk tuning; tidak dianggap angka final. Service worker dinaikkan ke `v51`; atlas dan karakter menjadi bagian precache wajib. Proyek tetap privat.
+- Chromium headless masih timeout tanpa DOM/screenshot; uji HP fisik belum dilakukan.
+
+## Batch 8C — 0.4.3-rc.1 — Hotbar, tas + peti, dan transfer aman (cache v50)
+
+- Enam alat dasar hotbar terkunci dari penimpaan; 10 slot sisanya mengikat material dari tas, menampilkan jumlah, dan tetap memakai swipe halaman. Konfigurasi pembuka alat terpusat dengan tanda `PLACEHOLDER`.
+- Gudang menjadi dua panel tas/peti, pilih sumber lalu tujuan, split 1/setengah/semua, quick-store/take, dan sort kategori/nama/jumlah. Daftar tidak diurutkan ulang saat jumlah berubah; hanya tombol sort yang mengubah urutan.
+- Transfer bahan menghitung batas tujuan sebelum mutasi dan hanya mengurangi sumber sebanyak yang benar-benar muat. Crafting dan upgrade tetap memeriksa kapasitas/bahan sebelum biaya; upgrade peti tidak memangkas isi lama. Hadiah equipment tertunda dapat dibuka langsung dari panel tas/peti.
+- Menambahkan atlas material turunan `assets/world/items.png` melalui `tools/build_inventory_icons.py` dari ikon terpilih 99 Ingredients dan simbol resource sederhana. ZIP pack dan berkas Aseprite tidak dimasukkan ke repo.
+- Menambah regresi `tools/test_inventory_storage.js`; memperbarui versi repo ke `0.4.3-rc.1`, service worker/cache ke `v50`, katalog aset, kredit, roadmap, dan catatan implementasi.
+- Status validasi perangkat harus dicatat terpisah: tes otomatis dijalankan pada batch ini; Chromium headless/HP fisik belum diklaim lulus. Proyek tetap privat.
+
+## Batch 8B — 0.4.2-rc.1 — HUD responsif, safe area, dan pengaturan (cache v49)
+
+- Mencegah minimap ganda dan banner biome permanen; banner besar hanya ditampilkan saat biome pertama kali ditemukan, sedangkan toast biasa lebih ringkas.
+- Memisahkan panel FOKUS dari minimap/banner dan memastikan teks HUD baru minimal 9 px.
+- Menghormati safe-area viewport, mempertahankan instruksi rotasi portrait, menangkap pointer UI, dan memperbesar hitbox hotbar/aksi serta tombol pengaturan menjadi minimal 44 CSS px efektif.
+- Menambahkan skala UI 3 tingkat serta membagi Pengaturan ke halaman ringkas agar target sentuh tidak saling menimpa; volume, getaran, pengurangan efek, dan ukuran UI tetap memakai Save.*.
+- Menambah regresi untuk skala/hitbox HUD, penyimpanan pengaturan, penemuan biome idempoten, input yang tidak tembus, serta pemulihan posisi/tool setelah panel ditutup.
+- Memperbarui spesifikasi, roadmap, catatan implementasi, dan cache service worker ke `v49`.
+- `npm test` lulus; Chromium headless timeout sebelum menghasilkan DOM/screenshot, dan pengujian HP nyata tetap terbuka. Proyek tetap privat dan tidak dipublikasikan.
+
+## Batch 7+ — 0.4.1-rc.2 — Tahap 8A: HUD kontekstual + interior bangunan (cache v48)
+
+## Batch 7+ — 0.4.1-rc.2 — Tahap 8A: HUD kontekstual + interior bangunan (cache v48)
+- Baru `js/interior.js`: 15 bangunan desa punya interior yang bisa dijelajahi (Toko dengan kasir + mesin gacha, Barak, Balai Desa, Bengkel, Dapur, Rumah Kamu, Pondok Penebang/Nelayan, 7 rumah penduduk). Masuk lewat tombol aksi MASUK di pintu; KELUAR kembali ke pintu luar. Posisi interior tidak disimpan: save selalu pulih di pintu luar. Menu/transaksi hanya terbuka lewat objek (kasir, mesin gacha, kompor, meja kerja, dst.).
+- Baru `js/hud.js`: minimap kiri-atas tanpa judul (ketuk = peta dunia), hotbar 8 slot (ketuk pilih, geser = halaman 2), satu tombol aksi ikon tangan dengan label kontekstual, jam HH:MM. Tool terpilih di `S.hb` (save lama tanpa field ini tetap valid).
+- Alat menentukan aksi: Kapak = tebang, Beliung = gali, Tangan = petik, Pancing = lempar kail; alat tidak sesuai menampilkan petunjuk, bukan aksi. Ember punya status kosong/berisi.
+- Bangunan terkunci tidak lagi digelapkan/bergembok: coba masuk -> toast syarat 3 detik.
+- Eksterior rumah diganti dari `Houses_Sprite_Sheet.png` (15 bangunan, `b_*` di sprites.png). Pembangun: `tools/build_interiors.py`; pemasangan kode: `tools/patch_8a.py`. Tes: `tools/test_interior_hud.js`.
+- Dikecualikan/ditunda: jendela menyala malam untuk rumah baru, Gerbang/Papan Misi/Pasar/Kandang tetap objek luar, farming sapuan, memancing tanpa popup, papan biome, tutorial, hotbar item bebas.
+
+## Batch 7 — Release Candidate Hardening (`0.4.0-rc.1`, `sw.js` cache v47)
+
+- Reconfirmed baseline by running the full `npm test` suite on the release candidate.
+- Added `tools/test_release_integrity.js` to validate version/cache consistency, entry-point script precache coverage, GitHub Pages workflow safety, release docs, and common accidental-artifact exclusions.
+- Added the release-integrity check to the standard `npm test` pipeline so local checks and GitHub Actions use the same acceptance gate.
+- Refreshed active README/roadmap with acceptance-status accounting; historical batch notes remain unchanged.
+- Added a release-candidate checklist that separates passed automation from still-pending mobile, visual, license and public-deployment gates.
+- Bumped the service-worker cache to `v47` so deployed clients request the new release shell.
+- Public release is still blocked on third-party asset distribution review and physical-device testing.
+
+## Batch 6 — World Map & Dungeon Integration (`sw.js` cache v46)
+
+- Added a world-map overlay: primary biome regions remain visible while tile detail and points of interest reveal through exploration.
+- Removed the unconditional whole-map discovery migration; legacy `disc='*'` saves migrate to the explored radius around the saved player position.
+- Added safe world-map waypoints with a direction/distance cue; waypoints do not teleport the player and cannot be set on undiscovered tiles.
+- Added a three-room Forest Ruins dungeon accessible from the adventure gate after Main Stage 3 and the opening tutorial. The final room is a boss fight.
+- Dungeon room checkpoints survive reloads/defeats; normal room gold and material drops are reduced for repeat clears and the primary final-room reward is one-time.
+- Added regression coverage for dungeon progression, checkpoint persistence, replay reward reduction, primary reward idempotency, and waypoint discovery rules.
+- Updated runtime cache to `v46` and package version to `0.3.0`.
+- Automated tests pass; full visual and touch QA on a physical phone remains pending.
+
+## Batch 5 — Journal & Resident Bonds (`sw.js` cache v45)
+
+- Added a Journal tab and saved focus for the next Main Stage, daily quest, village story, or village request.
+- Added world HUD focus text and idempotent first-visit biome discovery tracking.
+- Added persistent NPC relationship tiers, per-day voluntary conversation progress, village request/story contribution, one-time tier rewards, and relationship milestone dialogue.
+- Added two resident-relation-gated kitchen recipes and a compact kitchen layout for six recipes.
+- Expanded achievements with village, crafting, fishing, exploration, and relationship goals.
+- Expanded English translations and bumped the service-worker cache to `v45`.
+- Added regression coverage for Journal, relationship rewards, recipe unlocking, and biome discovery.
+
+## Batch 4 — Combat & Boss Foundations (`sw.js` cache v44)
+
+- Armor damage mitigation is capped at 25% and shown in equipment detail.
+- Timed attack buff refresh replaces the active modifier rather than stacking modifiers.
+- Main-stage/tower bosses display health and phase UI; the 50% threshold triggers one transition announcement per boss instance.
+- Persistent `bossClaims` prevents repeat primary rewards and migrates legacy stage-claim data; replay gold is reduced.
+- Added/extended automated regression coverage across save recovery, storage/workshop, farming/weather, ranch offline production, combat and boss reward behavior.
+
+Earlier batch notes are in `docs/implementation-history/`.
