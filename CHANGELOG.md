@@ -1,5 +1,9 @@
 # Changelog
 
+## Batch 9B — 0.4.7-rc.2 — Satu kios pasar (cache v56)
+
+- Dua kios merah identik (Pasar Desa + Kasir Pasar) digabung jadi satu: tempat pasar dipindah ke posisi kasir (x=34) tanpa sprite sendiri, sehingga label "Pasar Desa" dan aksi kasir berada di kios yang sama. Cache service worker dinaikkan agar perangkat yang sudah memasang v55 memuat peta baru.
+
 ## Batch 9A — 0.4.7-rc.1 — Jembatan kayu, pembersihan peta & HUD fokus (cache v55)
 
 - Gapura biome dihapus (`biomeGates` kosong; papan nama biome tetap). Papan biome Meadow dipindah dari atas jembatan ke samping jalan.

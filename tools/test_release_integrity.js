@@ -29,7 +29,7 @@ assert.match(versionText, new RegExp(`repository bundle: ${pkg.version.replace(/
 const swMatch = sw.match(/const VERSION\s*=\s*['"](v\d+)['"]/);
 assert.ok(swMatch, 'service-worker cache version is declared');
 assert.match(versionText, new RegExp(`Runtime service-worker cache: ${swMatch[1]}`), 'VERSION and service worker cache must match');
-assert.match(changelog, new RegExp(`^## Batch 9A[^\n]*${swMatch[1]}`, 'm'), 'changelog has a current entry for this cache version');
+assert.match(changelog, new RegExp(`^## Batch 9[AB][^\n]*${swMatch[1]}`, 'm'), 'changelog has a current entry for this cache version');
 assert.match(readme, new RegExp(pkg.version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), 'README describes the current candidate');
 assert.equal(manifest.orientation, 'landscape', 'PWA manifest declares the required mobile orientation');
 assert.equal(manifest.start_url, './', 'PWA start URL remains relative for GitHub Pages repository subpaths');

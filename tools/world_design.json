@@ -280,9 +280,8 @@
       "name": "Pasar Desa",
       "name_en": "Village Market",
       "type": "market",
-      "x": 30,
+      "x": 34,
       "y": 25,
-      "sprite": "stall_red",
       "footprint": [
         3,
         2
