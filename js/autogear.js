@@ -1,0 +1,14 @@
+/* ===== AUTO PASANG, AUTO DEPLOY & REKOMENDASI ===== */
+const XW={as:1,crit:.9,cd:.8,ls:1.6};
+function iScore(it,id){const v=iVal(it);if(it.slot!='x')return v;const r=id?HEROES[HID[id]].role:'';let w=XW[it.ty];if(it.ty=='ls'&&(r=='tank'||r=='healer'))w*=1.3;else if(it.ty=='cd'&&(r=='mage'||r=='healer'))w*=1.3;else if(it.ty=='crit'&&(r=='archer'||r=='assassin'||r=='fighter'))w*=1.2;return v*w}
+const hBase=(id,s)=>{const d=HEROES[HID[id]],m=mult(id);return s=='a'?d.hp*m*.2:d.dm*m};
+function autoEquip(){let n=0;const sq=S.deck.filter(id=>S.own[id]);['w','a','x'].forEach(s=>{const its=S.items.filter(i=>i.slot==s&&!i.lk),pr=[],fx=h=>{const u=(S.eq[h]||{})[s];return u!=null&&S.items.some(i=>i.u==u&&i.lk)};sq.forEach(h=>fx(h)||its.forEach(i=>pr.push([iScore(i,h)*hBase(h,s),h,i])));pr.sort((a,b)=>b[0]-a[0]);const dh={},du={};pr.forEach(p=>{if(!dh[p[1]]&&!du[p[2].u]){dh[p[1]]=p[2];du[p[2].u]=1}});
+sq.forEach(h=>{if(fx(h))return;const e=S.eq[h]=S.eq[h]||{},it=dh[h];if(it){if(e[s]!=it.u)n++;e[s]=it.u}else if(e[s]&&du[e[s]])delete e[s]});
+Object.keys(S.eq).forEach(h=>{if(!sq.includes(h)&&S.eq[h][s]&&du[S.eq[h][s]])delete S.eq[h][s]})});if(n)sv();return n}
+function recFor(it){let b=null;S.deck.forEach(h=>{if(!S.own[h])return;const e=S.eq[h]||{},cu=S.items.find(i=>i.u==e[it.slot]),gn=iScore(it,h)-(cu?iScore(cu,h):0);if(gn>0&&(!b||gn*hBase(h,it.slot)>b.gn*hBase(b.h,it.slot)))b={h,gn}});return b}
+const hPow=id=>{const d=HEROES[HID[id]],m=mult(id),q=eqStat(id);return d.dm*m*(1+q.atk)*3+d.hp*m*(1+q.hp)*.35+(d.role=='healer'?40:0)};
+function bestSquad(){const o=HEROES.filter(d=>S.own[d.id]).sort((a,b)=>hPow(b.id)-hPow(a.id)),p=[],add=d=>{if(d&&!p.includes(d)&&p.length<5)p.push(d)};add(o.find(d=>d.role=='tank'));add(o.find(d=>d.role=='healer'));o.forEach(add);return p.map(d=>d.id)}
+function autoSquad(){const n=bestSquad(),c=n.length!=S.deck.length||n.some(i=>!S.deck.includes(i));S.deck=n;if(c)sv();return c}
+function deployHero(id){if(S.deck.includes(id))return 1;if(S.deck.length<5){S.deck.push(id);return 1}const B=bestSquad();if(!B.includes(id))return 0;const o=S.deck.find(x=>!B.includes(x));if(o==null)return 0;S.deck[S.deck.indexOf(o)]=id;return 1}
+function heroNote(r){const id=r.id;if(r.msg=='BARU!'){if(S.ad){const k=deployHero(id);r.m2=k?'Masuk pasukan!':'Cadangan';r.mc=k?'#6f8':'#789'}else{const k=bestSquad().includes(id);r.m2=k?'Disarankan: pasukan':'Cadangan';r.mc=k?'#fc4':'#789'}}else{r.m2=S.deck.includes(id)?'Sudah di pasukan':'';r.mc='#9ab'}}
+function itemNote(r){const it=r.it;if(!S.items.includes(it)){r.m2='Dijual otomatis';r.mc='#f88';return}const eb=equippedBy(it.u);if(eb){r.m2='Dipasang: '+HEROES[HID[eb]].n.slice(0,8);r.mc='#6f8'}else{const rc=S.ad?0:recFor(it);if(rc){r.m2='Cocok: '+HEROES[HID[rc.h]].n.slice(0,10);r.mc='#fc4'}else{r.m2=S.ad?'Disimpan (lemah)':'Disimpan di gudang';r.mc='#789'}}}
