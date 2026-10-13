@@ -1,0 +1,21 @@
+{
+ "base": 128,
+ "ids": {
+  "top_L": 128,
+  "top_a": 129,
+  "top_b": 130,
+  "top_R": 131,
+  "top_post": 132,
+  "mid_L": 133,
+  "mid_a": 134,
+  "mid_b": 135,
+  "mid_R": 136,
+  "bot_L": 137,
+  "bot_a": 138,
+  "bot_b": 139,
+  "bot_R": 140,
+  "bot_post": 141,
+  "post_cap": 142,
+  "water_shadow": 143
+ }
+}
