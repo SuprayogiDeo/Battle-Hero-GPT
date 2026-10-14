@@ -166,6 +166,40 @@ var Tmap = (function () {
       }
     });
   }
+  var GO = {}, WSC = {}, WALL = { workshop: 'b_workshop', kitchen: 'b_kitchen', village_hall: 'b_hall', woodcutter_hut: 'b_woodcutter', fisher_hut: 'b_fisher' };
+  /* gerbang kayu dua daun di celah pagar selatan kandang; o = keterbukaan 0..1 (membuka ke dalam saat pemain dekat) */
+  function quad(g, c, pts) { g.fillStyle = c; g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]); g.closePath(); g.fill(); }
+  function drawPenGate(g, sx, sb, o) {
+    var hw = 31, lh = 23, k = 1 - .8 * o, lift = 10 * o, i, s, hx, fx, fy, P;
+    g.fillStyle = 'rgba(0,0,0,.16)'; g.fillRect(sx - hw, sb - 3, hw * 2, 4);
+    for (i = 0; i < 2; i++) {
+      s = i ? 1 : -1; hx = sx + s * hw; fx = hx - s * hw * k; fy = sb - 2 - lift;
+      P = function (u, v) { return [hx + (fx - hx) * u, (sb - 2) + (fy - (sb - 2)) * u - lh * v]; };
+      quad(g, '#3f2815', [P(0, 0), P(1, 0), P(1, 1), P(0, 1)]);
+      quad(g, '#b9824c', [P(.05, .08), P(.95, .08), P(.95, .92), P(.05, .92)]);
+      quad(g, '#e0ad72', [P(.05, .8), P(.95, .8), P(.95, .92), P(.05, .92)]);
+      quad(g, '#7a4d2a', [P(.05, .2), P(.95, .2), P(.95, .34), P(.05, .34)]);
+      quad(g, '#7a4d2a', [P(.05, .58), P(.95, .58), P(.95, .72), P(.05, .72)]);
+      g.strokeStyle = '#3f2815'; g.lineWidth = 2; g.beginPath(); g.moveTo(P(.06, .12)[0], P(.06, .12)[1]); g.lineTo(P(.94, .86)[0], P(.94, .86)[1]); g.stroke();
+      g.fillStyle = '#f0cf92'; g.fillRect(Math.round(P(.04, .5)[0]) - 1, Math.round(P(.04, .5)[1]) - 1, 3, 3);
+    }
+  }
+  /* papan nama menempel di dinding, tepat di atas bingkai pintu (posisi dihitung dari data door sprite) */
+  function wallSign(g, r, x0, y0, nm) {
+    var d = r.door, w = WSC[nm];
+    if (!w) { g.save(); g.font = 'bold 8px system-ui'; w = WSC[nm] = Math.ceil(g.measureText(nm).width) + 8; g.restore(); }
+    var h = 12, x = Math.round(x0 + (d[0] + d[2] / 2) * 2 - w / 2), y = y0 + d[1] * 2 - 3 - h;
+    g.fillStyle = 'rgba(0,0,0,.28)'; g.fillRect(x + 1, y + 2, w, h);
+    g.fillStyle = '#2a1c12'; g.fillRect(x - 1, y - 1, w + 2, h + 2); g.fillStyle = '#d9b982'; g.fillRect(x, y, w, h);
+    g.fillStyle = 'rgba(255,255,255,.28)'; g.fillRect(x, y, w, 2); g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(x, y + h - 2, w, 2);
+    g.fillStyle = '#2a1c12'; g.fillRect(x + 2, y + 3, 1, 1); g.fillRect(x + w - 3, y + 3, 1, 1);
+    g.save(); g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = 'bold 8px system-ui'; g.fillStyle = '#2a1c12'; g.fillText(nm, x + w / 2, y + h / 2 + 1); g.restore();
+  }
+  function wallName(k) {
+    if (!V || !V.places) return null;
+    for (var i = 0; i < V.places.length; i++) { var p = V.places[i]; if (WALL[p.type] === k) return (S && S.set && S.set.lang === 'en' ? p.name_en : p.name) || p.name; }
+    return null;
+  }
   /* pemain di dalam kandang atau di depan pintunya (satuan tile, float) */
   function nearPen(tx, ty) {
     if (!V || !V.pens) return null;
@@ -221,8 +255,7 @@ var Tmap = (function () {
         (function (tx, ty) { add(tx * 32 + 16, (ty + 1) * 32, 40, function (sx, sb) { drawFence(g, p, tx, ty, sx, sb); }); })(tx, ty);
       }
       add((p.x + p.w - 3) * 32, (p.y + 2) * 32, 20, function (sx, sb) { drawFeedTrough(g, sx, sb); });
-      var nm = (S && S.set && S.set.lang === 'en' ? p.name_en : p.name) || p.name;
-      add(p.signAt[0] * 2, p.signAt[1] * 2, 36, function (sx, sb) { drawPlate(g, sx, sb, nm, '#d9b982'); });
+      add((p.gateCols[0] + p.gateCols[1] + 1) * 16, (p.gateRow + 1) * 32, 40, function (sx, sb) { drawPenGate(g, sx, sb, GO[p.id] || 0); });
     });
   }
   /* plat nama: tiang ikut urutan kedalaman, papan + teks digambar di lapisan atas agar tidak tertutup pohon */
@@ -266,6 +299,13 @@ var Tmap = (function () {
   /* kritter berkeliaran di padang */
   function update(dt) {
     if (!okf) return; T += dt; syncPenAnimals(false);
+    if (V && V.pens && S && S.world) {
+      var ptx = S.world.x / 32, pty = S.world.y / 32;
+      V.pens.forEach(function (p) {
+        var gx = (p.gateCols[0] + p.gateCols[1] + 1) / 2, gy = p.gateRow + 1, near = (ptx >= p.x && ptx < p.x + p.w && pty >= p.y && pty < p.y + p.h) || Math.hypot(ptx - gx, pty - gy) <= 2.6, o = GO[p.id] || 0;
+        GO[p.id] = o + ((near ? 1 : 0) - o) * Math.min(1, dt * 9);
+      });
+    }
     for (var i = 0; i < CR.length; i++) {
       var c = CR[i];
       if (c.w > 0) { c.w -= dt; c.mv = 0; if (c.w <= 0) { c.tx = c.z[0] + Math.random() * (c.z[2] - c.z[0]); c.ty = c.z[1] + Math.random() * (c.z[3] - c.z[1]); } continue; }
@@ -329,6 +369,7 @@ var Tmap = (function () {
           if (r.door && dp > .02) doorFx(g, r.door, fx0, fy0, dp);
           if (r.win && FX.n > .02) winFx(g, r, o, fx0, fy0);
         }
+        if (md != 'l' && r.door) { var wn = wallName(o.k); if (wn) wallSign(g, r, Math.round(sx - r.w), Math.round(sb - r.h * 2), wn); }
         if (o.k == 'lamp' && FX.n > .02) LT.push([sx, Math.round(sb - r.h * 2) + 8, 46, .8]);
         if (o.biomeSign) {
           var wp = S && S.world, d = wp ? Math.hypot(wp.x / 32 - o.x / 16, wp.y / 32 - o.y / 16) : 99;
@@ -340,10 +381,10 @@ var Tmap = (function () {
         } }); })(o, r);
     }
     (V.places || []).forEach(function (p) {
-      var ax = p.signAt ? p.signAt[0] * 2 : p.x * 32, ay = p.signAt ? p.signAt[1] * 2 : p.y * 32;
-      add(ax, ay, 36, function (sx, sb) {
-        var nm = (S && S.set && S.set.lang === 'en' ? p.name_en : p.name) || p.name;
-        drawPlate(g, sx, sb, nm, p.type === 'pier' ? '#8fc4de' : p.type === 'orchard' ? '#a9d68f' : p.type === 'mushroom_grove' ? '#d9b3e6' : '#e6c56f');
+      if (p.sprite || p.type === 'animal_pen') return;   /* bangunan: papan di dinding; kandang: tanpa nama */
+      add(p.x * 32 + 16, p.y * 32, 36, function (sx, sb) {
+        var nm = (S && S.set && S.set.lang === 'en' ? p.name_en : p.name) || p.name, wp = S && S.world, d = wp ? Math.hypot(wp.x / 32 - p.x, wp.y / 32 - p.y) : 99, a = d <= 3 ? 1 : Math.max(0, Math.min(1, (8 - d) / 5));
+        if (a > .01) LBL.push({ k: 'label', text: nm, x: Math.round(sx), y: Math.round(sb - 26), a: a });
       });
     });
     penObjects(add, g);

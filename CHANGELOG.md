@@ -1,5 +1,11 @@
 # Changelog
 
+## Batch 9B-3 — 0.4.8-rc.1 — Gerbang kandang dan papan nama dinding (cache v58)
+
+- Kandang: plat nama dihapus (hewan sudah menjelaskan isinya); celah pagar selatan kini berisi gerbang kayu dua daun yang membuka ke dalam saat pemain mendekat atau masuk (`drawPenGate`, easing di `Tmap.update`).
+- Bangunan (Bengkel, Dapur, Balai Desa, Pondok Penebang, Pondok Nelayan): plat bertiang di jalan diganti papan nama yang menempel di dinding tepat di atas pintu; posisinya dihitung otomatis dari data `door` sprite (`wallSign`).
+- Tempat tanpa bangunan (Pasar, Dermaga, Kebun Buah, Hutan Jamur): tiang plat dihapus; nama tampil sebagai label melayang yang memudar saat pemain dekat.
+
 ## Batch 9B-2 — 0.4.8-rc.1 — Polish dunia: jembatan, bangunan, kandang, sumber daya, memancing (cache v57)
 
 - Jembatan kayu kini tepat menutupi air (x=54..59) dengan satu petak tumpuan di tiap sisi; tidak lagi menjulur ke darat.

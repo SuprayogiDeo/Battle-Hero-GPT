@@ -76,7 +76,7 @@ life=(ROOT/'js'/'life.js').read_text(encoding='utf-8')
 for token in ('S.fish','S.gather','S.kitchen','S.buff','S.village','S.orders','S.atmo','lifeFishingSpot','lifeDailyGrant'):
     if token not in life: fail(f'feature hook missing: {token}')
 sw=(ROOT/'sw.js').read_text(encoding='utf-8')
-if not re.search(r"const VERSION\s*=\s*'v57'", sw): fail('service-worker version not v57')
+if not re.search(r"const VERSION\s*=\s*'v58'", sw): fail('service-worker version not v58')
 if "'./js/life.js'" not in sw or "'./js/farm.js'" not in sw or "'./js/storagecraft.js'" not in sw or "'./assets/world/index.json'" not in sw or "'./assets/world/atlas.json'" not in sw or "'./assets/world/chars.png'" not in sw: fail('life/farm/storagecraft script or world assets not precached')
 for p in ('index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','icons/apple-touch-icon.png','icons/favicon-32.png','js/life.js','js/farm.js','js/storagecraft.js','assets/world/atlas.json','assets/world/chars.png'):
     if not (ROOT/p).is_file(): fail(f'precache file missing: {p}')
