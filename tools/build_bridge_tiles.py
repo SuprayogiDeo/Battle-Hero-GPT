@@ -25,7 +25,7 @@ def rail_bot(im, post=False):
     d = ImageDraw.Draw(im); R(d, 0, 9, 16, 2, C('#000000', 70)); R(d, 0, 11, 16, 1, OL); R(d, 0, 12, 16, 1, HI); R(d, 0, 13, 16, 2, P3); R(d, 0, 15, 16, 1, OL)
     if post: R(d, 5, 7, 6, 9, OL); R(d, 6, 8, 4, 7, P2); R(d, 6, 8, 4, 1, HI); R(d, 6, 13, 4, 2, P3)
 def end(im, left):
-    d = ImageDraw.Draw(im); x = 0 if left else 12; R(d, x, 0, 4, 16, OL); R(d, x + 1, 0, 2, 16, P3); R(d, x + 1 if left else x + 1, 0, 1, 16, HI)
+    d = ImageDraw.Draw(im); x = 0 if left else 12; R(d, x, 0, 4, 16, OL); R(d, x + 1, 0, 2, 16, P3); R(d, x + 1 if left else x + 2, 0, 1, 16, HI)
 tiles = {}
 for row in ('top', 'mid', 'bot'):
     for col in ('L', 'a', 'b', 'R', 'post'):

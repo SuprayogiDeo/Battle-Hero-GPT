@@ -246,6 +246,15 @@ var Tmap = (function () {
     fPost(g, postX, sb, ph, ph > 24 ? '#f0cf92' : null);
     if (ty === y1 && (tx === G0 - 1 || tx === G1 + 1)) { g.fillStyle = '#f0cf92'; g.fillRect(postX - 3, sb - ph - 5, 6, 3); }
   }
+  /* pagar ladang: tiang sudut + balok menyambung, gaya sama dengan kandang (drawFence), tanpa celah di sudut */
+  function farmRect() { var b = V && V.bld && V.bld.F; return b ? { x: b[0], y: b[1], w: b[2] - b[0] + 1, h: b[3] - b[1] + 1, gateCols: [-99, -99] } : null; }
+  function farmFence(add, g) {
+    var p = farmRect(); if (!p) return;
+    for (var ty = p.y; ty < p.y + p.h; ty++) for (var tx = p.x; tx < p.x + p.w; tx++) {
+      if (!(tx === p.x || tx === p.x + p.w - 1 || ty === p.y || ty === p.y + p.h - 1)) continue;
+      (function (tx, ty) { add(tx * 32 + 16, (ty + 1) * 32, 40, function (sx, sb) { drawFence(g, p, tx, ty, sx, sb); }); })(tx, ty);
+    }
+  }
   function penObjects(add, g) {
     if (!V || !V.pens) return;
     V.pens.forEach(function (p) {
@@ -358,6 +367,7 @@ var Tmap = (function () {
       if (o.a) { (function (o) { var treeState = o.a.indexOf('tree') === 0 && typeof lifeTreeObjectState === 'function' ? lifeTreeObjectState(o) : ''; if (treeState === 'hidden') return; add(wx, wy, 120, function (sx, sb) { if (treeState === 'stump') { g.fillStyle = '#60402a'; g.fillRect(sx-7,sb-8,14,8); g.fillStyle = '#b68b50'; g.fillRect(sx-6,sb-9,12,3); g.fillStyle = '#3c2b1b'; g.fillRect(sx-2,sb-5,4,4); } else { var an = o.a.indexOf('tree') == 0 || o.a.indexOf('mush') == 0; Anim.draw(g, o.a, an ? tm + o.x * 41 : 0, sx, sb, false, 2); } }); })(o); continue; }
       if (o.k == 'gate_arch') { add(wx, wy, 74, function (sx, sb) { drawGate(g, sx, sb); }); continue; }
       if (o.k == 'feed_trough') { add(wx, wy, 14, function (sx, sb) { drawFeedTrough(g, sx, sb); }); continue; }
+      if ((o.k == 'fence_h' || o.k == 'fence_v') && farmRect() && o.x >= farmRect().x * 16 && o.x < (farmRect().x + farmRect().w) * 16 && o.y > farmRect().y * 16 && o.y <= (farmRect().y + farmRect().h) * 16) continue;   /* pagar ladang digambar ulang di farmFence() */
       var r = V.spr[o.k]; if (!r) continue;
       (function (o, r) { add(wx, wy, r.h * 2, function (sx, sb) {
         var md = (o.c && o.c != 'f' && 'SR'.indexOf(o.c) >= 0 && lockFn(o.c)) ? 'l' : snow ? 's' : '';
@@ -387,7 +397,7 @@ var Tmap = (function () {
         if (a > .01) LBL.push({ k: 'label', text: nm, x: Math.round(sx), y: Math.round(sb - 26), a: a });
       });
     });
-    penObjects(add, g);
+    penObjects(add, g); farmFence(add, g);
     if (typeof lifeMovedTrees === 'function') lifeMovedTrees().forEach(function (t) { add(t.x * 2, t.y * 2, 120, function (sx, sb) { Anim.draw(g, t.a, tm + t.x * 41, sx, sb, false, 2); }); });
     g_ = g; farmCrops(add);
     CR.forEach(function (c) { add(c.x * 2, c.y * 2, 70, function (sx, sb) { Anim.draw(g, c.a, c.mv ? tm + c.x * 13 : 0, sx, sb, c.fl, 2); Anim.shadow(g, sx, sb - 1, 9, 3, .25); }); });

@@ -1,5 +1,12 @@
 # Changelog
 
+## Batch 9B-4 — 0.4.8-rc.1 — Perbaikan jembatan, pagar ladang, sprite rusak (cache v59)
+
+- Pagar ladang digambar ulang dengan `drawFence` (`farmFence` di tilemap.js): tiang sudut, balok menyambung, tanpa celah di sudut.
+- Sprite `flower_7` (blok oranye, crop atlas salah) dihapus dari dunia (71 objek) dan dari pembangkit dekor.
+- Jembatan timur: baris pagar atas/bawah kini padat (hanya baris tengah bisa dilalui); tiang simetris (x=55 dan 58); tile tepi sungai lama di ujung kiri dihapus; ujung kanan dicerminkan agar sama dengan kiri.
+- Jembatan barat: ujung bawah kiri dan kanan kini memakai tutup rel yang sama dengan sisi atas.
+
 ## Batch 9B-3 — 0.4.8-rc.1 — Gerbang kandang dan papan nama dinding (cache v58)
 
 - Kandang: plat nama dihapus (hewan sudah menjelaskan isinya); celah pagar selatan kini berisi gerbang kayu dua daun yang membuka ke dalam saat pemain mendekat atau masuk (`drawPenGate`, easing di `Tmap.update`).

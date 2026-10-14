@@ -18,7 +18,7 @@ const ch = {}; for (const f of fs.readdirSync(path.join(root, 'assets/world/chun
 const tileAt = (L, x, y) => { for (const k in ch) { const c = ch[k]; if (x >= c.x && x < c.x + c.w && y >= c.y && y < c.y + c.h) return c.layers[L][(y - c.y) * c.w + (x - c.x)]; } return 0; };
 const [[x0, yc], [x1]] = br.points, top = yc - 1;
 for (let x = x0; x <= x1; x++) for (let y = top; y <= top + 2; y++) ok(ids.has(tileAt('ground', x, y)), 'sel jembatan ' + x + ',' + y + ' bukan tile kayu');
-ok(Object.values(BT.ids).some(i => tileAt('decor', x0, top - 1) === i || tileAt('decor', x0 + 3, top - 1) === i), 'tiang jembatan ada di layer decor');
+ok(Object.values(BT.ids).some(i => tileAt('decor', x0, top - 1) === i || tileAt('decor', x0 + 2, top - 1) === i), 'tiang jembatan ada di layer decor');
 ok(Math.max(...ids) < 32 * 5, 'id tile jembatan dalam sheet 5 baris');
 ok(!I.objects.some(o => o.biomeSign && (o.x >> 4) >= x0 && (o.x >> 4) <= x1 && ((o.y >> 4) - 1) >= top - 1 && ((o.y >> 4) - 1) <= top + 3), 'papan biome tidak menutupi jembatan');
 // 4) minimap terbuka penuh; tanpa popup memancing/E-KETUK saat dekat air

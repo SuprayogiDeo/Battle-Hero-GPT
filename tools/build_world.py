@@ -13,10 +13,8 @@ def bridge_tile(bridge, ids, xx, yy):
     """Pilih tile jembatan kayu: baris (atas/tengah/bawah) x kolom (ujung kiri/kanan, papan a/b, tiang)."""
     xs = [p[0] for p in bridge['points']]; x0, x1 = min(xs), max(xs); w = max(1, int(bridge.get('width', 1))); yc = bridge['points'][0][1]
     top = yc - w // 2; r = yy - top; row = 'top' if r == 0 else 'bot' if r == w - 1 else 'mid'
-    mid = (x0 + x1) // 2
-    # Tiang simetris: ujung dan dua titik di dalam; hindari menumpuk pada jembatan pendek.
-    post_x = {x0, x0 + 2, x1 - 2, x1}
-    col = 'L' if xx == x0 else 'R' if xx == x1 else 'post' if (xx in post_x and row != 'mid') else ('a' if (xx & 1) == 0 else 'b')
+    d = min(xx - x0, x1 - xx)   # tiang simetris: 2 petak dari tiap ujung
+    col = 'L' if xx == x0 else 'R' if xx == x1 else 'post' if (d == 2 and row != 'mid') else ('a' if (xx & 1) == 0 else 'b')
     return ids[row + '_' + col]
 
 
@@ -138,7 +136,7 @@ def main():
                     i = yy * W + xx
                     layers['ground'][i] = bridge_tile(bridge, BT, xx, yy) if bridge.get('style') == 'plank' else int(bridge.get('tile', 50))
                     grid[yy][xx] = '+'
-                    layers['collision'][i] = 0
+                    layers['collision'][i] = 0 if (bridge.get('style') != 'plank' or (w > 2 and yy == yc)) else 1   # jembatan plank: hanya baris tengah yang bisa dilalui
 
     # Jembatan kayu: tiang pada layer decor (di atas air sisi utara) dan bayangan di air sisi selatan.
     for bridge in design.get('bridges', []):
@@ -146,7 +144,7 @@ def main():
         xs = [p[0] for p in bridge['points']]; x0, x1 = min(xs), max(xs); w = max(1, int(bridge.get('width', 1))); yc = bridge['points'][0][1]
         top, bot = yc - w // 2, yc - w // 2 + w - 1
         for xx in range(x0, x1 + 1):
-            if grid[top - 1][xx] == '~' and xx in (x0, x1, x0 + 3, (x0 + x1) // 2, x1 - 3): layers['decor'][(top - 1) * W + xx] = BT['post_cap']
+            if grid[top - 1][xx] == '~' and xx in (x0 + 2, x1 - 2): layers['decor'][(top - 1) * W + xx] = BT['post_cap']
             if grid[bot + 1][xx] == '~': layers['shadow'][(bot + 1) * W + xx] = BT['water_shadow']
 
     # Roads join the legacy village to every new region without destroying old village art.
@@ -314,9 +312,9 @@ def main():
             if hash01(x, y, 31) >= density: continue
             if kind == 'forest': key = ('tree_1', 'tree_2', 'pine_a', 'pine_b')[int(hash01(x, y, 32) * 4) % 4]
             elif kind == 'mountain': key = ('rock_a', 'rock_b', 'pine_a', 'pine_b')[int(hash01(x, y, 33) * 4) % 4]
-            elif kind == 'shore': key = ('bush_a', 'bush_c', 'flower_2', 'flower_7')[int(hash01(x, y, 34) * 4) % 4]
-            elif kind == 'coast': key = ('bush_a', 'flower_2', 'flower_7')[int(hash01(x, y, 35) * 3) % 3]
-            else: key = ('flower_0', 'flower_2', 'flower_5', 'flower_7', 'bush_a')[int(hash01(x, y, 36) * 5) % 5]
+            elif kind == 'shore': key = ('bush_a', 'bush_c', 'flower_2', 'flower_0')[int(hash01(x, y, 34) * 4) % 4]
+            elif kind == 'coast': key = ('bush_a', 'flower_2', 'flower_0')[int(hash01(x, y, 35) * 3) % 3]
+            else: key = ('flower_0', 'flower_2', 'flower_5', 'bush_a')[int(hash01(x, y, 36) * 4) % 4]
             add_sprite(key, x, y)
             if key.startswith(('tree_', 'pine_', 'rock_')):
                 grid[y][x] = 'X'; layers['collision'][y * W + x] = 1
