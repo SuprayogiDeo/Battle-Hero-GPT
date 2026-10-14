@@ -102,7 +102,7 @@ lifeDoGather=function(r){
  const now=lifeNow(),id=r.id,item=req[0],qty=req[1],room=scFreeBag(),stored=Math.min(room,qty),dropped=qty-stored;
  /* Satu transaksi: kapasitas dihitung dahulu, lalu tas + drop + cooldown disimpan bersama. */
  if(stored)S.gather.items[item]=(S.gather.items[item]||0)+stored;
- S.gather.nodes[id]={readyAt:now+(r.respawnMs||req[2]),last:now,stump:r.kind==='tree'?1:0};S.gather.count++;
+ lifeMarkHarvested(r,r.respawnMs||req[2]);S.gather.count++;
  if(dropped){if(!Array.isArray(S.worldDrops))S.worldDrops=[];const wx=Number.isFinite(+r.x)?+r.x:Math.floor(((S.world&&S.world.x)||0)/WS),wy=Number.isFinite(+r.y)?+r.y:Math.floor(((S.world&&S.world.y)||0)/WS);S.worldDrops.push({id:'drop_'+id+'_'+now,item,qty:dropped,x:wx,y:wy,createdAt:now});}
  if(wAct&&S.world){wAct.face((r.x+.5)*WS-S.world.x,(r.y+.5)*WS-S.world.y);wAct.play(req[3],performance.now())}sv();if(typeof hapticPulse==='function')hapticPulse(12);sfx(req[3]==='axe'?'hit':'clear');
  const msg=(stored?'+'+stored+' ':'')+(item==='wood'?'Kayu':item==='stone'?'Batu':item==='mushroom'?'Jamur':item==='herb'?'Herba':'Buah')+(dropped?' · '+dropped+' dijatuhkan dekat sumber':'');say(msg||scLang('Tunggul dibersihkan.','Stump cleared.'));return true;

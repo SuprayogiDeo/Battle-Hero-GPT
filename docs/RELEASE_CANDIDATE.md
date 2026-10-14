@@ -1,10 +1,10 @@
-# Release candidate 0.4.7-rc.2
+# Release candidate 0.4.8-rc.1
 
 **Status:** kandidat privat untuk review kode. BUKAN rilis publik; jangan jalankan workflow deploy sebelum gate lisensi aset dan pengujian HP nyata lulus. Cache service worker `v53`.
 
 ## Verifikasi otomatis yang telah dijalankan
 
-- [x] `npm test` berhasil pada kandidat `0.4.7-rc.2` / cache `v56`, pada repo kerja dan hasil ekstraksi arsip.
+- [x] `npm test` berhasil pada kandidat `0.4.8-rc.1` / cache `v56`, pada repo kerja dan hasil ekstraksi arsip.
 - [x] JavaScript sintaks dan path aset statis lolos pemeriksaan.
 - [x] Tes pemulihan save, farming/cuaca, produksi offline, storage/workshop, combat/boss, Journal/relationship, dungeon dan waypoint lulus.
 - [x] Pemeriksaan integritas versi, service-worker cache, HTML entry point dan workflow GitHub Pages lulus.

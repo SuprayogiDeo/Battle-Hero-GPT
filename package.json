@@ -1,6 +1,6 @@
 {
   "name": "hero-battle",
-  "version": "0.4.7-rc.2",
+  "version": "0.4.8-rc.1",
   "private": true,
   "description": "Hero Battle \u2014 browser-based pixel-art combat, exploration and village game",
   "scripts": {

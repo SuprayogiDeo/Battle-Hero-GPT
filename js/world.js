@@ -63,7 +63,7 @@ const wVC={};
 function wVar(k,md){const id=k+md;if(wVC[id])return wVC[id];const r=WSP[k],c=document.createElement('canvas');c.width=r[2];c.height=r[3];const x=c.getContext('2d');x.drawImage(ADV,r[0],r[1],r[2],r[3],0,0,r[2],r[3]);x.globalCompositeOperation='source-atop';
 if(md=='s'){const gr=x.createLinearGradient(0,0,0,r[3]*.55);gr.addColorStop(0,'rgba(248,251,255,.92)');gr.addColorStop(1,'rgba(248,251,255,0)');x.fillStyle=gr}else x.fillStyle='rgba(14,14,30,.62)';x.fillRect(0,0,r[2],r[3]);return wVC[id]=c}
 const WSPEED=96,WFH=9,WFV=8; // kecepatan px/detik; kotak kaki: setengah lebar 9, tinggi 8 (lebih kecil dari 1 tile)
-function wSolid(px,py){const tx=Math.floor(px/WS),ty=Math.floor(py/WS);if(!(tx>=0&&ty>=0&&tx<WW&&ty<WH))return true;const c=WMAP[ty][tx],gridSolid=!!WSOL[c]||(c=='p'&&wLock('F'));if(c=='p')return gridSolid;if(self.Tmap&&Tmap.collisionAt){const cs=Tmap.collisionAt(tx,ty);if(cs===true)return true;if(cs===false)return gridSolid}return gridSolid}
+function wSolid(px,py){const tx=Math.floor(px/WS),ty=Math.floor(py/WS);if(!(tx>=0&&ty>=0&&tx<WW&&ty<WH))return true;if(self.lifeDynSolid){const dyn=lifeDynSolid(tx,ty);if(dyn===true||dyn===false)return dyn}const c=WMAP[ty][tx],gridSolid=!!WSOL[c]||(c=='p'&&wLock('F'));if(c=='p')return gridSolid;if(self.Tmap&&Tmap.collisionAt){const cs=Tmap.collisionAt(tx,ty);if(cs===true)return true;if(cs===false)return gridSolid}return gridSolid}
 const wBlocked=(x,y)=>wSolid(x-WFH,y-WFV)||wSolid(x+WFH,y-WFV)||wSolid(x-WFH,y)||wSolid(x+WFH,y)||!!(self.npcHit&&npcHit(x,y));
 function worldEnter(){wUseV();const w=S.world;if(!w||!isFinite(w.x)||!isFinite(w.y)||wBlocked(w.x,w.y))S.world={x:WSPAWN[0]*WS+WS/2,y:WSPAWN[1]*WS+WS/2+8};/* Keep exploration per save; do not reveal every tile when entering the world. */wjx=wjy=0;wjid=null;wcx=null;wHint=6;wFrom=0;wDlg=0;wTalk=null;st='world';wUnlockCheck();sv();sfx('click')}
 function worldLeave(){wjid=null;wjx=wjy=0;wFrom=0;wDlg=0;wTalk=null;st='menu';sv();sfx('click')}
@@ -129,7 +129,7 @@ dT(tall.filter(o=>o.y<=w.y));if(self.npcDraw)npcDraw(cx,cy,w.y,0);
 if(wAct&&Anim.has('avatar_'+wAct.state)){Anim.shadow(g,px,py-1,9,3,.3);wAct.draw(g,px,py,performance.now(),WZ)}
 else{g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(px,py-1,10,4,0,0,7);g.fill();
 g.save();g.translate(px,py);if(wface<0)g.scale(-1,1);if(ok)spr(d.s,0,0,2,-bob);else{g.fillStyle=RC[d.rar];g.fillRect(-8,-30-bob,16,28)}g.restore()}
-if(self.npcDraw)npcDraw(cx,cy,w.y,1);dT(tall.filter(o=>o.y>w.y));wTint();
+if(self.npcDraw)npcDraw(cx,cy,w.y,1);dT(tall.filter(o=>o.y>w.y));wTint();if(wVon&&Tmap.overlay)Tmap.overlay(g);
 WBLD.forEach(b=>{const sx=(b.x0+b.x1+1)*WS/2-cx-OX,ly=(b.y1+1)*WS-cy+13,my=(b.y0+b.y1+1)*WS/2-cy;if(!(sx>-90-OX&&sx<VW+90))return;const lk=wLock(b.c),rd=b.c=='F'&&!lk&&farmReady();
 if(lk){T(WNAME[b.c],sx,ly,'#99a',11,'center')}
 else T(WNAME[b.c]+(rd?' (!)':''),sx,ly,rd?'#fc4':'#fff',11,'center')});

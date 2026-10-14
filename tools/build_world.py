@@ -165,6 +165,20 @@ def main():
             obj['k'] = old['k']
     places = design.get('places', [])
     occupied = set()
+    # Metadata ukuran sprite (atlas lama + bangunan b_*), dipakai untuk menurunkan footprint collision dari sprite.
+    sprite_meta = dict(src.get('spr', {}))
+    for name, meta in prior.get('spr', {}).items():
+        if name.startswith('b_'): sprite_meta[name] = meta
+
+    def in_bounds(x, y): return 0 <= x < W and 0 <= y < H
+
+    def block(x, y):
+        if in_bounds(x, y):
+            grid[y][x] = 'X'; layers['collision'][y * W + x] = 1; occupied.add((x, y))
+
+    def clear_zone(cx, cy, r):
+        for yy in range(cy - r, cy + r + 1):
+            for xx in range(cx - r, cx + r + 1): occupied.add((xx, yy))
 
     def add_sprite(key, tx, ty, c='', offset=1):
         # Tree animations use the 'a' field; static atlas sprites use 'k'.
@@ -193,14 +207,28 @@ def main():
                     layers['collision'][yy * W + xx] = 0
                     occupied.add((xx, yy))
         if 'sprite' in p:
-            fw, fh = p.get('footprint', [2, 2])
-            left = x - fw // 2; top = y - fh + 1
-            for yy in range(max(0, top), min(H, y + 1)):
-                for xx in range(max(0, left), min(W, left + fw)):
-                    # Keep the player's approach tile clear.
-                    if xx == x and yy == y: continue
-                    grid[yy][xx] = 'X'; layers['collision'][yy * W + xx] = 1; occupied.add((xx, yy))
-            add_sprite(p['sprite'], x, y, offset=0)
+            obj = add_sprite(p['sprite'], x, y, offset=0)
+            meta = sprite_meta.get(obj.get('k'))
+            if meta:
+                # Footprint = tile yang benar-benar tertutup sprite (tumpang tindih >= 6 px). Baris tepat di depan
+                # bangunan (baris y) selalu bebas sehingga pemain bisa berjalan di depan pintu tanpa dinding tak terlihat.
+                left = obj['x'] - meta['ax']; top_px = obj['y'] - meta['h']
+                for yy in range(top_px // 16, (obj['y'] - 1) // 16 + 1):
+                    if min(obj['y'], (yy + 1) * 16) - max(top_px, yy * 16) < 6: continue
+                    for xx in range(left // 16, (left + meta['w'] - 1) // 16 + 1):
+                        if min(left + meta['w'], (xx + 1) * 16) - max(left, xx * 16) < 6: continue
+                        block(xx, yy)
+                # Plat nama berdiri di sisi kanan-depan bangunan, bukan menimpa pintu.
+                # Dua baris di depan bangunan bebas vegetasi acak (tidak ada pohon tepat di depan pintu).
+                for yy in (y, y + 1):
+                    for xx in range(left // 16 - 1, (left + meta['w'] - 1) // 16 + 2): occupied.add((xx, yy))
+                p['signAt'] = [left + meta['w'] + 10, obj['y'] + 13]
+                clear_zone((left + meta['w'] + 10) // 16, y, 1)
+            else:
+                fw, fh = p.get('footprint', [2, 2])
+                for yy in range(max(0, y - fh + 1), min(H, y)):
+                    for xx in range(max(0, x - fw // 2), min(W, x - fw // 2 + fw)): block(xx, yy)
+        if p.get('clearRadius'): clear_zone(x, y, int(p['clearRadius']))
         if 'fence' in p:
             fw, fh = p['fence']['w'], p['fence']['h']; left, top = x - fw // 2, y - fh + 1
             for xx in range(left, left + fw):
@@ -222,15 +250,41 @@ def main():
                         add_sprite(key, xx, yy); made += 1
                         if key.startswith(('tree_', 'pine_')): grid[yy][xx] = 'X'; layers['collision'][yy * W + xx] = 1
                         occupied.add((xx, yy))
+        if 'mushrooms' in p:
+            m = p['mushrooms']
+            for yy in range(y - m['h'] // 2, y + m['h'] // 2 + 1):
+                for xx in range(x - m['w'] // 2, x + m['w'] // 2 + 1):
+                    if not in_bounds(xx, yy) or (xx, yy) in occupied or grid[yy][xx] in ('~', ',', '+', 'X'): continue
+                    if hash01(xx, yy, 93) >= m.get('density', .4): continue
+                    an = m['anims'][int(hash01(xx, yy, 94) * len(m['anims'])) % len(m['anims'])]
+                    objects.append({'x': xx * 16 + 8 + int((hash01(xx, yy, 95) - .5) * 8), 'y': (yy + 1) * 16 - int(hash01(xx, yy, 96) * 4), 'c': '', 'a': an, 'deco': 'mushroom'})
+                    occupied.add((xx, yy))
         for deco in p.get('decor', []):
             add_sprite(deco['sprite'], x + deco.get('dx', 0), y + deco.get('dy', 0))
+
+    # Kandang per spesies: pagar tertutup rapat (collision), pintu terbuka di sisi selatan, interior tetap bisa dimasuki.
+    pens_out = []
+    for pen in design.get('pens', []):
+        x0, y0, pw, ph = int(pen['x']), int(pen['y']), int(pen['w']), int(pen['h'])
+        gate = pen.get('gate', {'at': pw // 2 - 1, 'width': 2})
+        gcols = list(range(x0 + int(gate['at']), x0 + int(gate['at']) + int(gate['width'])))
+        for yy in range(y0 - 1, y0 + ph + 2):
+            for xx in range(x0 - 1, x0 + pw + 1): occupied.add((xx, yy))
+        for yy in range(y0, y0 + ph):
+            for xx in range(x0, x0 + pw):
+                if not (xx in (x0, x0 + pw - 1) or yy in (y0, y0 + ph - 1)): continue
+                if yy == y0 + ph - 1 and xx in gcols: continue
+                block(xx, yy)
+        pens_out.append(dict(pen, gateCols=[gcols[0], gcols[-1]], gateRow=y0 + ph - 1,
+                             interior=[(x0 + 1) * 16, (y0 + 1) * 16, (x0 + pw - 1) * 16, (y0 + ph - 1) * 16],
+                             signAt=[(x0 + 1) * 16 + 8, (y0 + ph) * 16 + 14]))
 
     # Physical biome signs: labels are attached to the sign objects and rendered with distance fade.
     for sign in design.get('biomeSigns', []):
         x, y = int(sign['x']), int(sign['y'])
         obj = add_sprite(sign.get('sprite', 'sign'), x, y, offset=1)
         obj.update(biomeSign=sign['id'], signName=sign['name'], signNameEn=sign['name_en'])
-        occupied.add((x, y))
+        occupied.add((x, y)); clear_zone(x, y, 2)   # papan tidak boleh tertutup pohon
 
     # Major transitions get decorative arches; these are visual props and deliberately add no collision.
     for gate in design.get('biomeGates', []):
@@ -262,7 +316,7 @@ def main():
             elif kind == 'coast': key = ('bush_a', 'flower_2', 'flower_7')[int(hash01(x, y, 35) * 3) % 3]
             else: key = ('flower_0', 'flower_2', 'flower_5', 'flower_7', 'bush_a')[int(hash01(x, y, 36) * 5) % 5]
             add_sprite(key, x, y)
-            if key.startswith(('tree_', 'pine_')):
+            if key.startswith(('tree_', 'pine_', 'rock_')):
                 grid[y][x] = 'X'; layers['collision'][y * W + x] = 1
 
     # Additional design-file scatter (for example rocky foothills) is separate from generic biome vegetation.
@@ -278,7 +332,7 @@ def main():
                 if hash01(xx, yy, 91) >= landmark.get('density', 0): continue
                 key = sprites[int(hash01(xx, yy, 92) * len(sprites)) % len(sprites)]
                 add_sprite(key, xx, yy); occupied.add((xx, yy))
-                if key.startswith(('tree_', 'pine_')):
+                if key.startswith(('tree_', 'pine_', 'rock_')):
                     grid[yy][xx] = 'X'; layers['collision'][yy * W + xx] = 1
 
     # Collision layer follows the authoritative grid. Water and props remain blocked; roads, sand and dock are walkable.
@@ -302,7 +356,7 @@ def main():
                spr=sprites, biomeRegions=design['biomes'], places=places, tags=design.get('tags', {}),
                resources=design.get('resources', []), npcs={**src.get('npcs', {}), **design.get('npcs', {})},
                biomeSigns=design.get('biomeSigns', []), biomeGates=design.get('biomeGates', []),
-               serviceObjects=service_objects, design='tools/world_design.json', objects=objects, anim=src.get('anim', {}))
+               serviceObjects=service_objects, pens=pens_out, animals=([] if pens_out else src.get('animals', [])), design='tools/world_design.json', objects=objects, anim=src.get('anim', {}))
     out = BASE / 'chunks'; out.mkdir(exist_ok=True)
     for old in out.glob('c*_*.json'): old.unlink()
     for cy in range((H + C - 1) // C):

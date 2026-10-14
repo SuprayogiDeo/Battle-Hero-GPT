@@ -63,6 +63,10 @@ function hudCtx(){
  if(spot){return{l:wL('LEMPAR','CAST'),on:tool=='rod',f:()=>{if(tool=='rod')lifeStartFishing(spot);else wSay(wL('Pilih Pancing di hotbar dulu (terbuka di stage 6).','Pick the fishing rod on the hotbar first (unlocks at stage 6).'),3)}}}
  if(tool=='can'&&hudWaterNear()&&Math.max(0,+S.hb.water||0)<6)return{l:wL('ISI AIR','FILL'),on:1,f:()=>{S.hb.water=6;sv();wSay(wL('Ember terisi penuh, cukup untuk enam kali siram.','Bucket filled, enough for six waterings.'),2);sfx('click')}};
  if(wNpc)return{l:wL('BICARA','TALK'),on:1,f:()=>_hudInteract()};
+ const pen=self.Tmap&&Tmap.nearPen&&S.world?Tmap.nearPen(S.world.x/WS,S.world.y/WS):null;
+ if(pen&&self.ranchPenInfo){const info=ranchPenInfo(pen.animal);
+  if(info.pending>0)return{l:wL(info.label[0],info.label[1]),on:1,f:()=>ranchCollectType(pen.animal)};
+  return{l:wL('KANDANG','PEN'),on:1,f:()=>wGo('ranch')}}
  const service=self.Tmap&&Tmap.nearService&&S.world?Tmap.nearService(S.world.x/WS,S.world.y/WS):null;
  if(service){const labels={quest_board:['MISI','QUEST'],market_cashier:['KASIR','CASHIER'],animal_trough:['PAKAN','FEED']},q=labels[service.type]||['GUNAKAN','USE'];return{l:wL(q[0],q[1]),on:1,f:()=>hudServiceAct(service)}}
  if(wPlace){const t=wPlace.type;if(t==='market')return{l:wL('CARI KASIR','FIND CASHIER'),on:0,f:()=>wSay(wL('Transaksi lewat kasir di kios.','Trade at the kiosk cashier.'),2.5)};if(t==='animal_pen')return{l:wL('CARI PALUNG','FIND TROUGH'),on:0,f:()=>wSay(wL('Pakan ada di palung samping kandang.','Feed is at the trough beside the pen.'),2.5)};if(t==='orchard'||t==='mushroom_grove')return{l:wL('LIHAT','LOOK'),on:1,f:()=>_hudInteract()}}

@@ -156,3 +156,23 @@ function drawMarket(){
  const left=Math.max(0,RANCH.dailyGoldCap-r.soldGold);T('Batas penjualan hari ini: '+r.soldGold+'/'+RANCH.dailyGoldCap+' emas',320,267,'#fc4',10,'center');T('Produksi offline dibatasi maksimal 24 jam.',320,284,'#9cf',9,'center');btn(190,299,260,36,'JUAL SEMUA HASIL ('+left+' G TERSISA)',left>0&&RPRODUCT.some(p=>r.stock[p[0]]>0));
 }
 function marketClick(x,y){if(y<34&&x<85){if(marketFrom==='ranch')st='ranch';else goBack();sfx('click');return}if(y>=298&&y<=340&&x>=185&&x<=455){ranchSellAll();return}}
+
+/* ===== Kandang di dunia ===== */
+/* jumlah hewan per jenis untuk digambar di kandang dunia; sebelum kandang dibeli tampil 2 hewan hias per kandang */
+function ranchWorldCounts(){
+ const r=typeof S!=='undefined'&&S.ranch;if(!r||!r.level||!Array.isArray(r.animals))return{chicken:2,cow:2,pig:2,sheep:2};
+ const c={chicken:0,cow:0,pig:0,sheep:0};r.animals.forEach(a=>{if(a&&c[a.type]!=null)c[a.type]++});return c;
+}
+const RPEN_LABEL={egg:['AMBIL TELUR','TAKE EGGS'],milk:['PERAH SUSU','MILK COW'],truffle:['CARI TRUFFLE','FIND TRUFFLE'],wool:['GUNTING WOL','SHEAR WOOL']};
+function ranchPenInfo(type){
+ const r=ranchGet();ranchSync(false);const cfg=RANIM[type];let pending=0,count=0;
+ r.animals.forEach(a=>{if(a.type===type){count++;pending+=a.pending}});
+ return{count,pending,product:cfg.product,label:RPEN_LABEL[cfg.product]};
+}
+/* ambil hasil hanya dari satu jenis hewan (telur dari ayam, susu dari sapi, dst) */
+function ranchCollectType(type){
+ const r=ranchGet();ranchSync(false);const cfg=RANIM[type],p=cfg.product;let got=0;
+ r.animals.forEach(a=>{if(a.type!==type)return;const room=RANCH.stockCap-r.stock[p],n=Math.min(a.pending,room);if(n>0){r.stock[p]+=n;a.pending-=n;got+=n}});
+ if(!got){say(ranchL('Belum ada hasil yang siap.','Nothing is ready yet.'));return false}
+ sv();sfx('coin');say(ranchL('Diambil '+got+' '+(RPRODUCT.find(q=>q[0]===p)||[0,p])[1],'Collected '+got+' '+(RPRODUCT.find(q=>q[0]===p)||[0,0,p])[2]));return true;
+}

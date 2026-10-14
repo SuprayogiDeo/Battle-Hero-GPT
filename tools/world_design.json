@@ -190,6 +190,18 @@
       50,
       77,
       45
+    ],
+    [
+      6,
+      54,
+      46,
+      54
+    ],
+    [
+      20,
+      54,
+      20,
+      57
     ]
   ],
   "waterFeatures": [
@@ -353,14 +365,16 @@
     {
       "id": "animal_pen",
       "name": "Kandang",
-      "name_en": "Animal Pen",
+      "name_en": "Animal Pens",
       "type": "animal_pen",
-      "x": 20,
+      "x": 7,
       "y": 55,
-      "fence": {
-        "w": 5,
-        "h": 4
-      }
+      "areaTiles": [
+        6,
+        48,
+        40,
+        7
+      ]
     },
     {
       "id": "orchard",
@@ -387,16 +401,27 @@
       "x": 105,
       "y": 28,
       "cluster": {
-        "w": 7,
-        "h": 6,
+        "w": 11,
+        "h": 9,
         "sprites": [
-          "rock_a",
-          "rock_b",
           "bush_c",
           "flower_4",
-          "flower_8"
+          "flower_8",
+          "flower_3"
         ]
-      }
+      },
+      "mushrooms": {
+        "w": 12,
+        "h": 10,
+        "density": 0.5,
+        "anims": [
+          "mush_red_1",
+          "mush_blue_1",
+          "mush_blue_2",
+          "mush_blue_3"
+        ]
+      },
+      "clearRadius": 2
     },
     {
       "id": "village_workshop",
@@ -494,7 +519,7 @@
           23
         ],
         [
-          64,
+          60,
           23
         ]
       ],
@@ -505,12 +530,12 @@
   ],
   "npcs": {
     "builder": [
-      63,
-      43
+      62,
+      47
     ],
     "cook": [
       62,
-      58
+      62
     ],
     "woodcutter": [
       87,
@@ -525,7 +550,13 @@
       "y": 16,
       "biome": "forest",
       "respawnMs": 420000,
-      "amount": 2
+      "amount": 2,
+      "zone": [
+        64,
+        0,
+        64,
+        64
+      ]
     },
     {
       "id": "wood_forest_2",
@@ -534,7 +565,13 @@
       "y": 34,
       "biome": "forest",
       "respawnMs": 420000,
-      "amount": 2
+      "amount": 2,
+      "zone": [
+        64,
+        0,
+        64,
+        64
+      ]
     },
     {
       "id": "wood_forest_3",
@@ -543,7 +580,13 @@
       "y": 52,
       "biome": "forest",
       "respawnMs": 420000,
-      "amount": 2
+      "amount": 2,
+      "zone": [
+        64,
+        0,
+        64,
+        64
+      ]
     },
     {
       "id": "stone_mountain_1",
@@ -552,7 +595,13 @@
       "y": 77,
       "biome": "mountain",
       "respawnMs": 540000,
-      "amount": 2
+      "amount": 2,
+      "zone": [
+        96,
+        60,
+        32,
+        36
+      ]
     },
     {
       "id": "stone_mountain_2",
@@ -561,7 +610,13 @@
       "y": 71,
       "biome": "mountain",
       "respawnMs": 540000,
-      "amount": 2
+      "amount": 2,
+      "zone": [
+        96,
+        60,
+        32,
+        36
+      ]
     },
     {
       "id": "mushroom_forest_1",
@@ -570,7 +625,13 @@
       "y": 30,
       "biome": "forest",
       "respawnMs": 360000,
-      "amount": 1
+      "amount": 1,
+      "zone": [
+        99,
+        23,
+        13,
+        13
+      ]
     },
     {
       "id": "mushroom_forest_2",
@@ -579,7 +640,13 @@
       "y": 35,
       "biome": "forest",
       "respawnMs": 360000,
-      "amount": 1
+      "amount": 1,
+      "zone": [
+        99,
+        23,
+        13,
+        13
+      ]
     },
     {
       "id": "herb_meadow_1",
@@ -588,7 +655,13 @@
       "y": 35,
       "biome": "meadow",
       "respawnMs": 300000,
-      "amount": 1
+      "amount": 1,
+      "zone": [
+        4,
+        46,
+        56,
+        16
+      ]
     },
     {
       "id": "herb_lakeside_2",
@@ -597,7 +670,13 @@
       "y": 76,
       "biome": "lake",
       "respawnMs": 300000,
-      "amount": 1
+      "amount": 1,
+      "zone": [
+        2,
+        66,
+        30,
+        24
+      ]
     },
     {
       "id": "fruit_orchard_1",
@@ -606,7 +685,13 @@
       "y": 21,
       "biome": "forest",
       "respawnMs": 480000,
-      "amount": 1
+      "amount": 1,
+      "zone": [
+        77,
+        19,
+        10,
+        9
+      ]
     },
     {
       "id": "fruit_orchard_2",
@@ -615,7 +700,13 @@
       "y": 25,
       "biome": "forest",
       "respawnMs": 480000,
-      "amount": 1
+      "amount": 1,
+      "zone": [
+        77,
+        19,
+        10,
+        9
+      ]
     }
   ],
   "biomeSigns": [
@@ -681,11 +772,73 @@
       "id": "animal_trough",
       "type": "animal_trough",
       "sprite": "feed_trough",
-      "x": 20,
+      "x": 26,
       "y": 56,
       "rangeTiles": 2.1,
       "name": "Palung Pakan",
       "name_en": "Feed Trough"
+    }
+  ],
+  "pens": [
+    {
+      "id": "pen_chicken",
+      "animal": "chicken",
+      "x": 8,
+      "y": 48,
+      "w": 8,
+      "h": 6,
+      "gate": {
+        "side": "S",
+        "at": 3,
+        "width": 2
+      },
+      "name": "Kandang Ayam",
+      "name_en": "Chicken Coop"
+    },
+    {
+      "id": "pen_sheep",
+      "animal": "sheep",
+      "x": 18,
+      "y": 48,
+      "w": 8,
+      "h": 6,
+      "gate": {
+        "side": "S",
+        "at": 3,
+        "width": 2
+      },
+      "name": "Kandang Domba",
+      "name_en": "Sheep Pen"
+    },
+    {
+      "id": "pen_cow",
+      "animal": "cow",
+      "x": 28,
+      "y": 48,
+      "w": 8,
+      "h": 6,
+      "gate": {
+        "side": "S",
+        "at": 3,
+        "width": 2
+      },
+      "name": "Kandang Sapi",
+      "name_en": "Cow Pen"
+    },
+    {
+      "id": "pen_pig",
+      "animal": "pig",
+      "x": 38,
+      "y": 48,
+      "w": 8,
+      "h": 6,
+      "gate": {
+        "side": "S",
+        "at": 3,
+        "width": 2
+      },
+      "name": "Kandang Babi",
+      "name_en": "Pig Pen"
     }
   ]
 }

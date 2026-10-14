@@ -36,6 +36,7 @@ function lifeEnsure(){
  if(!S.worldEarn||typeof S.worldEarn!=='object')S.worldEarn={day,gold:0,essence:0,tickets:0};if(S.worldEarn.day!==day){S.worldEarn={day,gold:0,essence:0,tickets:0};}
  if(!S.atmo||typeof S.atmo!=='object')S.atmo={weather:'clear',changedAt:lifeNow(),day,seed:lifeHash(day),clock:0};
  if(!S.buff||typeof S.buff!=='object'||!(S.buff.stages>0))S.buff=null;
+ if(typeof lifeNodesMigrate==='function')lifeNodesMigrate();
 }
 function lifeHash(s){let h=2166136261;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return h>>>0}
 function lifeLang(id,en){return S.set.lang==='en'?en:id}
@@ -45,12 +46,39 @@ function lifeHour(){return typeof wHr==='number'?wHr:9}
 function lifeTimeBand(){const h=lifeHour();return h<6?'night':h<8?'dawn':h<17?'day':h<20?'dusk':'night'}
 function lifeDailyGrant(gold,essence,ticket){lifeEnsure();const d=S.worldEarn;const g=Math.max(0,Math.min(gold||0,LIFE.goldCap-d.gold));const e=Math.max(0,Math.min(essence||0,LIFE.essCap-d.essence));const tk=Math.max(0,Math.min(ticket||0,LIFE.ticketCap-d.tickets));d.gold+=g;d.essence+=e;d.tickets+=tk;S.g+=g;S.es+=e;S.ft=(S.ft||0)+tk;sv();return{gold:g,essence:e,ticket:tk}}
 function lifeAssetData(){return typeof Tmap!=='undefined'&&Tmap.data?Tmap.data():null}
-function lifeFishingSpot(){lifeEnsure();if(st!=='world'||!S.world)return null;const data=lifeAssetData();if(!data)return null;const tx=Math.floor(S.world.x/WS),ty=Math.floor(S.world.y/WS);let ans=null,dist=Infinity;
- for(let y=Math.max(0,ty-3);y<=Math.min(data.h-1,ty+3);y++)for(let x=Math.max(0,tx-3);x<=Math.min(data.w-1,tx+3);x++){
-  const is=data.grid&&data.grid[y]&&data.grid[y].charAt(x)==='~';const tagged=typeof Tmap.hasTag==='function'&&Tmap.hasTag(x,y,'fishing_spot');if(!is&&!tagged)continue;
-  const px=(x+.5)*WS,py=(y+.5)*WS,d=Math.hypot(px-S.world.x,py-S.world.y);if(d<dist){dist=d;ans={x,y,biome:lifeBiome(x,y),d};}
+function lifeWaterComps(d){
+ /* Komponen air (4-arah) dihitung sekali per grid: ukuran badan air menentukan apakah itu laut/danau (luas) atau parit/sungai kecil. */
+ if(d.__waterComp&&d.__waterComp.grid===d.grid)return d.__waterComp;
+ const w=d.w,h=d.h,id=new Int32Array(w*h).fill(-1),size=[];let n=0;
+ for(let y0=0;y0<h;y0++)for(let x0=0;x0<w;x0++){
+  if(id[y0*w+x0]>=0||d.grid[y0].charAt(x0)!=='~')continue;
+  let cnt=0;const q=[y0*w+x0];id[y0*w+x0]=n;
+  while(q.length){const c=q.pop(),cx=c%w,cy=(c/w)|0;cnt++;
+   for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=w||ny>=h)continue;const ni=ny*w+nx;if(id[ni]>=0||d.grid[ny].charAt(nx)!=='~')continue;id[ni]=n;q.push(ni)}}
+  size.push(cnt);n++;
  }
- return ans&&dist<=WS*2.4?ans:null;
+ return d.__waterComp={grid:d.grid,id,size,w};
+}
+const LIFE_BIG_WATER=80; /* minimal petak air terhubung agar dianggap laut/danau */
+function lifeIsWater(d,x,y){return x>=0&&y>=0&&x<d.w&&y<d.h&&d.grid[y].charAt(x)==='~'}
+function lifeDeepWater(d,x,y){
+ /* petak "dalam": air luas, seluruh 8 tetangga juga air -> pelampung jatuh jelas di air, bukan di tepi tanah */
+ if(!lifeIsWater(d,x,y))return false;const c=lifeWaterComps(d);if(c.size[c.id[y*d.w+x]]<LIFE_BIG_WATER)return false;
+ for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(!lifeIsWater(d,x+dx,y+dy))return false;
+ return true;
+}
+function lifeFishingSpot(){lifeEnsure();if(st!=='world'||!S.world)return null;const data=lifeAssetData();if(!data||!data.grid)return null;
+ const px=S.world.x,py=S.world.y,tx=Math.floor(px/WS),ty=Math.floor(py/WS);
+ /* 1) pemain harus menempel ke tepi air (jarak kaki ke petak air terdekat <= 16 px) */
+ let edge=Infinity;
+ for(let y=ty-1;y<=ty+1;y++)for(let x=tx-1;x<=tx+1;x++){if(!lifeIsWater(data,x,y))continue;const c=lifeWaterComps(data);if(c.size[c.id[y*data.w+x]]<LIFE_BIG_WATER)continue;
+  const ddx=Math.max(x*WS-px,0,px-(x+1)*WS),ddy=Math.max(y*WS-py,0,py-(y+1)*WS);edge=Math.min(edge,Math.hypot(ddx,ddy))}
+ if(edge>16)return null;
+ /* 2) pelampung dilempar ke petak air dalam terdekat (maks 4 tile) sehingga mendarat jelas di air */
+ let ans=null,dist=Infinity;
+ for(let y=Math.max(0,ty-4);y<=Math.min(data.h-1,ty+4);y++)for(let x=Math.max(0,tx-4);x<=Math.min(data.w-1,tx+4);x++){
+  if(!lifeDeepWater(data,x,y))continue;const d=Math.hypot((x+.5)*WS-px,(y+.5)*WS-py);if(d<dist){dist=d;ans={x,y,biome:lifeBiome(x,y),d}}}
+ return ans&&dist<=WS*4.2?ans:null;
 }
 function lifeFishPool(spot){const band=lifeTimeBand(),season=lifeSeason();let pool=LIFE_FISH.filter(f=>f.biomes.includes(spot.biome)&&(f.times.includes('any')||f.times.includes(band))&&f.seasons.includes(season));if(!pool.length)pool=LIFE_FISH.filter(f=>f.biomes.includes(spot.biome));if(!pool.length)pool=LIFE_FISH.filter(f=>f.biomes.includes('lake'));return pool}
 function lifeChooseFish(spot){const pool=lifeFishPool(spot);const weights={common:62,uncommon:27,rare:9,legendary:2};let total=pool.reduce((a,f)=>a+(weights[f.rarity]||1),0),v=Math.random()*total;for(const f of pool){v-=weights[f.rarity]||1;if(v<=0)return f;}return pool[pool.length-1]}
@@ -90,14 +118,87 @@ function lifeTreeResourceEligible(r){
  /* Resource markers over an actual eligible tree are handled by that object so the tree/stump art changes in place. */
  const d=lifeAssetData();return !(d&&Array.isArray(d.objects)&&(d.objects||[]).some(o=>lifeTreeEdgeEligible(o)&&Math.hypot((+o.x/16)-x,(+o.y/16)-y)<1.5));
 }
-function lifeTreeObjectState(o){if(!lifeTreeEdgeEligible(o))return'';const q=S.gather&&S.gather.nodes&&S.gather.nodes[lifeTreeObjectId(o)];if(!q||!q.readyAt||lifeNow()>=q.readyAt)return'';return q.cleared?'hidden':q.stump?'stump':''}
+function lifeTreeObjectState(o){if(!lifeTreeEdgeEligible(o))return'';const q=S.gather&&S.gather.nodes&&S.gather.nodes[lifeTreeObjectId(o)];if(!q)return'';if(q.gone)return'hidden';if(!q.readyAt||lifeNow()>=q.readyAt)return'';return q.cleared?'hidden':q.stump?'stump':''}
+/* ===== Siklus sumber daya =====
+ Dipanen -> hilang total (tanpa bayangan/tunggul/penanda) -> setelah jeda muncul lagi di titik ACAK di dalam zona yang sama
+ (hutan tetap di hutan, jamur tetap di hutan jamur, dst). Posisi baru dipilih saat panen dan disimpan di S.gather.nodes[id].pos. */
+let lifeDynMap=null,lifeDynRef=null,lifeDynSeen=-1,lifeDynNext=0,lifeDynRev=0;
+const LIFE_TREE_ZONE=[64,0,64,64];
+function lifeNodePos(r){const q=S.gather&&S.gather.nodes&&S.gather.nodes[r.id];return q&&q.pos?q.pos:{x:r.x,y:r.y}}
+function lifeZoneOf(r,d){if(r.zone&&r.zone.length===4)return{x:r.zone[0],y:r.zone[1],w:r.zone[2],h:r.zone[3]};const b=(d.biomeRegions||[]).find(q=>q.id===r.biome);return b?{x:b.x,y:b.y,w:b.w,h:b.h}:{x:0,y:0,w:d.w,h:d.h}}
+function lifePickSpot(r){
+ const d=lifeAssetData();if(!d||!d.grid)return{x:r.x,y:r.y};
+ const z=lifeZoneOf(r,d),px=S.world?S.world.x/WS:-99,py=S.world?S.world.y/WS:-99,minD=r.kind==='tree'?1.4:1.0;
+ const obs=(d.objects||[]).filter(o=>!(o.k&&o.k.indexOf('flower')===0)).map(o=>[o.x/16,o.y/16-.5]);
+ const taken=[];(d.resources||[]).forEach(q=>{if(q.id!==r.id){const p=lifeNodePos(q);taken.push([p.x,p.y])}});
+ Object.keys(S.gather.nodes||{}).forEach(id=>{const q=S.gather.nodes[id];if(id!==r.id&&q&&q.pos)taken.push([q.pos.x,q.pos.y])});
+ const places=(d.places||[]).filter(p=>p.sprite||p.type==='market'||p.type==='pier'||p.type==='animal_pen');
+ for(let n=0;n<90;n++){
+  const x=z.x+Math.floor(Math.random()*z.w),y=z.y+Math.floor(Math.random()*z.h);
+  if(x<0||y<0||x>=d.w||y>=d.h||d.grid[y].charAt(x)!=='.')continue;
+  if(Math.hypot(x+.5-px,y+.5-py)<3)continue;
+  if((d.pens||[]).some(q=>x>=q.x-1&&x<=q.x+q.w&&y>=q.y-1&&y<=q.y+q.h+1))continue;
+  if(places.some(q=>Math.hypot(q.x-x,q.y-y)<3.2))continue;
+  if(taken.some(t=>Math.hypot(t[0]-x,t[1]-y)<2.5))continue;
+  if(obs.some(o=>Math.hypot(o[0]-(x+.5),o[1]-(y+.5))<minD))continue;
+  return{x,y};
+ }
+ return{x:r.x,y:r.y};
+}
+function lifeMarkHarvested(r,ms){
+ const now=lifeNow(),node={readyAt:now+ms,last:now,m:1};node.pos=lifePickSpot(r);
+ if(r.object){node.gone=1;node.a=r.a||'tree_1'}
+ S.gather.nodes[r.id]=node;lifeDynRev++;return node;
+}
+function lifeNodesMigrate(){
+ /* Simpanan lama menyimpan tunggul/"cleared"; ubah ke model baru (asli hilang permanen + posisi baru) sekali saja. */
+ const d=lifeAssetData();if(!d||!S.gather||!S.gather.nodes)return;
+ Object.keys(S.gather.nodes).forEach(id=>{const q=S.gather.nodes[id];if(!q||q.m)return;
+  const m=/^tree_obj_(-?\d+)_(-?\d+)$/.exec(id);
+  if(m){const o=(d.objects||[]).find(v=>Math.round(+v.x)===+m[1]&&Math.round(+v.y)===+m[2]);
+   if(q.stump||q.cleared||q.readyAt){q.gone=1;q.a=(o&&o.a)||'tree_1';q.readyAt=q.readyAt||lifeNow();q.pos=lifePickSpot({id,kind:'tree',x:Math.floor(+m[1]/16),y:Math.floor(+m[2]/16)-1,zone:LIFE_TREE_ZONE});q.stump=0;q.cleared=0}
+  }else if(q.stump||q.cleared){const r=(d.resources||[]).find(v=>v.id===id);if(r){q.pos=lifePickSpot(r)}q.stump=0;q.cleared=0}
+  q.m=1;lifeDynRev++;
+ });
+}
+function lifeTreeTile(x,y){return[Math.floor(x),Math.floor(y)]}
+function lifeDynBuild(){
+ const d=lifeAssetData(),map=Object.create(null),now=lifeNow();let next=Infinity;
+ if(d){
+  const nodes=S.gather.nodes;
+  Object.keys(nodes).forEach(id=>{const q=nodes[id];if(!q)return;
+   const m=/^tree_obj_(-?\d+)_(-?\d+)$/.exec(id);
+   if(q.readyAt&&now<q.readyAt)next=Math.min(next,q.readyAt);
+   if(m&&q.gone){map[Math.floor((+m[2]-1)/16)*d.w+Math.floor(+m[1]/16)]=false}   /* tempat pohon asli: terbuka */
+  });
+  Object.keys(nodes).forEach(id=>{const q=nodes[id];if(!q||!q.gone||!q.pos||(q.readyAt&&now<q.readyAt))return;map[q.pos.y*d.w+q.pos.x]=true});   /* pohon yang tumbuh lagi: padat */
+  (d.resources||[]).forEach(r=>{if(r.kind!=='tree'||!lifeTreeResourceEligible(r))return;const q=nodes[r.id]||{};if(q.readyAt&&now<q.readyAt)return;const p=lifeNodePos(r);map[p.y*d.w+p.x]=true});
+ }
+ lifeDynMap=map;lifeDynRef=S.gather.nodes;lifeDynSeen=lifeDynRev;lifeDynNext=next;
+}
+function lifeDynSolid(tx,ty){
+ if(!S||!S.gather||!S.gather.nodes||typeof Tmap==='undefined'||!Tmap.data)return null;const d=Tmap.data();if(!d)return null;
+ if(lifeDynRef!==S.gather.nodes||lifeDynSeen!==lifeDynRev||lifeNow()>=lifeDynNext)lifeDynBuild();
+ const v=lifeDynMap[ty*d.w+tx];return v===true||v===false?v:null;
+}
+function lifeMovedTrees(){
+ /* pohon yang tumbuh kembali di titik acak + penanda pohon sumber daya yang siap, digambar sebagai sprite pohon biasa */
+ const out=[],d=lifeAssetData();if(!d||!S.gather||!S.gather.nodes)return out;const now=lifeNow(),nodes=S.gather.nodes;
+ Object.keys(nodes).forEach(id=>{const q=nodes[id];if(!q||!q.gone||!q.pos||(q.readyAt&&now<q.readyAt))return;out.push({x:q.pos.x*16+8,y:(q.pos.y+1)*16,a:q.a||'tree_1'})});
+ (d.resources||[]).forEach(r=>{if(r.kind!=='tree'||!lifeTreeResourceEligible(r))return;const q=nodes[r.id]||{};if(q.readyAt&&now<q.readyAt)return;const p=lifeNodePos(r);out.push({x:p.x*16+8,y:(p.y+1)*16,a:'tree_1'})});
+ return out;
+}
+
 function lifeNearWorldDrop(){lifeEnsure();if(!S.world||!Array.isArray(S.worldDrops))return null;let best=null,bd=46;for(const d of S.worldDrops){if(!d||!(+d.qty>0))continue;const dist=Math.hypot((d.x+.5)*WS-S.world.x,(d.y+1)*WS-S.world.y);if(dist<bd){bd=dist;best=d}}return best}
 function lifeTakeWorldDrop(id){lifeEnsure();const d=(S.worldDrops||[]).find(x=>x&&x.id===id);if(!d)return false;const room=typeof scFreeBag==='function'?scFreeBag():Math.max(0,60-Object.values(S.gather.items||{}).reduce((a,n)=>a+(+n||0),0));const n=Math.min(Math.max(0,Math.floor(+d.qty||0)),room);if(n<1){say(lifeLang('Tas penuh. Bahannya tetap di tanah.','Bag is full. The materials stay on the ground.'));return false;}S.gather.items[d.item]=(S.gather.items[d.item]||0)+n;d.qty-=n;if(d.qty<=0)S.worldDrops=S.worldDrops.filter(x=>x!==d);sv();sfx('clear');say(lifeLang('+'+n+' '+d.item,'+'+n+' '+d.item));return true}
 function lifeNearResource(){
  lifeEnsure();const d=lifeAssetData();if(!d||!Array.isArray(d.resources)||!S.world)return null;const now=lifeNow();let best=null,bd=44;
- const consider=r=>{const q=S.gather.nodes[r.id]||{},dist=Math.hypot((r.x+.5)*WS-S.world.x,(r.y+1)*WS-S.world.y);if(dist>=bd)return;if(r.kind==='stump'){if(!q.stump||!q.readyAt||now>=q.readyAt)return;}else if(q.readyAt&&now<q.readyAt)return;bd=dist;best=r;};
- d.resources.forEach(r=>{if(r.kind==='tree'&&!lifeTreeResourceEligible(r))return;const q=S.gather.nodes[r.id]||{};if(r.kind==='tree'&&q.readyAt&&now<q.readyAt&&q.stump)consider(Object.assign({},r,{kind:'stump',sourceKind:'tree'}));else if(r.kind!=='tree'||!q.readyAt||now>=q.readyAt)consider(r);});
- (d.objects||[]).forEach(o=>{if(!lifeTreeEdgeEligible(o))return;const id=lifeTreeObjectId(o),q=S.gather.nodes[id]||{},state=lifeTreeObjectState(o);if(state==='hidden')return;const r={id,kind:state==='stump'?'stump':'tree',sourceKind:'tree',x:(+o.x/16)-.5,y:(+o.y/16)-1,respawnMs:420000,amount:2,object:true /* PLACEHOLDER: 7 menit sebelum pohon tumbuh kembali */};if(state==='stump')consider(r);else if(!q.readyAt||now>=q.readyAt)consider(r);});
+ const consider=r=>{const dist=Math.hypot((r.x+.5)*WS-S.world.x,(r.y+1)*WS-S.world.y);if(dist<bd){bd=dist;best=r}};
+ d.resources.forEach(r=>{if(r.kind==='tree'&&!lifeTreeResourceEligible(r))return;const q=S.gather.nodes[r.id]||{};if(q.readyAt&&now<q.readyAt)return;const p=lifeNodePos(r);consider(Object.assign({},r,{x:p.x,y:p.y}))});
+ (d.objects||[]).forEach(o=>{if(!lifeTreeEdgeEligible(o))return;const id=lifeTreeObjectId(o),q=S.gather.nodes[id];if(q&&(q.gone||(q.readyAt&&now<q.readyAt)))return;
+  consider({id,kind:'tree',sourceKind:'tree',x:(+o.x/16)-.5,y:(+o.y/16)-1,respawnMs:420000,amount:2,object:true,a:o.a,zone:LIFE_TREE_ZONE,biome:'forest' /* PLACEHOLDER: 7 menit sebelum pohon tumbuh lagi */})});
+ Object.keys(S.gather.nodes).forEach(id=>{const q=S.gather.nodes[id];if(!q||!q.gone||!q.pos||!q.readyAt||now<q.readyAt)return;
+  consider({id,kind:'tree',sourceKind:'tree',x:q.pos.x,y:q.pos.y,respawnMs:420000,amount:2,object:true,a:q.a,zone:LIFE_TREE_ZONE,biome:'forest'})});
  return best;
 }
 function lifeDoGather(r){lifeEnsure();if(!r)return false;
@@ -109,7 +210,7 @@ function lifeDoGather(r){lifeEnsure();if(!r)return false;
  if(S.gather.count>=LIFE.gatherCap){say(lifeLang('Cukup mengumpulkan untuk hari ini. Lanjut besok ya.','That is enough gathering for today. More tomorrow.'));return false}
  /* PLACEHOLDER respawn: 7 menit pohon, 9 menit batu, 6/5/8 menit bahan lain; minta tuning bermain. */
  const map={tree:['wood',2,420000,'axe'],stone:['stone',2,540000,'mining'],mushroom:['mushroom',1,360000,'dig'],herb:['herb',1,300000,'dig'],fruit:['fruit',1,480000,'axe']},q=map[r.kind]||['herb',1,300000,'dig'];
- S.gather.items[q[0]]=(S.gather.items[q[0]]||0)+q[1];S.gather.nodes[r.id]={readyAt:now+(r.respawnMs||q[2]),last:now,stump:r.kind==='tree'?1:0};S.gather.count++;if(wAct){wAct.face((r.x+.5)*WS-S.world.x,(r.y+1)*WS-S.world.y);wAct.play(q[3],performance.now())}sv();if(typeof hapticPulse==='function')hapticPulse(12);sfx(q[3]==='axe'?'hit':'clear');say('+'+q[1]+' '+q[0]+' · muncul lagi '+Math.ceil((r.respawnMs||q[2])/60000)+' menit');return true;
+ S.gather.items[q[0]]=(S.gather.items[q[0]]||0)+q[1];lifeMarkHarvested(r,r.respawnMs||q[2]);S.gather.count++;if(wAct){wAct.face((r.x+.5)*WS-S.world.x,(r.y+1)*WS-S.world.y);wAct.play(q[3],performance.now())}sv();if(typeof hapticPulse==='function')hapticPulse(12);sfx(q[3]==='axe'?'hit':'clear');say('+'+q[1]+' '+q[0]+' · muncul lagi '+Math.ceil((r.respawnMs||q[2])/60000)+' menit');return true;
 }
 function lifeDrawWorldDrops(){if(!S.world||!Array.isArray(S.worldDrops))return;const cx=typeof wcx==='number'?wcx:0,cy=typeof wcy==='number'?wcy:0;for(const d of S.worldDrops){if(!d||!(+d.qty>0))continue;const x=(d.x+.5)*WS-cx-OX,y=(d.y+1)*WS-cy;if(x<-22||x>VW+22||y<-8||y>370)continue;g.fillStyle='rgba(18,22,24,.72)';g.fillRect(x-15,y-13,30,12);g.fillStyle=d.item==='wood'?'#d8a16a':d.item==='stone'?'#aabac4':'#b5df9b';g.fillRect(x-7,y-8,14,5);T(String(d.qty),x,y-4,'#fff',9,'center');}}
 function lifeFoodCount(k){lifeEnsure();if(k==='egg'||k==='milk'||k==='truffle'||k==='wool')return Math.max(0,+(S.ranch&&S.ranch.stock&&S.ranch.stock[k])||0);if(k==='fish')return Object.keys(S.fish.stock).reduce((a,id)=>a+(S.fish.stock[id]||0),0);return Math.max(0,+(S.kitchen.food[k])||0)+(S.gather.items[k]||0)}
@@ -150,14 +251,19 @@ function lifeWorldUpdate(dt){lifeEnsure();lifeWeatherInit();lifeNow();if(S.atmo)
  if(st==='world'){lifeFishUpdate(dt);}
  lifeVillageSyncNPCs();if(lifeNow()-lifeLastSave>30000){lifeLastSave=lifeNow();sv();}}
 function lifeDrawWeather(){const wx=lifeWeather(),en=S.set.lang==='en',n=wx==='rain'||wx==='storm'?42:wx==='snow'?60:0;if(wx==='cloudy'){g.fillStyle='rgba(78,91,111,.09)';g.fillRect(-OX,0,VW,360)}if(wx==='rain'||wx==='storm'){g.strokeStyle=wx==='storm'?'rgba(160,204,255,.68)':'rgba(155,200,240,.5)';g.lineWidth=1;for(let i=0;i<n;i++){const x=((i*97+t*(wx==='storm'?190:130))%VW)-OX,y=(i*71+t*(wx==='storm'?300:230))%370;g.beginPath();g.moveTo(x,y);g.lineTo(x-3,y+9);g.stroke()}if(wx==='storm'&&Math.sin(t*1.9)>0.985){g.fillStyle='rgba(220,235,255,.22)';g.fillRect(-OX,0,VW,360)}}else if(wx==='snow'||wSn){g.fillStyle='rgba(235,245,255,.14)';g.fillRect(-OX,0,VW,360);for(let i=0;i<60;i++){const x=((i*71+Math.sin(t+i)*12-t*9)%VW+VW)%VW-OX,y=(i*49+t*(20+(i%5)*5))%370;g.fillStyle='rgba(255,255,255,.84)';g.fillRect(x,y,i%4===0?2:1,i%4===0?2:1)}}}
-function lifeDrawResourceNodes(){const d=lifeAssetData();if(!d||!d.resources||!S.world)return;lifeEnsure();const cx=typeof wcx==='number'?wcx:0,cy=typeof wcy==='number'?wcy:0,n=lifeNow();for(const r of d.resources){if(r.kind==='tree'&&!lifeTreeResourceEligible(r))continue;const x=(r.x+.5)*WS-cx-OX,y=(r.y+1)*WS-cy;if(x<-32-OX||x>VW+32||y<-25||y>390)continue;const state=S.gather.nodes[r.id]||{},ready=!state.readyAt||n>=state.readyAt;if(r.kind==='tree'&&state.cleared&&!ready)continue;g.save();if(!ready&&!state.stump)g.globalAlpha=.35;
- if(r.kind==='tree'&&state.stump&&!ready){g.fillStyle='#60402a';g.fillRect(x-7,y-8,14,8);g.fillStyle='#bd985e';g.fillRect(x-6,y-10,12,3);g.fillStyle='#3c2b1b';g.fillRect(x-2,y-6,4,5)}
- else if(r.kind==='tree'){g.fillStyle='#70452e';g.fillRect(x-3,y-21,6,22);g.fillStyle=ready?'#286b39':'#52634a';g.beginPath();g.arc(x,y-24,13,0,Math.PI*2);g.fill();g.beginPath();g.arc(x-7,y-17,8,0,Math.PI*2);g.fill();g.beginPath();g.arc(x+8,y-17,8,0,Math.PI*2);g.fill()}
- else if(r.kind==='stone'){g.fillStyle='#586b75';g.beginPath();g.moveTo(x-12,y);g.lineTo(x-9,y-13);g.lineTo(x-1,y-19);g.lineTo(x+10,y-14);g.lineTo(x+13,y-3);g.closePath();g.fill();g.fillStyle='#9bb4bc';g.fillRect(x-5,y-12,4,3)}
- else if(r.kind==='mushroom'){for(let i=0;i<3;i++){g.fillStyle=['#dc5360','#dc8b48','#a96ac7'][i];g.fillRect(x-10+i*8,y-10-(i%2)*4,7,5);g.fillStyle='#f7e8bd';g.fillRect(x-7+i*8,y-5-(i%2)*4,2,6)}}
- else if(r.kind==='herb'){g.strokeStyle='#3a8c4b';g.lineWidth=3;for(let i=0;i<3;i++){g.beginPath();g.moveTo(x,y);g.lineTo(x-7+i*7,y-13-i%2*3);g.stroke();g.fillStyle='#76bd61';g.fillRect(x-8+i*7,y-15-i%2*3,5,4)}}
- else {g.strokeStyle='#4b8a48';g.lineWidth=3;g.beginPath();g.moveTo(x,y);g.lineTo(x,y-19);g.stroke();g.fillStyle='#b93d43';g.beginPath();g.arc(x-6,y-12,4,0,7);g.arc(x+6,y-16,4,0,7);g.fill();g.fillStyle='#e9bb68';g.fillRect(x-1,y-22,3,5)}
- if(ready){g.fillStyle='rgba(0,0,0,.55)';g.fillRect(x-10,y-37,20,10);T('E',x,y-29,'#fc4',8,'center')}else{T(Math.ceil((state.readyAt-n)/60000)+'m',x,y-28,'#ccc',8,'center')}g.restore();}}
+function lifeDrawResourceNodes(){const d=lifeAssetData();if(!d||!d.resources||!S.world)return;lifeEnsure();const cx=typeof wcx==='number'?wcx:0,cy=typeof wcy==='number'?wcy:0,n=lifeNow(),tm=performance.now();
+ for(const r of d.resources){
+  if(r.kind==='tree')continue; /* pohon digambar sebagai sprite pohon lewat Tmap.tall (urutan kedalaman) */
+  const st=S.gather.nodes[r.id]||{};if(st.readyAt&&n<st.readyAt)continue; /* sedang pulih: tidak ada bayangan/penanda sama sekali */
+  const p=lifeNodePos(r),x=(p.x+.5)*WS-cx-OX,y=(p.y+1)*WS-cy;if(x<-32-OX||x>VW+32||y<-25||y>390)continue;
+  g.save();
+  if(r.kind==='stone'){Anim.shadow(g,x,y-1,13,4,.28);g.fillStyle='#586b75';g.beginPath();g.moveTo(x-12,y);g.lineTo(x-9,y-13);g.lineTo(x-1,y-19);g.lineTo(x+10,y-14);g.lineTo(x+13,y-3);g.closePath();g.fill();g.fillStyle='#9bb4bc';g.fillRect(x-5,y-12,4,3)}
+  else if(r.kind==='mushroom'){Anim.shadow(g,x,y-1,16,4,.25);const a=['mush_red_1','mush_blue_2','mush_blue_1'];let ok=false;for(let i=0;i<3;i++)ok=Anim.draw(g,a[i],tm+i*170,x-11+i*11,y-(i%2)*4,false,2)||ok;
+   if(!ok){for(let i=0;i<3;i++){g.fillStyle=['#dc5360','#dc8b48','#a96ac7'][i];g.fillRect(x-10+i*8,y-10-(i%2)*4,7,5);g.fillStyle='#f7e8bd';g.fillRect(x-7+i*8,y-5-(i%2)*4,2,6)}}}
+  else if(r.kind==='herb'){Anim.shadow(g,x,y-1,10,3,.22);g.strokeStyle='#3a8c4b';g.lineWidth=3;for(let i=0;i<3;i++){g.beginPath();g.moveTo(x,y);g.lineTo(x-7+i*7,y-13-i%2*3);g.stroke();g.fillStyle='#76bd61';g.fillRect(x-8+i*7,y-15-i%2*3,5,4)}}
+  else{Anim.shadow(g,x,y-1,10,3,.22);g.strokeStyle='#4b8a48';g.lineWidth=3;g.beginPath();g.moveTo(x,y);g.lineTo(x,y-19);g.stroke();g.fillStyle='#b93d43';g.beginPath();g.arc(x-6,y-12,4,0,7);g.arc(x+6,y-16,4,0,7);g.fill();g.fillStyle='#e9bb68';g.fillRect(x-1,y-22,3,5)}
+  g.fillStyle='rgba(0,0,0,.55)';g.fillRect(x-10,y-37,20,10);T('E',x,y-29,'#fc4',8,'center');g.restore();
+ }}
 function lifeDrawWorldOverlay(){lifeEnsure();lifeDrawLockedPlaces();g.fillStyle='rgba(8,18,22,.76)';g.fillRect(VW-OX-78,6,68,22);g.strokeStyle='#8db9c0';g.strokeRect(VW-OX-77.5,6.5,67,21);T((self.hudClock?hudClock():String(Math.floor(lifeHour())).padStart(2,'0')+':00'),VW-OX-44,21,'#e4f1f2',10,'center');
  lifeDrawWorldDrops();
  if(lifeFish&&lifeFish.active){const cx=typeof wcx==='number'?wcx:0,cy=typeof wcy==='number'?wcy:0,x=(lifeFish.spot.x+.5)*WS-cx-OX,y=(lifeFish.spot.y+.5)*WS-cy,phase=lifeFish.phase;g.strokeStyle=phase==='bite'?'#ffe36d':'#9edfea';g.lineWidth=1.5;for(let j=0;j<(phase==='bite'?3:2);j++){const r=5+j*5+(phase==='bite'?Math.abs(Math.sin(t*16))*4:Math.sin(t*4+j)*2);g.beginPath();g.ellipse(x,y+3,r,r*.45,0,0,Math.PI*2);g.stroke()}g.fillStyle=phase==='bite'?'#ffe36d':'#f7f3e7';g.beginPath();g.ellipse(x,y-2,3.5,5,0,0,Math.PI*2);g.fill();g.fillStyle='#c64d4d';g.fillRect(x-2,y-7,4,3);return;}

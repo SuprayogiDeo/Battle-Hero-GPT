@@ -1,5 +1,16 @@
 # Changelog
 
+## Batch 9B-2 — 0.4.8-rc.1 — Polish dunia: jembatan, bangunan, kandang, sumber daya, memancing (cache v57)
+
+- Jembatan kayu kini tepat menutupi air (x=54..59) dengan satu petak tumpuan di tiap sisi; tidak lagi menjulur ke darat.
+- Footprint collision bangunan diturunkan dari ukuran sprite; baris di depan pintu selalu bebas dan dua baris di depannya bebas pohon acak (tidak ada dinding tak terlihat).
+- Plat nama bangunan berdiri di sisi kanan-depan (tidak menimpa pintu). Papan/plat dan labelnya digambar di lapisan atas sehingga tidak tertutup pohon; lebar plat menyesuaikan teks. Area 5x5 di sekitar papan biome bebas pohon.
+- Hutan Jamur memakai jamur animasi asli Sunnyside (tools/add_mushrooms.py), bukan batu berkilau emas. Batu `rock_*` kini padat (tidak bisa ditembus).
+- Sumber daya (jamur, pohon, herba, buah, batu): setelah dipanen hilang total tanpa bayangan/tunggul/timer, lalu muncul lagi di titik acak yang valid di zona yang sama (hutan tetap di hutan). Bekas pohon tidak lagi menjadi dinding tak terlihat. Simpanan lama dimigrasi otomatis.
+- Kandang dipisah per spesies (ayam, domba, sapi, babi): pagar menyambung, pintu di sisi selatan, interior bisa dimasuki, hewan hanya berkeliaran di kandangnya. Dari dalam/depan kandang, tombol aksi mengambil telur/susu/truffle/wol langsung atau membuka menu kandang.
+- Memancing hanya di laut/danau (badan air luas) dan pemain harus menempel ke tepi air; pelampung selalu mendarat di air dalam.
+- Bayangan kontak di bawah bangunan. Tes baru: tools/test_polish_10a.js.
+
 ## Batch 9B — 0.4.7-rc.2 — Satu kios pasar (cache v56)
 
 - Dua kios merah identik (Pasar Desa + Kasir Pasar) digabung jadi satu: tempat pasar dipindah ke posisi kasir (x=34) tanpa sprite sendiri, sehingga label "Pasar Desa" dan aksi kasir berada di kios yang sama. Cache service worker dinaikkan agar perangkat yang sudah memasang v55 memuat peta baru.
