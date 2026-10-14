@@ -5,6 +5,9 @@
 - Pagar ladang digambar ulang dengan `drawFence` (`farmFence` di tilemap.js): tiang sudut, balok menyambung, tanpa celah di sudut.
 - Sprite `flower_7` (blok oranye, crop atlas salah) dihapus dari dunia (71 objek) dan dari pembangkit dekor.
 - Jembatan timur: baris pagar atas/bawah kini padat (hanya baris tengah bisa dilalui); tiang simetris (x=55 dan 58); tile tepi sungai lama di ujung kiri dihapus; ujung kanan dicerminkan agar sama dengan kiri.
+- Bangunan: jalan setapak dari pintu Bengkel, Dapur, Balai Desa, dan Pondok Penebang ke jalan terdekat (juga ditambah di `world_design.json`); pohon/batu/semak yang menumpuk di bangunan atau menghalangi pintu dihapus.
+- Desa: lorong timur-barat di depan pintu barisan rumah utara (y=13) plus penghubung ke jalan utama; jalan pendek ke pintu rumah selatan dan rumah timur; semak/batu di jalur dihapus.
+- Petak kebun 6x4 dipindah dari depan Barak (menimpa sprite bangunan) ke padang berpagar di timur-selatan desa (x=39..44, y=29..32).
 - Jembatan barat: ujung bawah kiri dan kanan kini memakai tutup rel yang sama dengan sisi atas.
 
 ## Batch 9B-3 — 0.4.8-rc.1 — Gerbang kandang dan papan nama dinding (cache v58)
