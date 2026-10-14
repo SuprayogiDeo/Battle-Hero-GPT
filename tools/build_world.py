@@ -14,7 +14,9 @@ def bridge_tile(bridge, ids, xx, yy):
     xs = [p[0] for p in bridge['points']]; x0, x1 = min(xs), max(xs); w = max(1, int(bridge.get('width', 1))); yc = bridge['points'][0][1]
     top = yc - w // 2; r = yy - top; row = 'top' if r == 0 else 'bot' if r == w - 1 else 'mid'
     mid = (x0 + x1) // 2
-    col = 'L' if xx == x0 else 'R' if xx == x1 else 'post' if (xx in (x0 + 3, mid, x1 - 3) and row != 'mid') else ('a' if (xx & 1) == 0 else 'b')
+    # Tiang simetris: ujung dan dua titik di dalam; hindari menumpuk pada jembatan pendek.
+    post_x = {x0, x0 + 2, x1 - 2, x1}
+    col = 'L' if xx == x0 else 'R' if xx == x1 else 'post' if (xx in post_x and row != 'mid') else ('a' if (xx & 1) == 0 else 'b')
     return ids[row + '_' + col]
 
 
