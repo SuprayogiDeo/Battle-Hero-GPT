@@ -1,12 +1,12 @@
 # Changelog
 
-## Batch 9B-9 (polish visual, Step 1) — 0.4.8-rc.1 — Pasar padat, papan kosong dibuang, pagar jembatan solid (cache v64)
+## Batch 9B-9 (polish visual, Step 1) — 0.4.8-rc.1 — Pasar padat, papan kosong dibuang, tepi jembatan padat per piksel (cache v64)
 
 Data lewat `tools/fix_map_9e.py` (idempoten; menyentuh index.json, chunk c1_0, village.json). Tes 9C diperbarui.
 
 - Kios Pasar (Kasir Pasar) kini padat (x=33..35, y=24..25); baris depannya tetap bebas sehingga kasir terjangkau. Sebelumnya karakter bisa menembus kios.
 - Papan merah kosong di tile (37,23) dibuang (bukan papan misi dan tanpa teks).
-- Jembatan timur: pagar atas/bawah (y=22 dan 24) padat, hanya jalur tengah (y=23) yang bisa dilalui. Membalik keputusan 9C atas permintaan agar karakter tidak berdiri di tepi jembatan. Kotak kaki pemain tinggi 8 px, jadi jalur efektif 24 px dan jalan kiri 3 petak mengerucut ke satu jalur.
+- Jembatan timur: hanya tepi (pagar) yang padat; lantai papan tetap bisa dilalui. Collision per pita piksel lewat `index.json › bridgeRails` + `Tmap.railSolid` yang dipanggil `wSolid` (pagar atas y-lokal < 16 px di baris 22, pagar bawah y-lokal >= 18 px di baris 24). Memadatkan satu tile penuh (percobaan pertama) salah karena satu tile baris pagar juga berisi papan lantai, sehingga lantai yang tampak datar tidak bisa dimasuki dari jalan kanan. Tes 9C memeriksa pita ini, termasuk kotak kaki pemain.
 
 ## Batch 9B-8 (perbaikan 9D) — 0.4.8-rc.1 — Jarak bangunan dari jalan, plat Hutan Jamur (cache v63)
 

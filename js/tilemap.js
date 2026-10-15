@@ -122,6 +122,19 @@ var Tmap = (function () {
     g.fillStyle='#f7f0d0';g.fillRect(x0+px/V.w*w-1.5,y0+py/V.h*h-1.5,4,4);g.strokeStyle='#d8e8d5';g.lineWidth=1;g.strokeRect(x0+.5,y0+.5,w-1,h-1);g.restore();
   }
   function chunkKey(x,y){return x+'_'+y;}
+  /* Jembatan: hanya pagar (tepi) yang padat. Baris atas padat di y-lokal < topSolid, baris bawah di y-lokal >= botSolid (piksel dunia),
+     baris tengah bebas. true/false untuk petak jembatan, undefined di luar jembatan (pakai collision biasa). */
+  function railSolid(px, py) {
+    var B = V && V.bridgeRails; if (!B) return undefined;
+    var tx = Math.floor(px / 32), ty = Math.floor(py / 32);
+    for (var i = 0; i < B.length; i++) {
+      var b = B[i]; if (tx < b.x0 || tx > b.x1) continue;
+      if (ty === b.top) return (py - ty * 32) < b.topSolid;
+      if (ty === b.bot) return (py - ty * 32) >= b.botSolid;
+      if (ty > b.top && ty < b.bot) return false;
+    }
+    return undefined;
+  }
   function collisionAt(tx,ty){
     if(!V||tx<0||ty<0||tx>=V.w||ty>=V.h)return true;
     if(BLK[ty*V.w+tx])return true;
@@ -426,6 +439,6 @@ var Tmap = (function () {
     add(w.x * 2, w.y * 2, 140, function (sx, sb) { Anim.draw(g, 'windmill', tm, sx, sb, false, 2); }, tw ? tw.y * 2 + 1 : null);
     return out;
   }
-  return { init: init, ready: ready, data: data, update: update, draw: draw, tall: tall, fx: fx, lights: lights, farm: farm, explore: explore, hud: hud, collisionAt: collisionAt, hasTag: hasTag, nearService: nearService, nearPen: nearPen, overlay: overlay };
+  return { init: init, ready: ready, data: data, update: update, draw: draw, tall: tall, fx: fx, lights: lights, farm: farm, explore: explore, hud: hud, collisionAt: collisionAt, railSolid: railSolid, hasTag: hasTag, nearService: nearService, nearPen: nearPen, overlay: overlay };
 })();
 try { Tmap.init(); } catch (e) { }

@@ -27,11 +27,24 @@ ok(/wNear\.c!='F'&&wNear\.c!='G'/.test(WJ), 'tanpa sorot kuning untuk ladang/ger
 const rowRoad = y => [...Array(64).keys()].filter(x => x >= 44 && x <= 56 && I.grid[y][x] === ',');
 for (const y of [20, 21]) { const r = rowRoad(y).filter(x => x >= 49 && x <= 51); ok(r.join() === '49,50,51' || (y === 20 && r.join() === '50'), 'jalan rumah timur baris ' + y + ': ' + r); }
 ok(I.grid[20][48] !== ',' && I.grid[21][48] !== ',', 'jalan lama x=48 dihapus');
-// 9E (membalik 9C): hanya baris tengah dek (y=23) yang bisa dilalui; pagar atas/bawah (y=22, 24) padat, tidak bisa diinjak
+// 9E: seluruh sel jembatan terbuka di level tile; tepi (pagar) padat per pita piksel lewat Tmap.railSolid (bukan tile penuh)
+const rs = new Function('V', fs.readFileSync(path.join(root, 'js/tilemap.js'), 'utf8').match(/function railSolid\(px, py\) \{[\s\S]*?\n  \}\n/)[0] + '\nreturn railSolid;')(I);
+const wsrc = fs.readFileSync(path.join(root, 'js/world.js'), 'utf8'); ok(/Tmap\.railSolid\(px,py\)/.test(wsrc), 'wSolid memakai Tmap.railSolid');
+ok(Array.isArray(I.bridgeRails) && I.bridgeRails.length === 1, 'metadata bridgeRails ada');
 for (let x = 53; x <= 60; x++) {
-  ok(I.grid[23][x] === '+' && !col[23 * W + x], 'jalur tengah jembatan bebas ' + x);
-  for (const y of [22, 24]) ok(col[y * W + x] === 1 && 'XT~'.includes(I.grid[y][x]), 'pagar jembatan padat ' + x + ',' + y);
+  for (const y of [22, 23, 24]) ok(I.grid[y][x] === '+' && !col[y * W + x], 'sel jembatan terbuka di level tile ' + x + ',' + y);
+  const px = x * 32 + 16;
+  ok(rs(px, 22 * 32 + 4) === true && rs(px, 22 * 32 + 15) === true, 'pagar atas padat ' + x);
+  ok(rs(px, 22 * 32 + 16) === false && rs(px, 22 * 32 + 31) === false, 'papan baris atas bisa diinjak ' + x);
+  ok(rs(px, 23 * 32 + 1) === false && rs(px, 23 * 32 + 31) === false, 'baris tengah bebas ' + x);
+  ok(rs(px, 24 * 32 + 0) === false && rs(px, 24 * 32 + 17) === false, 'papan baris bawah bisa diinjak ' + x);
+  ok(rs(px, 24 * 32 + 18) === true && rs(px, 24 * 32 + 31) === true, 'pagar bawah padat ' + x);
 }
+ok(rs(52 * 32 + 16, 23 * 32) === undefined && rs(56 * 32, 21 * 32) === undefined && rs(61 * 32, 24 * 32 + 25) === undefined, 'di luar jembatan memakai collision biasa');
+// kotak kaki pemain (setengah lebar 9, tinggi 8) bisa masuk jembatan dari jalan kanan pada lantai papan baris bawah: kaki y=24*32+10
+const feetOk = (x, y) => ![rs(x - 9, y - 8), rs(x + 9, y - 8), rs(x - 9, y), rs(x + 9, y)].includes(true);
+ok(feetOk(60 * 32 + 16, 24 * 32 + 10) && feetOk(57 * 32, 23 * 32 + 16) && feetOk(57 * 32, 22 * 32 + 26), 'pemain bisa berdiri di lantai papan, termasuk dekat tepi');
+ok(!feetOk(57 * 32, 22 * 32 + 10) && !feetOk(57 * 32, 24 * 32 + 28), 'pemain tidak bisa berdiri di atas pagar');
 // 9E: kios Pasar padat tetapi baris depannya bebas; papan merah kosong dibuang (papan misi berlayanan tetap ada)
 for (const y of [24, 25]) for (const x of [33, 34, 35]) ok(col[y * W + x] === 1 && I.grid[y][x] === 'X', 'kios pasar padat ' + x + ',' + y);
 for (const x of [33, 34, 35]) ok(!col[26 * W + x] && I.grid[26][x] !== 'X', 'baris depan kios bebas ' + x);
