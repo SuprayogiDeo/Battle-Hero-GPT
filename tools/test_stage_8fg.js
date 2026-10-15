@@ -16,7 +16,7 @@ let n = 0; const ok = (c, m) => { assert.ok(c, m); n++; };
 // 1) Explicit entry/exit metadata matches every runtime building and reachable room doorway.
 const buildings = ev('INT_B.map(b=>({id:b.id,tpl:b.tpl,x:b.x,y:b.y}))');
 ok(interior.v === 2, 'interior.json schema upgraded to v2');
-ok(interior.buildingDoors.length === buildings.length && buildings.length === 15, 'all 15 buildings have entry/exit registry data');
+ok(interior.buildingDoors.length === buildings.length && buildings.length === 13, 'all 13 buildings have entry/exit registry data');
 for (const b of buildings) {
   const d = interior.buildingDoors.find(q => q.id === b.id);
   ok(!!d, 'missing door registry for ' + b.id);

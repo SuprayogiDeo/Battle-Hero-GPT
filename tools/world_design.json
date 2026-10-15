@@ -481,14 +481,19 @@
           "mush_blue_3"
         ]
       },
-      "clearRadius": 2
+      "clearRadius": 2,
+      "noLabel": true,
+      "sign": {
+        "x": 102,
+        "y": 28
+      }
     },
     {
       "id": "village_workshop",
       "name": "Bengkel Desa",
       "name_en": "Village Workshop",
       "type": "workshop",
-      "x": 63,
+      "x": 59,
       "y": 46,
       "sprite": "house_hut",
       "footprint": [
@@ -502,7 +507,7 @@
       "name": "Dapur Desa",
       "name_en": "Village Kitchen",
       "type": "kitchen",
-      "x": 62,
+      "x": 59,
       "y": 61,
       "sprite": "house_hut",
       "footprint": [

@@ -136,7 +136,7 @@ def main():
                     i = yy * W + xx
                     layers['ground'][i] = bridge_tile(bridge, BT, xx, yy) if bridge.get('style') == 'plank' else int(bridge.get('tile', 50))
                     grid[yy][xx] = '+'
-                    layers['collision'][i] = 0 if (bridge.get('style') != 'plank' or (w > 2 and yy == yc)) else 1   # jembatan plank: hanya baris tengah yang bisa dilalui
+                    layers['collision'][i] = 0   # seluruh dek jembatan bisa dilalui (variabel w/yc tidak ada di lingkup ini dan membuat build gagal)
 
     # Jembatan kayu: tiang pada layer decor (di atas air sisi utara) dan bayangan di air sisi selatan.
     for bridge in design.get('bridges', []):

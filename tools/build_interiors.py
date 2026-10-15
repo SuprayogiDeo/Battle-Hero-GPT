@@ -196,13 +196,12 @@ sheet, tab = pack(list(SP.items())); sheet.save(os.path.join(WD, 'interior.png')
 # Koordinat exterior menggunakan satuan piksel map mentah (16 px per petak).
 BUILDING_DOORS = [
     ('toko','shop',320,320,13,9,6), ('barak','barracks',712,320,15,9,7),
-    ('home','home',448,512,11,8,5), ('bengkel','workshop',1016,736,11,8,5),
-    ('dapur','kitchen',1000,976,11,8,5), ('penebang','woodcutter',1448,336,9,7,4),
+    ('bengkel','workshop',952,736,11,8,5),
+    ('dapur','kitchen',952,976,11,8,5), ('penebang','woodcutter',1448,336,9,7,4),
     ('balai','hall',1240,704,14,10,7), ('nelayan','fisher',776,1184,9,7,4),
     ('res1','res1',200,320,9,7,4), ('res2','res2',808,320,9,7,4),
     ('res3','res3',192,208,9,7,4), ('res4','res1',328,208,9,7,4),
     ('res5','res2',832,208,9,7,4), ('res6','res3',712,208,9,7,4),
-    ('res7','res1',560,512,9,7,4),
 ]
 building_doors = [dict(id=i, tpl=t, exterior={'x':x,'y':y}, room={'w':w,'h':h},
                        entry={'x':dx,'y':h-2}, exit={'x':dx,'y':h-1})
