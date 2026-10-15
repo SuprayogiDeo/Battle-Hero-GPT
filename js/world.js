@@ -76,7 +76,7 @@ function wGo(s){wbCheck();wFrom=1;wDlg=0;wTalk=null;wjid=null;wjx=wjy=0;sv();st=
 function wInteract(){if(st!='world'||wDlg)return;if(wTalk){npcAdv();return}wjid=null;wjx=wjy=0;
 if(wNpc){npcStart(wNpc);return}if(wPlace){sfx('click');if(wPlace.type==='animal_pen')wGo('ranch');else if(wPlace.type==='market'){marketFrom='world';wGo('market')}return}if(!wNear)return;sfx('click');
 if(wLock(wNear.c)){wSay(wL('Terkunci. Capai stage '+WUN[wNear.c]+' dulu (rekormu: '+best+')','Locked. Reach stage '+WUN[wNear.c]+' first (your best: '+best+')'),3);return}
-if(wNear.c=='G'){wDlg=1;return}if(wNear.c=='F'){say(wL('Ladangnya di petak rumput terbuka. Pilih cangkul, benih, atau ember di hotbar.','The field is on the open grass plots. Pick the hoe, seeds, or bucket on the hotbar.'));return}if(WGO[wNear.c])wGo(WGO[wNear.c])}
+if(wNear.c=='G'){wDlg=1;return}if(wNear.c=='F')return;if(WGO[wNear.c])wGo(WGO[wNear.c])}
 function worldResume(){wjid=null;wjx=wjy=0;wDlg=0;wTalk=null;wHint=0;st='world';wUnlockCheck();sv()}
 function goBack(){if(wFrom)worldResume();else st='menu'}
 function worldDown(id,x,y){if(wTalk){npcAdv();return}if(wDlg){WGD.forEach((b,i)=>{if(x>=b[1]&&x<=b[1]+b[3]&&y>=b[2]&&y<=b[2]+b[4]){sfx('click');if(i==0)wGo('stages');else if(i==1)hbStartDungeon();else if(i==2)wGo('tower');else wDlg=0}});return}
@@ -122,7 +122,7 @@ if(wVon){if(Tmap.farm&&typeof farmGet!='undefined')Tmap.farm(farmGet().p,Date.no
 if(wArt()){for(let ty=y0;ty<=Math.min(WH-1,y1+3);ty++)for(let tx=Math.max(0,x0-2);tx<=Math.min(WW-1,x1+2);tx++)if(WMAP[ty][tx]=='T')tall.push({y:ty*WS+WS-2,k:hh(ty*WW+tx,6)>.5?'t1':'t2',x:tx*WS+WS/2-cx-OX,b:ty*WS+WS-2-cy,z:1.5,md:wSn?'s':0});
 for(const c of'SR'){const b=WBM[c];if(!b)continue;tall.push({y:(b.y1+1)*WS,k:c,x:(b.x0+b.x1+1)*WS/2-cx-OX,b:(b.y1+1)*WS-cy,z:2,md:wLock(c)?'l':wSn?'s':0})}}}
 tall.sort((a,b)=>a.y-b.y);const dT=l=>l.forEach(o=>{if(o.x>-90-OX&&o.x<VW+90)(o.f?o.f():wSprite(o.k,o.x,o.b,o.z,o.md))});
-if(wNear&&!wDlg&&!wTalk&&!wNpc){const o=wNear;g.strokeStyle=wLock(o.c)?'#f88':'#fc4';g.globalAlpha=.6+.4*Math.sin(t*6);g.lineWidth=2;g.strokeRect(o.x0*WS-cx-OX+1,o.y0*WS-cy+1,(o.x1-o.x0+1)*WS-2,(o.y1-o.y0+1)*WS-2);g.globalAlpha=1}
+if(wNear&&wNear.c!='F'&&wNear.c!='G'&&!wDlg&&!wTalk&&!wNpc){const o=wNear;g.strokeStyle=wLock(o.c)?'#f88':'#fc4';g.globalAlpha=.6+.4*Math.sin(t*6);g.lineWidth=2;g.strokeRect(o.x0*WS-cx-OX+1,o.y0*WS-cy+1,(o.x1-o.x0+1)*WS-2,(o.y1-o.y0+1)*WS-2);g.globalAlpha=1}
 if(self.lifeDrawResourceNodes)lifeDrawResourceNodes(cx,cy);
 const id=S.own[S.lead]?S.lead:(S.deck[0]||'recruit'),d=HEROES[HID[id]],px=w.x-cx-OX,py=w.y-cy,bob=wwalk?Math.abs(Math.sin(wwalk*10))*3:0,im=IM[d.s],ok=im&&im.complete&&im.naturalWidth>0;
 dT(tall.filter(o=>o.y<=w.y));if(self.npcDraw)npcDraw(cx,cy,w.y,0);
@@ -130,7 +130,7 @@ if(wAct&&Anim.has('avatar_'+wAct.state)){Anim.shadow(g,px,py-1,9,3,.3);wAct.draw
 else{g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(px,py-1,10,4,0,0,7);g.fill();
 g.save();g.translate(px,py);if(wface<0)g.scale(-1,1);if(ok)spr(d.s,0,0,2,-bob);else{g.fillStyle=RC[d.rar];g.fillRect(-8,-30-bob,16,28)}g.restore()}
 if(self.npcDraw)npcDraw(cx,cy,w.y,1);dT(tall.filter(o=>o.y>w.y));wTint();if(wVon&&Tmap.overlay)Tmap.overlay(g);
-WBLD.forEach(b=>{const sx=(b.x0+b.x1+1)*WS/2-cx-OX,ly=(b.y1+1)*WS-cy+13,my=(b.y0+b.y1+1)*WS/2-cy;if(!(sx>-90-OX&&sx<VW+90))return;const lk=wLock(b.c),rd=b.c=='F'&&!lk&&farmReady();
+WBLD.forEach(b=>{if(b.c=='F'||b.c=='G')return;const sx=(b.x0+b.x1+1)*WS/2-cx-OX,ly=(b.y1+1)*WS-cy+13,my=(b.y0+b.y1+1)*WS/2-cy;if(!(sx>-90-OX&&sx<VW+90))return;const lk=wLock(b.c),rd=b.c=='F'&&!lk&&farmReady();
 if(lk){T(WNAME[b.c],sx,ly,'#99a',11,'center')}
 else T(WNAME[b.c]+(rd?' (!)':''),sx,ly,rd?'#fc4':'#fff',11,'center')});
 if(wSn){g.fillStyle='rgba(190,210,240,.08)';g.fillRect(-OX,0,VW,360);const nf=S.set.fx?70:30;g.fillStyle='#fff';for(let i=0;i<nf;i++){const x=(((hh(i,1)*VW+Math.sin(t*.8+i)*14-t*5)%VW)+VW)%VW-OX,y=(((hh(i,2)*380+t*(18+hh(i,3)*30))%380)+380)%380-10,z=(i%3)?1:2;g.fillRect(x|0,y|0,z,z)}}

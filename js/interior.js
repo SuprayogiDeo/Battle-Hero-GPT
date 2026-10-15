@@ -10,9 +10,8 @@ let wI=null,wFade=null,intT=0;
 const INT_B=[
 {id:'toko',tpl:'shop',x:320,y:320,n:['TOKO','SHOP']},
 {id:'barak',tpl:'barracks',x:712,y:320,n:['BARAK','BARRACKS'],stg:3},
-{id:'home',tpl:'home',x:448,y:512,n:['RUMAH KAMU','YOUR HOUSE']},
-{id:'bengkel',tpl:'workshop',x:1016,y:736,n:['BENGKEL DESA','VILLAGE WORKSHOP'],lv:2},
-{id:'dapur',tpl:'kitchen',x:1000,y:976,n:['DAPUR DESA','VILLAGE KITCHEN'],lv:3},
+{id:'bengkel',tpl:'workshop',x:952,y:736,n:['BENGKEL DESA','VILLAGE WORKSHOP'],lv:2},
+{id:'dapur',tpl:'kitchen',x:952,y:976,n:['DAPUR DESA','VILLAGE KITCHEN'],lv:3},
 {id:'penebang',tpl:'woodcutter',x:1448,y:336,n:['PONDOK PENEBANG','WOODCUTTER HUT'],lv:4},
 {id:'balai',tpl:'hall',x:1240,y:704,n:['BALAI DESA','VILLAGE HALL'],lv:5},
 {id:'nelayan',tpl:'fisher',x:776,y:1184,n:['PONDOK NELAYAN',"FISHERMAN'S HUT"]},
@@ -21,8 +20,7 @@ const INT_B=[
 {id:'res3',tpl:'res3',x:192,y:208,n:['RUMAH PENDUDUK','RESIDENT HOUSE']},
 {id:'res4',tpl:'res1',x:328,y:208,n:['RUMAH PENDUDUK','RESIDENT HOUSE']},
 {id:'res5',tpl:'res2',x:832,y:208,n:['RUMAH PENDUDUK','RESIDENT HOUSE']},
-{id:'res6',tpl:'res3',x:712,y:208,n:['RUMAH PENDUDUK','RESIDENT HOUSE']},
-{id:'res7',tpl:'res1',x:560,y:512,n:['RUMAH PENDUDUK','RESIDENT HOUSE']}];
+{id:'res6',tpl:'res3',x:712,y:208,n:['RUMAH PENDUDUK','RESIDENT HOUSE']}];
 /* pesan singkat [ID, EN] */
 const INT_MSG={
  books:['Buku-buku tua tentang pertanian dan petualangan.','Old books about farming and adventure.'],

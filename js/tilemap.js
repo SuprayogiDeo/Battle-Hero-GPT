@@ -239,20 +239,29 @@ var Tmap = (function () {
     }
     var ls = L, re = R, postX = sx, ph = 24;
     if (tx === x0) { ls = sx; ph = 30; } if (tx === x1) { re = sx; ph = 30; }
-    if (ty === y1 && tx === G0 - 1) { re = R - 2; postX = R - 2; ph = 32; }
-    if (ty === y1 && tx === G1 + 1) { ls = L + 2; postX = L + 2; ph = 32; }
+    var gy = p.gateSide === 'N' ? y0 : y1;
+    if (ty === gy && tx === G0 - 1) { re = R - 2; postX = R - 2; ph = 32; }
+    if (ty === gy && tx === G1 + 1) { ls = L + 2; postX = L + 2; ph = 32; }
     g.fillStyle = 'rgba(0,0,0,.16)'; g.fillRect(ls, sb - 3, re - ls, 4);
     fRail(g, ls, sb - 20, re - ls); fRail(g, ls, sb - 10, re - ls);
     fPost(g, postX, sb, ph, ph > 24 ? '#f0cf92' : null);
-    if (ty === y1 && (tx === G0 - 1 || tx === G1 + 1)) { g.fillStyle = '#f0cf92'; g.fillRect(postX - 3, sb - ph - 5, 6, 3); }
+    if (ty === gy && (tx === G0 - 1 || tx === G1 + 1)) { g.fillStyle = '#f0cf92'; g.fillRect(postX - 3, sb - ph - 5, 6, 3); }
   }
   /* pagar ladang: tiang sudut + balok menyambung, gaya sama dengan kandang (drawFence), tanpa celah di sudut */
-  function farmRect() { var b = V && V.bld && V.bld.F; return b ? { x: b[0], y: b[1], w: b[2] - b[0] + 1, h: b[3] - b[1] + 1, gateCols: [-99, -99] } : null; }
+  function farmRect() { var b = V && V.bld && V.bld.F, gt = V && V.farmGate; return b ? { x: b[0], y: b[1], w: b[2] - b[0] + 1, h: b[3] - b[1] + 1, gateCols: gt ? gt.cols : [-99, -99], gateSide: gt ? gt.side : 'S' } : null; }
   function farmFence(add, g) {
     var p = farmRect(); if (!p) return;
     for (var ty = p.y; ty < p.y + p.h; ty++) for (var tx = p.x; tx < p.x + p.w; tx++) {
       if (!(tx === p.x || tx === p.x + p.w - 1 || ty === p.y || ty === p.y + p.h - 1)) continue;
+      if (p.gateSide === 'N' && ty === p.y && tx >= p.gateCols[0] && tx <= p.gateCols[1]) continue;   /* celah gerbang ladang (sisi utara) */
       (function (tx, ty) { add(tx * 32 + 16, (ty + 1) * 32, 40, function (sx, sb) { drawFence(g, p, tx, ty, sx, sb); }); })(tx, ty);
+    }
+    if (p.gateSide === 'N') {   /* gerbang dua daun, membuka saat pemain dekat; nama ladang memudar mengikuti jarak */
+      add((p.gateCols[0] + p.gateCols[1] + 1) * 16, (p.y + 1) * 32, 40, function (sx, sb) {
+        drawPenGate(g, sx, sb, GO.farm || 0);
+        var wp = S && S.world, gt = V.farmGate, d = wp ? Math.hypot(wp.x / 32 - (p.gateCols[0] + p.gateCols[1] + 1) / 2, wp.y / 32 - p.y) : 99, a = d <= 3 ? 1 : Math.max(0, Math.min(1, (8 - d) / 5));
+        if (a > .01) LBL.push({ k: 'label', text: (S && S.set && S.set.lang === 'en' ? gt.name_en : gt.name) || gt.name || '', x: Math.round(sx), y: Math.round(sb - 40), a: a });
+      });
     }
   }
   function penObjects(add, g) {
@@ -308,6 +317,11 @@ var Tmap = (function () {
   /* kritter berkeliaran di padang */
   function update(dt) {
     if (!okf) return; T += dt; syncPenAnimals(false);
+    if (V && V.farmGate && V.bld && V.bld.F && S && S.world) {
+      var fb = V.bld.F, fx = S.world.x / 32, fy = S.world.y / 32, fg = (V.farmGate.cols[0] + V.farmGate.cols[1] + 1) / 2;
+      var fnear = (fx >= fb[0] && fx < fb[2] + 1 && fy >= fb[1] && fy < fb[3] + 1) || Math.hypot(fx - fg, fy - fb[1]) <= 2.6;
+      GO.farm = (GO.farm || 0) + ((fnear ? 1 : 0) - (GO.farm || 0)) * Math.min(1, dt * 9);
+    }
     if (V && V.pens && S && S.world) {
       var ptx = S.world.x / 32, pty = S.world.y / 32;
       V.pens.forEach(function (p) {
@@ -364,7 +378,7 @@ var Tmap = (function () {
     function add(wx, wy, h, fn, ky) { var sx = wx - cx - OX, sb = wy - cy; if (sx < -150 || sx > VW + 150 || sb < -10 || sb > 360 + h) return; out.push({ y: ky == null ? wy : ky, x: sx, b: sb, f: function () { fn(sx, sb); } }); }
     for (var i = 0; i < OB.length; i++) {
       var o = OB[i], wx = o.x * 2, wy = o.y * 2;
-      if (o.a) { (function (o) { var treeState = o.a.indexOf('tree') === 0 && typeof lifeTreeObjectState === 'function' ? lifeTreeObjectState(o) : ''; if (treeState === 'hidden') return; add(wx, wy, 120, function (sx, sb) { if (treeState === 'stump') { g.fillStyle = '#60402a'; g.fillRect(sx-7,sb-8,14,8); g.fillStyle = '#b68b50'; g.fillRect(sx-6,sb-9,12,3); g.fillStyle = '#3c2b1b'; g.fillRect(sx-2,sb-5,4,4); } else { var an = o.a.indexOf('tree') == 0 || o.a.indexOf('mush') == 0; Anim.draw(g, o.a, an ? tm + o.x * 41 : 0, sx, sb, false, 2); } }); })(o); continue; }
+      if (o.a) { (function (o) { var treeState = o.a.indexOf('tree') === 0 && typeof lifeTreeObjectState === 'function' ? lifeTreeObjectState(o) : ''; if (treeState === 'hidden') return; if (o.deco === 'mushroom' && typeof lifeMushState === 'function' && lifeMushState(o) === 'hidden') return; add(wx, wy, 120, function (sx, sb) { if (treeState === 'stump') { g.fillStyle = '#60402a'; g.fillRect(sx-7,sb-8,14,8); g.fillStyle = '#b68b50'; g.fillRect(sx-6,sb-9,12,3); g.fillStyle = '#3c2b1b'; g.fillRect(sx-2,sb-5,4,4); } else { var an = o.a.indexOf('tree') == 0 || o.a.indexOf('mush') == 0; Anim.draw(g, o.a, an ? tm + o.x * 41 : 0, sx, sb, false, 2); } }); })(o); continue; }
       if (o.k == 'gate_arch') { add(wx, wy, 74, function (sx, sb) { drawGate(g, sx, sb); }); continue; }
       if (o.k == 'feed_trough') { add(wx, wy, 14, function (sx, sb) { drawFeedTrough(g, sx, sb); }); continue; }
       if ((o.k == 'fence_h' || o.k == 'fence_v') && farmRect() && o.x >= farmRect().x * 16 && o.x < (farmRect().x + farmRect().w) * 16 && o.y > farmRect().y * 16 && o.y <= (farmRect().y + farmRect().h) * 16) continue;   /* pagar ladang digambar ulang di farmFence() */
@@ -381,17 +395,23 @@ var Tmap = (function () {
         }
         if (md != 'l' && r.door) { var wn = wallName(o.k); if (wn) wallSign(g, r, Math.round(sx - r.w), Math.round(sb - r.h * 2), wn); }
         if (o.k == 'lamp' && FX.n > .02) LT.push([sx, Math.round(sb - r.h * 2) + 8, 46, .8]);
-        if (o.biomeSign) {
+        if (o.biomeSign || o.placeSign) {   /* plat biome, atau plat tempat (mis. Hutan Jamur) */
           var wp = S && S.world, d = wp ? Math.hypot(wp.x / 32 - o.x / 16, wp.y / 32 - o.y / 16) : 99;
           var alpha = d <= 2.5 ? 1 : Math.max(0, Math.min(1, (7 - d) / 4.5));
           if (alpha > .01) {
-            var label = (S && S.set && S.set.lang === 'en' ? o.signNameEn : o.signName) || o.biomeSign;
+            var label = (S && S.set && S.set.lang === 'en' ? o.signNameEn : o.signName) || o.biomeSign || o.placeSign;
             LBL.push({ k: 'label', text: label, x: Math.round(sx), y: Math.round(sb - r.h * 2 - 2), a: alpha });
           }
         } }); })(o, r);
     }
+    (V.labels || []).forEach(function (l) {   /* label melayang tanpa plat (mis. Gerbang) */
+      add(l.x * 32, l.y * 32, 36, function (sx, sb) {
+        var nm = (S && S.set && S.set.lang === 'en' ? l.name_en : l.name) || l.name, wp = S && S.world, d = wp ? Math.hypot(wp.x / 32 - l.x, wp.y / 32 - l.y) : 99, a = d <= 4 ? 1 : Math.max(0, Math.min(1, (9 - d) / 5));
+        if (a > .01) LBL.push({ k: 'label', text: nm, x: Math.round(sx), y: Math.round(sb - 26), a: a });
+      });
+    });
     (V.places || []).forEach(function (p) {
-      if (p.sprite || p.type === 'animal_pen') return;   /* bangunan: papan di dinding; kandang: tanpa nama */
+      if (p.sprite || p.noLabel || p.type === 'animal_pen') return;   /* bangunan: papan di dinding; kandang: tanpa nama; noLabel: sudah punya plat sendiri */
       add(p.x * 32 + 16, p.y * 32, 36, function (sx, sb) {
         var nm = (S && S.set && S.set.lang === 'en' ? p.name_en : p.name) || p.name, wp = S && S.world, d = wp ? Math.hypot(wp.x / 32 - p.x, wp.y / 32 - p.y) : 99, a = d <= 3 ? 1 : Math.max(0, Math.min(1, (8 - d) / 5));
         if (a > .01) LBL.push({ k: 'label', text: nm, x: Math.round(sx), y: Math.round(sb - 26), a: a });

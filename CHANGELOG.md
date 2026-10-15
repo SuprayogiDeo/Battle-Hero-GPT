@@ -1,5 +1,37 @@
 # Changelog
 
+## Batch 9B-8 (perbaikan 9D) — 0.4.8-rc.1 — Jarak bangunan dari jalan, plat Hutan Jamur (cache v63)
+
+Dari daftar bug foto no. 8 dan 9. Data lewat `tools/fix_map_9d.py` (idempoten).
+
+- Bengkel Desa digeser 4 petak dan Dapur Desa 3 petak ke barat (keduanya kini berpusat di x=952, tile 59), berjarak >= 3 petak dari jalan utama x=65; sebelumnya sprite bengkel menimpa jalan. Jalan ke pintu bengkel dibuat ulang (baris y=46, x=58..65), pintu dapur kini langsung di jalan barat-timur y=61. Posisi baru diikuti `places`, `signAt`, `interior.json`, `INT_B`, `world_design.json`, dan `build_interiors.py` (entri `home` dan `res7` yang sudah dihapus di 9A juga dibuang dari sana).
+- Hutan Jamur: ditambah plat (`sign`, `biomeSign:'mushroom'`) di mulut jalan masuk (tile 102,28) seperti biome lain; label melayang tempatnya dimatikan lewat `noLabel` agar tidak ganda. Ditambahkan juga ke `biomeSigns` di `world_design.json`.
+
+## Batch 9B-7 (perbaikan 9C) — 0.4.8-rc.1 — Jalan rumah timur, dek jembatan, jamur bisa dipetik (cache v62)
+
+Dari daftar bug foto no. 5, 6, 7. Data lewat `tools/fix_map_9c.py` (idempoten); tes baru `tools/test_stage_9c.js` (mencakup 9A-9C).
+
+- Jalan ke pintu Rumah Penduduk timur disejajarkan dengan pintunya (3 petak, x=49..51); petak jalan nyasar di (50,20) dibuang.
+- Jembatan timur: seluruh dek (y=22..24) kini bisa dilalui. Sebelumnya baris atas/bawah padat sehingga pemain di jalur bawah terhalang. `tools/build_world.py` memakai variabel `w`/`yc` yang tidak ada (UnboundLocalError) di baris ini; diganti sehingga skrip bisa dijalankan lagi.
+- Ikon "E" di atas sumber daya (jamur, herba, batu, buah) dihapus.
+- Semua jamur dekor di Hutan Jamur (`deco:'mushroom'`) kini bisa dipetik lewat aksi biasa: hilang selama jeda 6 menit lalu muncul lagi di tempat yang sama (`lifeMushState`, `lifeNearResource`, `lifeMarkHarvested`). Batas harian mengumpulkan (`LIFE.gatherCap` = 12) tidak diubah.
+
+## Batch 9B-6 (perbaikan 9B) — 0.4.8-rc.1 — Gerbang ladang, gerbang petualangan simetris (cache v61)
+
+Dari daftar bug foto no. 3 dan 4. Data lewat `tools/fix_map_9b.py` (idempoten), perilaku lewat world.js, hud.js, tilemap.js.
+
+- Ladang: celah utara kini berisi gerbang kayu dua daun (`drawPenGate`) yang membuka saat pemain mendekat; nama "Ladang" tampil sebagai label melayang yang memudar. Tombol aksi "LADANG", pesan "Ladangnya di petak rumput terbuka", label permanen di bawah ladang, dan sorot kuning saat didekati dihapus (tanaman kini ada di dalam ladang).
+- Gerbang petualangan: menara kanan digeser dari x=560 ke 544 sehingga kedua menara simetris terhadap jalan (x=29..32, sumbu x=31); `bld.G` menjadi [27,8,34,8]. Dua plat kosong dihapus, nama "Gerbang" jadi label melayang (`labels` di data dunia). Sorot dan label permanen gerbang dihapus; dialog gerbang tetap lewat tombol aksi.
+
+## Batch 9B-5 (perbaikan 9A) — 0.4.8-rc.1 — Taman Desa, ladang tunggal, jalan sejajar pintu (cache v60)
+
+Dari daftar bug foto no. 1 dan 2. Dijalankan lewat `tools/fix_map_9a.py` (memutakhirkan `index.json`, chunk, dan `village.json`; idempoten).
+
+- Dihapus: Rumah Kamu (`b_home`, berisi tempat tidur + peti), rumah penduduk selatan (`b_res6` di x=35,y=32), padang berpagar timur (pagar, tebing bertingkat, tangga) beserta jalan penghubung pintunya. Peti tetap ada di Barak dan Pondok Penebang; entri `home` dan `res7` dihapus dari `INT_B` dan `interior.json`.
+- Diisi Taman Desa: petak bunga, bangku, dan lampu simetris di kedua sisi jalan utama (sumbu x=31), padang lapang dengan pohon di tepi selatan/timur, dua petak bunga simetris di sekitar lampu x=45.
+- Petak tanam 6x4 (24 petak) dipindah ke ladang barat berpagar (x=11..16, y=30..33). Pagar utara ladang diberi celah di ujung jalan setapak (x=13..14), diatur lewat `farmGate` di data dunia dan dibaca `farmRect`/`farmFence` di tilemap.js. Pintu bergerak, plat, dan sorot dekat ladang menyusul di 9B.
+- Jalan ke pintu Toko disempitkan jadi 2 petak (x=19..20) dan jalan ke Rumah Penduduk barat dilebarkan jadi 3 petak (x=11..13) sehingga simetris terhadap pintu masing-masing.
+
 ## Batch 9B-4 — 0.4.8-rc.1 — Perbaikan jembatan, pagar ladang, sprite rusak (cache v59)
 
 - Pagar ladang digambar ulang dengan `drawFence` (`farmFence` di tilemap.js): tiang sudut, balok menyambung, tanpa celah di sudut.

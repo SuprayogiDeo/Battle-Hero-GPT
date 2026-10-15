@@ -70,7 +70,7 @@ function hudCtx(){
  const service=self.Tmap&&Tmap.nearService&&S.world?Tmap.nearService(S.world.x/WS,S.world.y/WS):null;
  if(service){const labels={quest_board:['MISI','QUEST'],market_cashier:['KASIR','CASHIER'],animal_trough:['PAKAN','FEED']},q=labels[service.type]||['GUNAKAN','USE'];return{l:wL(q[0],q[1]),on:1,f:()=>hudServiceAct(service)}}
  if(wPlace){const t=wPlace.type;if(t==='market')return{l:wL('CARI KASIR','FIND CASHIER'),on:0,f:()=>wSay(wL('Transaksi lewat kasir di kios.','Trade at the kiosk cashier.'),2.5)};if(t==='animal_pen')return{l:wL('CARI PALUNG','FIND TROUGH'),on:0,f:()=>wSay(wL('Pakan ada di palung samping kandang.','Feed is at the trough beside the pen.'),2.5)};if(t==='orchard'||t==='mushroom_grove')return{l:wL('LIHAT','LOOK'),on:1,f:()=>_hudInteract()}}
- if(wNear){if(wNear.c=='G')return{l:wL('GERBANG','GATE'),on:1,f:()=>_hudInteract()};if(wNear.c=='Q')return{l:wL('PAPAN MISI','QUEST BOARD'),on:0,f:()=>wSay(wL('Papan misinya ada di dekat jalur.','The quest board is near the path.'),2.5)};if(wNear.c=='F')return{l:wL('LADANG','FIELD'),on:!wLock('F'),f:()=>{if(wLock('F'))_hudInteract();else say(wL('Ladangnya di petak rumput terbuka. Pilih cangkul, benih, atau ember di hotbar.','The field is on the open grass plots. Pick the hoe, seeds, or bucket on the hotbar.'))}}}
+ if(wNear){if(wNear.c=='G')return{l:wL('GERBANG','GATE'),on:1,f:()=>_hudInteract()};if(wNear.c=='Q')return{l:wL('PAPAN MISI','QUEST BOARD'),on:0,f:()=>wSay(wL('Papan misinya ada di dekat jalur.','The quest board is near the path.'),2.5)};}
  return null;
 }
 const hudIcon=(i,x,y,z,a)=>{if(HUD_IM.complete&&HUD_IM.naturalWidth>0){g.globalAlpha=a==null?1:a;g.drawImage(HUD_IM,i*16,0,16,16,Math.round(x),Math.round(y),16*z,16*z);g.globalAlpha=1}};
