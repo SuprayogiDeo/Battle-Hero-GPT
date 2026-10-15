@@ -27,8 +27,16 @@ ok(/wNear\.c!='F'&&wNear\.c!='G'/.test(WJ), 'tanpa sorot kuning untuk ladang/ger
 const rowRoad = y => [...Array(64).keys()].filter(x => x >= 44 && x <= 56 && I.grid[y][x] === ',');
 for (const y of [20, 21]) { const r = rowRoad(y).filter(x => x >= 49 && x <= 51); ok(r.join() === '49,50,51' || (y === 20 && r.join() === '50'), 'jalan rumah timur baris ' + y + ': ' + r); }
 ok(I.grid[20][48] !== ',' && I.grid[21][48] !== ',', 'jalan lama x=48 dihapus');
-// 9C: dek jembatan bebas
-for (let y = 0; y < I.h; y++) for (let x = 0; x < W; x++) if (I.grid[y][x] === '+' && y >= 22 && y <= 24) ok(!col[y * W + x], 'dek jembatan bebas ' + x + ',' + y);
+// 9E (membalik 9C): hanya baris tengah dek (y=23) yang bisa dilalui; pagar atas/bawah (y=22, 24) padat, tidak bisa diinjak
+for (let x = 53; x <= 60; x++) {
+  ok(I.grid[23][x] === '+' && !col[23 * W + x], 'jalur tengah jembatan bebas ' + x);
+  for (const y of [22, 24]) ok(col[y * W + x] === 1 && 'XT~'.includes(I.grid[y][x]), 'pagar jembatan padat ' + x + ',' + y);
+}
+// 9E: kios Pasar padat tetapi baris depannya bebas; papan merah kosong dibuang (papan misi berlayanan tetap ada)
+for (const y of [24, 25]) for (const x of [33, 34, 35]) ok(col[y * W + x] === 1 && I.grid[y][x] === 'X', 'kios pasar padat ' + x + ',' + y);
+for (const x of [33, 34, 35]) ok(!col[26 * W + x] && I.grid[26][x] !== 'X', 'baris depan kios bebas ' + x);
+ok(!I.objects.some(o => o.k === 'board' && !o.serviceId), 'tidak ada papan kosong tanpa fungsi');
+ok(I.objects.some(o => o.serviceId === 'quest_board'), 'papan misi tetap ada');
 // 9C: jamur
 const LIFE = js('life.js'), TM = js('tilemap.js');
 ok(!/T\('E',x,y-29/.test(LIFE), 'ikon E dihapus dari sumber daya');

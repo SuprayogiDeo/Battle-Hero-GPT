@@ -61,7 +61,7 @@ ok(idx.biomeGates.length===0 && idx.objects.filter(o=>o.k==='gate_arch').length=
 for(const gate of idx.biomeGates){const o=idx.objects.find(q=>q.gateId===gate.id&&q.k==='gate_arch');ok(!!o, 'gate object exists: '+gate.id);ok(!['~','T','X','S','R','G','Q','F'].includes(idx.grid[gate.y][gate.x]), 'gate does not block its crossing tile: '+gate.id);}
 const expectedServices={quest_board:'board',market_cashier:'stall_red',animal_trough:'feed_trough'};
 ok(idx.serviceObjects.length===3, 'three physical service descriptors exist');
-for(const s of idx.serviceObjects){const o=idx.objects.find(q=>q.serviceId===s.id&&q.serviceType===s.type);ok(!!o&&o.k===expectedServices[s.type], 'physical service object exists: '+s.id);ok(!['~','T','X','S','R','G','Q','F'].includes(idx.grid[s.y][s.x]), 'service base tile is open: '+s.id);}
+for(const s of idx.serviceObjects){const o=idx.objects.find(q=>q.serviceId===s.id&&q.serviceType===s.type);ok(!!o&&o.k===expectedServices[s.type], 'physical service object exists: '+s.id);ok(s.type==='market_cashier' /* 9E: kios padat; dijangkau dari baris depan y+1 */ ? !['~','T','X','S','R','G','Q','F'].includes(idx.grid[s.y+1][s.x]) : !['~','T','X','S','R','G','Q','F'].includes(idx.grid[s.y][s.x]), 'service base tile is open (kios padat: baris depan terbuka): '+s.id);}
 const tilemapSrc=fs.readFileSync(path.join(root,'js/tilemap.js'),'utf8');
 ok(tilemapSrc.includes('o.biomeSign')&&tilemapSrc.includes('signNameEn')&&tilemapSrc.includes('nearService'), 'runtime binds fade/name/service proximity to physical objects');
 ok(tilemapSrc.includes('function drawGate')&&tilemapSrc.includes('function drawFeedTrough'), 'gate and trough procedural visuals are present');
