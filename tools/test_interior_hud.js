@@ -13,8 +13,9 @@ const IJ = JSON.parse(fs.readFileSync(path.join(root, 'assets/world/interior.jso
 let n = 0; const ok = (c, m) => { assert.ok(c, m); n++; };
 // 1) setiap bangunan terdaftar cocok dengan objek b_* di index.json (kaki sprite) dan tiap pintu menghadap sel jalan
 const bl = ev('INT_B.map(b=>({id:b.id,tpl:b.tpl,x:b.x,y:b.y}))');
-const objs = I.objects.filter(o => (o.k || '').startsWith('b_'));
-ok(objs.length === bl.length, 'jumlah bangunan ' + objs.length + ' vs ' + bl.length);
+const objs = I.objects.filter(o => (o.k || '').startsWith('b_') && o.k !== 'b_market');
+ok(objs.length === bl.length, 'jumlah bangunan interior ' + objs.length + ' vs ' + bl.length);
+ok(I.objects.some(o => o.k === 'b_market' && o.serviceType === 'market_cashier'), 'pasar fisik terdaftar sebagai layanan mandiri, bukan interior');
 bl.forEach(b => { ok(objs.some(o => o.x === b.x && o.y === b.y), 'bangunan ' + b.id + ' tidak cocok dengan objek di index.json');
   const gx = (b.x >> 4), gy = (b.y >> 4), ch = I.grid[gy][gx]; ok(ch !== '~' && ch !== 'T' && ch !== 'X', 'sel pintu ' + b.id + ' tidak bisa dilalui: ' + ch); });
 // 2) semua sprite yang dipakai ruangan ada di interior.json

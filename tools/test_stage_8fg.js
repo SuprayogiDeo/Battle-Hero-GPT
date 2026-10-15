@@ -40,7 +40,7 @@ ok(houseKeys.length >= 14, 'new house sprite metadata retained by world rebuild'
 let windowCount=0;
 for (const key of houseKeys) {
   const s=idx.spr[key]; ok(Array.isArray(s.win)&&s.win.length>0, 'night-window metadata present: '+key); windowCount += s.win.length;
-  const [dx,dy,dw,dh]=s.door;
+  const [dx,dy,dw,dh]=s.door; ok(dx>=0&&dy>=0&&dw>0&&dh>0&&dx+dw<=s.w&&dy+dh<=s.h, 'door rectangle fits '+key);
   for (const [x,y,w,h] of s.win) {
     ok(x>=0&&y>=0&&w>0&&h>0&&x+w<=s.w&&y+h<=s.h, 'window rectangle fits '+key);
     ok(!(x<dx+dw&&x+w>dx&&y<dy+dh&&y+h>dy), 'window does not cover door '+key);
@@ -59,7 +59,7 @@ for(const sign of idx.biomeSigns){
 }
 ok(idx.biomeGates.length===0 && idx.objects.filter(o=>o.k==='gate_arch').length===0, 'no border gate arches (removed in 9A: they faced the viewer, not the road)');
 for(const gate of idx.biomeGates){const o=idx.objects.find(q=>q.gateId===gate.id&&q.k==='gate_arch');ok(!!o, 'gate object exists: '+gate.id);ok(!['~','T','X','S','R','G','Q','F'].includes(idx.grid[gate.y][gate.x]), 'gate does not block its crossing tile: '+gate.id);}
-const expectedServices={quest_board:'board',market_cashier:'stall_red',animal_trough:'feed_trough'};
+const expectedServices={quest_board:'board',market_cashier:'b_market',animal_trough:'feed_trough'};
 ok(idx.serviceObjects.length===3, 'three physical service descriptors exist');
 for(const s of idx.serviceObjects){const o=idx.objects.find(q=>q.serviceId===s.id&&q.serviceType===s.type);ok(!!o&&o.k===expectedServices[s.type], 'physical service object exists: '+s.id);ok(s.type==='market_cashier' /* 9E: kios padat; dijangkau dari baris depan y+1 */ ? !['~','T','X','S','R','G','Q','F'].includes(idx.grid[s.y+1][s.x]) : !['~','T','X','S','R','G','Q','F'].includes(idx.grid[s.y][s.x]), 'service base tile is open (kios padat: baris depan terbuka): '+s.id);}
 const tilemapSrc=fs.readFileSync(path.join(root,'js/tilemap.js'),'utf8');
@@ -68,7 +68,7 @@ ok(tilemapSrc.includes('function drawGate')&&tilemapSrc.includes('function drawF
 
 // 4) Proximity does not open a service panel automatically; explicit action activates only its physical object.
 ev("sfx=function(){};say=function(){};wSay=function(){};st='world';wI=null;wFade=null;wDlg=0;wTalk=null;wNpc=null;wPlace=null;wNear=null;S.world={x:70*WS+16,y:70*WS+16,disc:'*'};lifeNearWorldDrop=()=>null;lifeFishingSpot=()=>null;lifeNearResource=()=>null;hudWaterNear=()=>false;best=10;wGo=function(d){__serviceDest=d;st=d};Tmap.nearService=function(){return {type:__testServiceType}};__serviceDest='';__testServiceType='market_cashier';");
-let ctx=ev('hudCtx()');ok(ev("st==='world'&&__serviceDest===''"), 'nearby cashier does not auto-open its service screen');ok(ctx.l==='KASIR', 'cashier context label targets physical object');
+let ctx=ev('hudCtx()');ok(ev("st==='world'&&__serviceDest===''"), 'nearby cashier does not auto-open its service screen');ok(ctx.l==='PASAR', 'cashier context label targets physical object');
 // Invoke inside the VM so the physical service closure remains in its original context.
 ev("st='world';__testServiceType='market_cashier';hudCtx().f();");ok(ev("__serviceDest==='market'&&marketFrom==='world'"), 'cashier action opens market transaction screen');
 ev("st='world';__serviceDest='';__testServiceType='quest_board';hudCtx().f();");ok(ev("__serviceDest==='quests'"), 'physical quest board opens quest screen');

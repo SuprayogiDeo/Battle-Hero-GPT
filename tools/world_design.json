@@ -349,15 +349,28 @@
   "places": [
     {
       "id": "village_market",
-      "name": "Pasar Desa",
-      "name_en": "Village Market",
+      "name": "Pasar",
+      "name_en": "Market",
       "type": "market",
-      "x": 34,
-      "y": 25,
+      "x": 44,
+      "y": 34,
       "footprint": [
-        3,
-        2
-      ]
+        11,
+        9
+      ],
+      "sprite": "b_market",
+      "plaza": {
+        "x0": 37,
+        "y0": 25,
+        "x1": 51,
+        "y1": 35
+      },
+      "legacyFootprint": {
+        "x0": 33,
+        "y0": 24,
+        "x1": 35,
+        "y1": 25
+      }
     },
     {
       "id": "fishing_pier",
@@ -826,12 +839,12 @@
     {
       "id": "market_cashier",
       "type": "market_cashier",
-      "sprite": "stall_red",
-      "x": 34,
-      "y": 25,
+      "x": 44,
+      "y": 33,
       "rangeTiles": 2.4,
-      "name": "Kasir Pasar",
-      "name_en": "Market Cashier"
+      "name": "Pasar",
+      "name_en": "Market",
+      "attachTo": "village_market"
     },
     {
       "id": "animal_trough",

@@ -158,6 +158,16 @@ def main():
         set_tile(x, y, 34, ',')
 
     objects = list(src.get('objects', []))
+    # Keep authored place-name signs that are stored in generated index.json rather than village.json.
+    existing_place_signs = {o.get('placeSign') for o in objects if o.get('placeSign')}
+    objects.extend(dict(o) for o in prior.get('objects', [])
+                   if o.get('placeSign') and o.get('placeSign') not in existing_place_signs)
+    # Clear props from the single continuous market plaza before adding its building sprite.
+    _mp = next((q for q in design.get('places', []) if q.get('id') == 'village_market'), {})
+    _pl = _mp.get('plaza')
+    if _pl:
+        _x0, _y0, _x1, _y1 = (_pl['x0'], _pl['y0'], _pl['x1'], _pl['y1'])
+        objects = [o for o in objects if not ('x' in o and 'y' in o and _x0 <= int(o['x']) // 16 <= _x1 and _y0 - 1 <= (int(o['y']) - 1) // 16 <= _y1)]
     # Restore the new house sprite ids on legacy village objects at the same coordinates.
     for obj in objects:
         old = prior_objects.get((obj.get('x'), obj.get('y')))
@@ -165,6 +175,28 @@ def main():
             obj['k'] = old['k']
     places = design.get('places', [])
     occupied = set()
+    # Market plaza is an intentional override of the legacy village tiles.
+    for p in places:
+        pl = p.get('plaza')
+        if not pl: continue
+        for yy in range(int(pl['y0']), int(pl['y1']) + 1):
+            for xx in range(int(pl['x0']), int(pl['x1']) + 1):
+                if not (0 <= xx < W and 0 <= yy < H) or grid[yy][xx] in ('~', '+'): continue
+                i = yy * W + xx
+                layers['ground'][i] = 34; layers['decor'][i] = 0; layers['shadow'][i] = 0; layers['over'][i] = 0
+                grid[yy][xx] = ','; layers['collision'][i] = 0; occupied.add((xx, yy))
+        legacy = p.get('legacyFootprint')
+        if legacy:
+            for yy in range(int(legacy['y0']), int(legacy['y1']) + 1):
+                for xx in range(int(legacy['x0']), int(legacy['x1']) + 1):
+                    if not (0 <= xx < W and 0 <= yy < H): continue
+                    i = yy * W + xx
+                    layers['shadow'][i] = 0; layers['over'][i] = 0; layers['decor'][i] = 0; layers['collision'][i] = 0
+                    if yy == 24:
+                        layers['ground'][i] = 34; grid[yy][xx] = ','
+                    else:
+                        biome = biome_at(xx, yy); choices = biome.get('groundTiles', [5, 6, 7, 8])
+                        layers['ground'][i] = choices[int(hash01(xx, yy, 11) * len(choices)) % len(choices)]; grid[yy][xx] = '.'
     # Metadata ukuran sprite (atlas lama + bangunan b_*), dipakai untuk menurunkan footprint collision dari sprite.
     sprite_meta = dict(src.get('spr', {}))
     for name, meta in prior.get('spr', {}).items():
@@ -218,10 +250,19 @@ def main():
                     for xx in range(left // 16, (left + meta['w'] - 1) // 16 + 1):
                         if min(left + meta['w'], (xx + 1) * 16) - max(left, xx * 16) < 6: continue
                         block(xx, yy)
-                # Plat nama berdiri di sisi kanan-depan bangunan, bukan menimpa pintu.
-                # Dua baris di depan bangunan bebas vegetasi acak (tidak ada pohon tepat di depan pintu).
+                # Dua baris di depan bangunan bebas collision/prop; sel di depan pintu menjadi jalan.
+                front_left, front_right = left // 16 - 1, (left + meta['w'] - 1) // 16 + 1
                 for yy in (y, y + 1):
-                    for xx in range(left // 16 - 1, (left + meta['w'] - 1) // 16 + 2): occupied.add((xx, yy))
+                    for xx in range(front_left, front_right + 1):
+                        if not in_bounds(xx, yy): continue
+                        occupied.add((xx, yy)); fi = yy * W + xx
+                        layers['collision'][fi] = 0
+                        if grid[yy][xx] in ('X', 'T', 'S', 'R', 'G', 'Q', 'F'):
+                            grid[yy][xx] = '.'
+                if in_bounds(x, y):
+                    fi = y * W + x
+                    grid[y][x] = ','; layers['ground'][fi] = 34
+                    layers['decor'][fi] = 0; layers['shadow'][fi] = 0; layers['over'][fi] = 0
                 p['signAt'] = [left + meta['w'] + 10, obj['y'] + 13]
                 clear_zone((left + meta['w'] + 10) // 16, y, 1)
             else:
@@ -297,8 +338,14 @@ def main():
     service_objects = []
     for service in design.get('serviceObjects', []):
         x, y = int(service['x']), int(service['y'])
-        sprite = service.get('sprite', 'board')
-        obj = add_sprite(sprite, x, y, offset=1)
+        obj = None
+        if service.get('attachTo'):
+            target = next((p for p in places if p.get('id') == service['attachTo']), None)
+            if target and target.get('sprite'):
+                obj = next((q for q in objects if q.get('k') == target['sprite'] and q.get('x') == int(target['x'] * 16 + 8) and q.get('y') == int(target['y'] * 16)), None)
+        if obj is None:
+            sprite = service.get('sprite', 'board')
+            obj = add_sprite(sprite, x, y, offset=1)
         obj.update(serviceId=service['id'], serviceType=service['type'])
         occupied.add((x, y))
         service_objects.append({k: service[k] for k in ('id', 'type', 'x', 'y', 'rangeTiles', 'name', 'name_en') if k in service})
@@ -356,7 +403,9 @@ def main():
                spr=sprites, biomeRegions=design['biomes'], places=places, tags=design.get('tags', {}),
                resources=design.get('resources', []), npcs={**src.get('npcs', {}), **design.get('npcs', {})},
                biomeSigns=design.get('biomeSigns', []), biomeGates=design.get('biomeGates', []),
-               serviceObjects=service_objects, pens=pens_out, animals=([] if pens_out else src.get('animals', [])), design='tools/world_design.json', objects=objects, anim=src.get('anim', {}))
+               serviceObjects=service_objects, pens=pens_out, animals=([] if pens_out else src.get('animals', [])),
+               bridgeRails=prior.get('bridgeRails', src.get('bridgeRails', [])),
+               design='tools/world_design.json', objects=objects, anim=src.get('anim', {}))
     out = BASE / 'chunks'; out.mkdir(exist_ok=True)
     for old in out.glob('c*_*.json'): old.unlink()
     for cy in range((H + C - 1) // C):

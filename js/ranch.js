@@ -150,7 +150,7 @@ function ranchClick(x,y){const r=ranchGet();
  }
 }
 function drawMarket(){
- const r=ranchGet();ranchSync(true);ov(.95);btn(6,5,76,28,'KEMBALI');T('PASAR DESA',96,25,'#fc4',17);T('Emas: '+S.g,632,24,'#fc4',12,'right');
+ const r=ranchGet();ranchSync(true);ov(.95);btn(6,5,76,28,'KEMBALI');T('PASAR',96,25,'#fc4',17);T('Emas: '+S.g,632,24,'#fc4',12,'right');
  card(28,47,584,222,'#b28b59',true);T('HASIL PETERNAKAN',46,68,'#fc4',12);
  RPRODUCT.forEach((p,i)=>{const y=83+i*42,cfg=RANIM[({egg:'chicken',milk:'cow',truffle:'pig',wool:'sheep'})[p[0]]];g.fillStyle='#29253b';g.fillRect(42,y,556,34);g.strokeStyle='#55455a';g.strokeRect(42.5,y+.5,555,33);g.fillStyle=cfg.color;g.fillRect(52,y+8,18,18);T(p[S.set.lang==='en'?2:1],82,y+14,'#fff',11);T('Stok: '+r.stock[p[0]],290,y+14,'#cde',10);T('Harga '+cfg.sell+' G',422,y+14,'#fc4',10);T(r.stock[p[0]]?'SIAP':'KOSONG',570,y+14,r.stock[p[0]]?'#8f8':'#777',9,'center')});
  const left=Math.max(0,RANCH.dailyGoldCap-r.soldGold);T('Batas penjualan hari ini: '+r.soldGold+'/'+RANCH.dailyGoldCap+' emas',320,267,'#fc4',10,'center');T('Produksi offline dibatasi maksimal 24 jam.',320,284,'#9cf',9,'center');btn(190,299,260,36,'JUAL SEMUA HASIL ('+left+' G TERSISA)',left>0&&RPRODUCT.some(p=>r.stock[p[0]]>0));

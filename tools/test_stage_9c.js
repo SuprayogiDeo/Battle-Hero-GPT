@@ -45,9 +45,11 @@ ok(rs(52 * 32 + 16, 23 * 32) === undefined && rs(56 * 32, 21 * 32) === undefined
 const feetOk = (x, y) => ![rs(x - 9, y - 8), rs(x + 9, y - 8), rs(x - 9, y), rs(x + 9, y)].includes(true);
 ok(feetOk(60 * 32 + 16, 24 * 32 + 10) && feetOk(57 * 32, 23 * 32 + 16) && feetOk(57 * 32, 22 * 32 + 26), 'pemain bisa berdiri di lantai papan, termasuk dekat tepi');
 ok(!feetOk(57 * 32, 22 * 32 + 10) && !feetOk(57 * 32, 24 * 32 + 28), 'pemain tidak bisa berdiri di atas pagar');
-// 9E: kios Pasar padat tetapi baris depannya bebas; papan merah kosong dibuang (papan misi berlayanan tetap ada)
-for (const y of [24, 25]) for (const x of [33, 34, 35]) ok(col[y * W + x] === 1 && I.grid[y][x] === 'X', 'kios pasar padat ' + x + ',' + y);
-for (const x of [33, 34, 35]) ok(!col[26 * W + x] && I.grid[26][x] !== 'X', 'baris depan kios bebas ' + x);
+// 9E + market upgrade: old kiosk footprint is cleared and the new hall occupies the east plaza.
+for (const x of [33, 34, 35]) { ok(col[24 * W + x] === 0 && I.grid[24][x] === ',', 'jalan lama di depan pasar kembali terbuka ' + x); ok(col[25 * W + x] === 0 && I.grid[25][x] !== 'X', 'bekas kios pasar dibersihkan ' + x); }
+const mp = I.places.find(p => p.id === 'village_market'), mo = I.objects.find(o => o.k === 'b_market');
+ok(mp && mp.name === 'Pasar' && mp.x === 44 && mp.y === 34 && mo, 'Pasar baru terpasang di antara pasar lama dan jembatan timur');
+for (let y = 25; y <= 35; y++) for (let x = 37; x <= 51; x++) if (!(x >= 39 && x <= 49 && y >= 25 && y <= 33)) ok(I.grid[y][x] === ',', 'plaza pasar menyatu tanpa sel rumput ' + x + ',' + y);
 ok(!I.objects.some(o => o.k === 'board' && !o.serviceId), 'tidak ada papan kosong tanpa fungsi');
 ok(I.objects.some(o => o.serviceId === 'quest_board'), 'papan misi tetap ada');
 // 9C: jamur

@@ -68,7 +68,7 @@ function hudCtx(){
   if(info.pending>0)return{l:wL(info.label[0],info.label[1]),on:1,f:()=>ranchCollectType(pen.animal)};
   return{l:wL('KANDANG','PEN'),on:1,f:()=>wGo('ranch')}}
  const service=self.Tmap&&Tmap.nearService&&S.world?Tmap.nearService(S.world.x/WS,S.world.y/WS):null;
- if(service){const labels={quest_board:['MISI','QUEST'],market_cashier:['KASIR','CASHIER'],animal_trough:['PAKAN','FEED']},q=labels[service.type]||['GUNAKAN','USE'];return{l:wL(q[0],q[1]),on:1,f:()=>hudServiceAct(service)}}
+ if(service){const labels={quest_board:['MISI','QUEST'],market_cashier:['PASAR','MARKET'],animal_trough:['PAKAN','FEED']},q=labels[service.type]||['GUNAKAN','USE'];return{l:wL(q[0],q[1]),on:1,f:()=>hudServiceAct(service)}}
  if(wPlace){const t=wPlace.type;if(t==='market')return{l:wL('CARI KASIR','FIND CASHIER'),on:0,f:()=>wSay(wL('Transaksi lewat kasir di kios.','Trade at the kiosk cashier.'),2.5)};if(t==='animal_pen')return{l:wL('CARI PALUNG','FIND TROUGH'),on:0,f:()=>wSay(wL('Pakan ada di palung samping kandang.','Feed is at the trough beside the pen.'),2.5)};if(t==='orchard'||t==='mushroom_grove')return{l:wL('LIHAT','LOOK'),on:1,f:()=>_hudInteract()}}
  if(wNear){if(wNear.c=='G')return{l:wL('GERBANG','GATE'),on:1,f:()=>_hudInteract()};if(wNear.c=='Q')return{l:wL('PAPAN MISI','QUEST BOARD'),on:0,f:()=>wSay(wL('Papan misinya ada di dekat jalur.','The quest board is near the path.'),2.5)};}
  return null;
