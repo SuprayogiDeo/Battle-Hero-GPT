@@ -88,7 +88,7 @@ if(x>=500&&x<=558&&y>=6&&y<=32){worldLeave();return}if(x<170&&y>180){wjid=id;wMo
 function updWorld(dt){if(!wVon&&self.Tmap&&Tmap.ready())wUseV();const w=S.world;let dx=wjx,dy=wjy;const kx=(KD.d||KD.arrowright?1:0)-(KD.a||KD.arrowleft?1:0),ky=(KD.s||KD.arrowdown?1:0)-(KD.w||KD.arrowup?1:0);if(kx||ky){const l=Math.hypot(kx,ky);dx=kx/l;dy=ky/l}
 if(wDlg||wTalk)dx=dy=0;let mv=0;if(dx||dy){const nx=w.x+dx*WSPEED*dt,ny=w.y+dy*WSPEED*dt;if(!wBlocked(nx,w.y)){w.x=nx;mv=1}if(!wBlocked(w.x,ny)){w.y=ny;mv=1}if(dx)wface=dx>0?1:-1}
 wwalk=mv?wwalk+dt:0;if(mv)qDirty=1;if(wAct)wAct.update(mv?dx:0,mv?dy:0);if(wVon)Tmap.update(dt);if(self.npcUpdate)npcUpdate(dt);
-const tx=Math.max(0,Math.min(WW*WS-VW,w.x-VW/2)),ty=Math.max(0,Math.min(WH*WS-360,w.y-14-180));
+const zv=WZOOM,vw=VW/zv,vh=360/zv,tx=Math.max(0,Math.min(WW*WS-vw,w.x-vw/2)),ty=Math.max(0,Math.min(WH*WS-vh,w.y-14-vh/2));
 if(wcx==null){wcx=tx;wcy=ty}else{const k=1-Math.exp(-10*dt);wcx+=(tx-wcx)*k;wcy+=(ty-wcy)*k}if(wVon&&Tmap.explore){const oldDisc=w.disc||'';w.disc=Tmap.explore(w.x/WS,w.y/WS,oldDisc);if(w.disc!==oldDisc)sv()}if(wHint>0)wHint-=dt;if(wMsg.t>0)wMsg.t-=dt;wNear=wNearB();wPlace=wFindPlace();wNpc=self.npcNear?npcNear(w.x,w.y):null;wFx(dt)}
 /* siklus siang-malam (tint kanvas), pintu terbuka, jendela & lentera menyala (cahaya digambar di tilemap.js) 
  S.set.dn: 0 = siklus cepat (6 menit/hari, mulai pagi), 1 = jam perangkat, 2 = siang tetap. Jam game tidak disimpan (sengaja, tanpa ubah save). */
@@ -98,7 +98,7 @@ const WTK=[[0,10,16,64,.6],[5,18,24,70,.54],[6.5,255,140,70,.2],[8,255,205,150,0
 function wTone(h){let i=1;while(i<WTK.length-1&&WTK[i][0]<h)i++;const a=WTK[i-1],b=WTK[i],k=(h-a[0])/(b[0]-a[0]),m=j=>a[j]+(b[j]-a[j])*k,al=m(4);return[m(1)|0,m(2)|0,m(3)|0,al,Math.max(0,Math.min(1,(al-.1)/.25))]}
 function wFx(dt){const m=S.set.dn|0;let h=-1;if(m==0){wHr=(wHr+dt*24/360)%24;h=wHr}else if(m==1){const d=new Date();h=d.getHours()+d.getMinutes()/60}wTn=h<0?[0,0,0,0,0]:wTone(h);
 for(const c in wDoor){const tg=(wNear&&wNear.c==c&&!wLock(c)&&!wDlg&&!wTalk)?1:0;wDoor[c]+=(tg-wDoor[c])*Math.min(1,dt*9)}}
-function wTint(){if(wTn[3]>.01){g.fillStyle='rgba('+wTn[0]+','+wTn[1]+','+wTn[2]+','+wTn[3].toFixed(3)+')';g.fillRect(-OX,0,VW,360)}if(wVon&&self.Tmap&&Tmap.lights)Tmap.lights(g)}
+function wTint(){if(wTn[3]>.01){g.fillStyle='rgba('+wTn[0]+','+wTn[1]+','+wTn[2]+','+wTn[3].toFixed(3)+')';g.fillRect(-OX,0,VW,VH)}if(wVon&&self.Tmap&&Tmap.lights)Tmap.lights(g)}
 const WBM={};WBLD.forEach(b=>WBM[b.c]=b);
 const WGR=[[5,13],[5,13],[5,13],[5,13],[5,13],[3,11],[4,11],[5,11],[3,12],[4,12],[5,12],[3,13],[4,13]];
 const roadOK=r=>r===undefined||',dSRGFp'.includes(r),watOK=r=>r===undefined||r=='~';
@@ -117,9 +117,16 @@ else if(c=='Q')aT(4,18,sx,sy);
 if(sn&&c!='F'&&c!='G'&&c!='p'){g.fillStyle=wt?'rgba(215,235,250,.55)':rd?'rgba(228,236,244,.5)':'rgba(236,243,250,.78)';g.fillRect(sx,sy,WS,WS)}}
 function wSprite(k,cxp,by,z,md){const r=WSP[k],w=r[2]*z,h=r[3]*z;if(md)g.drawImage(wVar(k,md),cxp-w/2,by-h,w,h);else g.drawImage(ADV,r[0],r[1],r[2],r[3],cxp-w/2,by-h,w,h)}
 function wPlant(k,cx,cy,sc,rp){if(!(PLT.complete&&PLT.naturalWidth>0)||k==1)return false;const t=k==0?(rp?[26,3]:[27,1]):(rp?[24,4]:[25,6]),s=32*sc;g.drawImage(PLT,t[0]*16,t[1]*16,16,16,cx-s/2,cy+10*sc-s,s,s);return true}
-function drawWorld(){const w=S.world;wSn=wSnow();g.fillStyle=wSn?'#c8d6e4':'#2f5f36';g.fillRect(-OX,0,VW,360);if(wcx==null){wcx=Math.max(0,Math.min(WW*WS-VW,w.x-VW/2));wcy=Math.max(0,Math.min(WH*WS-360,w.y-194))}
+/* Zoom dunia: selama lapisan dunia digambar, VW/OX/VH ditukar ke ukuran virtual (kanvas/z) dan kanvas diskalakan z, sehingga semua culling lama otomatis ikut melebar. HUD digambar sesudahnya tanpa skala. */
+function wZoomActive(){return WZOOM<1&&!(typeof wI!=='undefined'&&wI)}
+function wZoomOn(){if(!wZoomActive())return null;const s={vw:VW,ox:OX};VW=s.vw/WZOOM;OX=s.ox/WZOOM;VH=360/WZOOM;g.save();g.scale(WZOOM,WZOOM);return s}
+function wZoomOff(s){if(!s)return;VW=s.vw;OX=s.ox;VH=360;g.restore()}
+function wScrX(wx,cx){return wZoomActive()?WZOOM*(wx-cx)-OX:wx-cx-OX}
+function wScrY(wy,cy){return wZoomActive()?WZOOM*(wy-cy):wy-cy}
+function drawWorld(){const w=S.world,zs=wZoomOn();try{wDrawLayer(w)}finally{wZoomOff(zs)}wDrawUI(w)}
+function wDrawLayer(w){wSn=wSnow();g.fillStyle=wSn?'#c8d6e4':'#2f5f36';g.fillRect(-OX,0,VW,VH);if(wcx==null){wcx=Math.max(0,Math.min(WW*WS-VW,w.x-VW/2));wcy=Math.max(0,Math.min(WH*WS-VH,w.y-14-VH/2))}
 g.imageSmoothingEnabled=false;
-const cx=Math.round(wcx),cy=Math.round(wcy),x0=Math.max(0,Math.floor(cx/WS)),x1=Math.min(WW-1,Math.floor((cx+VW)/WS)),y0=Math.max(0,Math.floor(cy/WS)),y1=Math.min(WH-1,Math.floor((cy+360)/WS)),tall=[];
+const cx=Math.round(wcx),cy=Math.round(wcy),x0=Math.max(0,Math.floor(cx/WS)),x1=Math.min(WW-1,Math.floor((cx+VW)/WS)),y0=Math.max(0,Math.floor(cy/WS)),y1=Math.min(WH-1,Math.floor((cy+VH)/WS)),tall=[];
 if(wVon){if(Tmap.farm&&typeof farmGet!='undefined')Tmap.farm(farmGet().p,Date.now(),WCROP,FC);Tmap.draw(g,cx,cy,OX,VW,wSn);if(Tmap.fx)Tmap.fx(wTn[4],wDoor);tall.push(...Tmap.tall(g,cx,cy,OX,VW,wSn,()=>false))}else{for(let ty=y0;ty<=y1;ty++)for(let tx=x0;tx<=x1;tx++)wTile(WMAP[ty][tx],tx*WS-cx-OX,ty*WS-cy,tx,ty);
 if(wArt()){for(let ty=y0;ty<=Math.min(WH-1,y1+3);ty++)for(let tx=Math.max(0,x0-2);tx<=Math.min(WW-1,x1+2);tx++)if(WMAP[ty][tx]=='T')tall.push({y:ty*WS+WS-2,k:hh(ty*WW+tx,6)>.5?'t1':'t2',x:tx*WS+WS/2-cx-OX,b:ty*WS+WS-2-cy,z:1.5,md:wSn?'s':0});
 for(const c of'SR'){const b=WBM[c];if(!b)continue;tall.push({y:(b.y1+1)*WS,k:c,x:(b.x0+b.x1+1)*WS/2-cx-OX,b:(b.y1+1)*WS-cy,z:2,md:wLock(c)?'l':wSn?'s':0})}}}
@@ -135,9 +142,9 @@ if(self.npcDraw)npcDraw(cx,cy,w.y,1);dT(tall.filter(o=>o.y>w.y));wTint();if(wVon
 WBLD.forEach(b=>{if(b.c=='F'||b.c=='G')return;const sx=(b.x0+b.x1+1)*WS/2-cx-OX,ly=(b.y1+1)*WS-cy+13,my=(b.y0+b.y1+1)*WS/2-cy;if(!(sx>-90-OX&&sx<VW+90))return;const lk=wLock(b.c),rd=b.c=='F'&&!lk&&farmReady();
 if(lk){T(WNAME[b.c],sx,ly,'#99a',11,'center')}
 else T(WNAME[b.c]+(rd?' (!)':''),sx,ly,rd?'#fc4':'#fff',11,'center')});
-if(wSn){g.fillStyle='rgba(190,210,240,.08)';g.fillRect(-OX,0,VW,360);const nf=S.set.fx?70:30;g.fillStyle='#fff';for(let i=0;i<nf;i++){const x=(((hh(i,1)*VW+Math.sin(t*.8+i)*14-t*5)%VW)+VW)%VW-OX,y=(((hh(i,2)*380+t*(18+hh(i,3)*30))%380)+380)%380-10,z=(i%3)?1:2;g.fillRect(x|0,y|0,z,z)}}
-if(self.lifeDrawWeather)lifeDrawWeather();
-if(!wTalk){g.globalAlpha=.35;g.fillStyle='#000';g.beginPath();g.arc(JC[0],JC[1],JR,0,7);g.fill();g.globalAlpha=.8;g.strokeStyle='#fff';g.lineWidth=2;g.stroke();g.globalAlpha=.85;g.fillStyle='#9cf';g.beginPath();g.arc(JC[0]+wjx*JR*.6,JC[1]+wjy*JR*.6,14,0,7);g.fill();g.strokeStyle='#000';g.lineWidth=1;g.stroke();g.globalAlpha=1}
+if(wSn){g.fillStyle='rgba(190,210,240,.08)';g.fillRect(-OX,0,VW,VH);const nf=S.set.fx?70:30;g.fillStyle='#fff';for(let i=0;i<nf;i++){const x=(((hh(i,1)*VW+Math.sin(t*.8+i)*14-t*5)%VW)+VW)%VW-OX,y=(((hh(i,2)*(VH+20)+t*(18+hh(i,3)*30))%(VH+20))+(VH+20))%(VH+20)-10,z=(i%3)?1:2;g.fillRect(x|0,y|0,z,z)}}
+if(self.lifeDrawWeather)lifeDrawWeather()}
+function wDrawUI(w){if(!wTalk){g.globalAlpha=.35;g.fillStyle='#000';g.beginPath();g.arc(JC[0],JC[1],JR,0,7);g.fill();g.globalAlpha=.8;g.strokeStyle='#fff';g.lineWidth=2;g.stroke();g.globalAlpha=.85;g.fillStyle='#9cf';g.beginPath();g.arc(JC[0]+wjx*JR*.6,JC[1]+wjy*JR*.6,14,0,7);g.fill();g.strokeStyle='#000';g.lineWidth=1;g.stroke();g.globalAlpha=1}
 btn(500,6,58,26,wL('MENU','MENU'),1);
 if(wHint>0){g.globalAlpha=Math.min(1,wHint);T('Geser joystick kiri atau WASD untuk berjalan',320,296,'#9cf',11,'center');g.globalAlpha=1}
 if(wMsg.t>0){g.globalAlpha=Math.min(1,wMsg.t);g.fillStyle='rgba(0,0,0,.78)';g.strokeStyle='#fc4';g.lineWidth=1;if(wMsg.kind==='discovery'){g.fillRect(122,44,396,24);g.strokeRect(122.5,44.5,395,23);T(wMsg.s,320,61,'#fe8',11,'center')}else{g.font='bold 10px monospace';const tw=Math.min(420,Math.max(336,Math.ceil(g.measureText(tr(wMsg.s)).width)+28)),tx=Math.round(320-tw/2);g.fillRect(tx,268,tw,24);g.strokeStyle='#76678c';g.strokeRect(tx+.5,268.5,tw-1,23);T(wMsg.s,320,284,'#cde',10,'center')}g.globalAlpha=1}

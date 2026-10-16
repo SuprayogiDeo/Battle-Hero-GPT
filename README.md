@@ -2,7 +2,7 @@
 
 Hero Battle adalah game 2D pixel-art untuk browser dengan pertarungan real-time, eksplorasi dunia, farming, crafting, pengembangan desa, dan progres yang tersimpan lokal. Antarmuka mobile dirancang untuk **orientasi landscape**.
 
-> **Status rilis:** `0.4.8-rc.1` / cache `v56` — Tahap 8H+8I menambah tutorial milestone per topik yang tersimpan, menunggu aksi nyata tanpa memindahkan pemain, dan profiler FPS/JS heap opt-in (`?perf=1`). Fitur interior/layanan objek, papan biome/rute aman, farming, memancing, penebangan, dan penambangan tetap tersedia. Proyek tetap privat; deployment publik dilarang sampai gerbang lisensi dan tes HP selesai. Nilai yang belum ditetapkan bertanda `PLACEHOLDER`. `npm test` lulus, tetapi Chromium headless timeout sebelum menghasilkan DOM; angka FPS/memori runtime dan uji HP nyata belum tersedia. Izin distribusi aset pihak ketiga tetap perlu ditinjau sebelum publikasi.
+> **Status rilis:** `0.4.8-rc.1` / cache `v73` — Tahap 8H+8I menambah tutorial milestone per topik yang tersimpan, menunggu aksi nyata tanpa memindahkan pemain, dan profiler FPS/JS heap opt-in (`?perf=1`). Fitur interior/layanan objek, papan biome/rute aman, farming, memancing, penebangan, dan penambangan tetap tersedia. Proyek tetap privat; deployment publik dilarang sampai gerbang lisensi dan tes HP selesai. Nilai yang belum ditetapkan bertanda `PLACEHOLDER`. `npm test` lulus, tetapi Chromium headless timeout sebelum menghasilkan DOM; angka FPS/memori runtime dan uji HP nyata belum tersedia. Izin distribusi aset pihak ketiga tetap perlu ditinjau sebelum publikasi.
 
 ## Jalankan secara lokal
 
@@ -25,6 +25,8 @@ npm test
 Perintah tersebut memeriksa sintaks, referensi file statis, alur pemuatan skrip, penyimpanan/pemulihan, world/farming gesture/moisture, fishing/gathering, storage/workshop, regresi combat/boss, tutorial milestone, dan integritas kandidat.
 
 Untuk mengukur sesi game secara langsung, tambahkan `?perf=1` pada URL lokal. Overlay menampilkan FPS saat ini, FPS rata-rata, dan JS heap jika browser mengekspos `performance.memory`. Angka hanya valid untuk perangkat/sesi yang diukur; profiler ini bukan pengganti pengujian HP nyata.
+
+Untuk memperluas area dunia yang terlihat, tambahkan `?zoom=0.8` pada URL (nilai 0.5-0.99; tanpa parameter = tampilan normal). Zoom hanya berlaku pada lapisan dunia; HUD, menu, dan interior tidak berubah. Karena kanvas internal 640x360, nilai non-bulat membuat pixel art sedikit tidak rata; `?zoom=0.5` adalah satu-satunya nilai yang pas-piksel. Uji visual di HP nyata masih diperlukan sebelum dijadikan default.
 
 CI GitHub Actions menjalankan tes yang sama ketika ada push atau pull request ke `main`/`master`. Pemeriksaan integritas release candidate juga memverifikasi konsistensi versi, service-worker cache, dan workflow GitHub Pages.
 

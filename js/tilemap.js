@@ -257,7 +257,7 @@ var Tmap = (function () {
     if (!V || !V.pens) return;
     V.pens.forEach(function (p) {
       var x = (p.x + 1) * 32 - cx - OX, y = (p.y + 1) * 32 - cy, w = (p.w - 2) * 32, h = (p.h - 2) * 32;
-      if (x > VW || x + w < 0 || y > 360 || y + h < 0) return;
+      if (x > VW || x + w < 0 || y > VH || y + h < 0) return;
       g.fillStyle = snow ? 'rgba(214,206,190,.55)' : 'rgba(150,110,62,.5)'; g.fillRect(x, y, w, h);
       g.fillStyle = 'rgba(96,64,32,.28)';
       for (var i = 0; i < 26; i++) { var hx = x + ((i * 53) % (w - 6)), hy = y + ((i * 37) % (h - 4)); g.fillRect(hx, hy, 6 + (i % 3) * 2, 2); }
@@ -381,8 +381,8 @@ var Tmap = (function () {
   }
   function sea_(g, cx, cy, OX, VW, snow) {
     var ox = -(cx + Math.floor(T * 7)) % 128, oy = -(cy + Math.floor(T * 3.5)) % 128;
-    g.save(); g.translate(-OX + ox - 128, oy - 128); g.fillStyle = g.createPattern(seaP, 'repeat'); g.fillRect(0, 0, VW + 256, 360 + 256); g.restore();
-    if (snow) { g.fillStyle = 'rgba(190,215,240,.18)'; g.fillRect(-OX, 0, VW, 360); }
+    g.save(); g.translate(-OX + ox - 128, oy - 128); g.fillStyle = g.createPattern(seaP, 'repeat'); g.fillRect(0, 0, VW + 256, VH + 256); g.restore();
+    if (snow) { g.fillStyle = 'rgba(190,215,240,.18)'; g.fillRect(-OX, 0, VW, VH); }
   }
   /* gambar laut + tanah (+ buih beranimasi); cx,cy = kamera (px layar x2) */
   function draw(g, cx, cy, OX, VW, snow) {
@@ -390,7 +390,7 @@ var Tmap = (function () {
     sea_(g, cx, cy, OX, VW, snow);
     var tc=V.tcols, cpx=Math.floor(cx/(CHSIZE*32)), cpy=Math.floor(cy/(CHSIZE*32));
     for(var yy=cpy-2;yy<=cpy+2;yy++)for(var xx=cpx-2;xx<=cpx+2;xx++)requestChunk(xx,yy);
-    for(var ci=0;ci<CHL.length;ci++){var ch=CH[CHL[ci]];if(!ch)continue;var dx=ch.x*2-cx-OX,dy=ch.y*2-cy;if(dx>VW||dx+ch.w*2<0||dy>360||dy+ch.h*2<0)continue;ch.used=++CHSEQ;g.drawImage(snow?snowChunk(ch):ch.canvas,0,0,ch.w,ch.h,dx,dy,ch.w*2,ch.h*2);for(var ai=0;ai<ch.anim.length;ai++){var a=ch.anim[ai],px=a.x*2-cx-OX,py=a.y*2-cy;if(px<-32||px>VW||py<-32||py>360)continue;var n=a.f[Math.floor(T*2.2)%a.f.length];g.drawImage(ti,(n%tc)*16,((n/tc)|0)*16,16,16,px,py,32,32);}}
+    for(var ci=0;ci<CHL.length;ci++){var ch=CH[CHL[ci]];if(!ch)continue;var dx=ch.x*2-cx-OX,dy=ch.y*2-cy;if(dx>VW||dx+ch.w*2<0||dy>VH||dy+ch.h*2<0)continue;ch.used=++CHSEQ;g.drawImage(snow?snowChunk(ch):ch.canvas,0,0,ch.w,ch.h,dx,dy,ch.w*2,ch.h*2);for(var ai=0;ai<ch.anim.length;ai++){var a=ch.anim[ai],px=a.x*2-cx-OX,py=a.y*2-cy;if(px<-32||px>VW||py<-32||py>VH)continue;var n=a.f[Math.floor(T*2.2)%a.f.length];g.drawImage(ti,(n%tc)*16,((n/tc)|0)*16,16,16,px,py,32,32);}}
     farmGround(g, cx, cy, OX, VW, snow);
     penGround(g, cx, cy, OX, VW, snow);
     g.imageSmoothingEnabled = old;
@@ -417,7 +417,7 @@ var Tmap = (function () {
   /* daftar objek tampak, siap diurutkan oleh world.js: {y,x,b,f} (y = kaki dunia, x/b = posisi layar) */
   function tall(g, cx, cy, OX, VW, snow, lockFn) {
     var out = []; LBL.length = 0; if (!okf) return out; labelFont(g); var tm = T * 1000;
-    function add(wx, wy, h, fn, ky) { var sx = wx - cx - OX, sb = wy - cy; if (sx < -150 || sx > VW + 150 || sb < -10 || sb > 360 + h) return; out.push({ y: ky == null ? wy : ky, x: sx, b: sb, f: function () { fn(sx, sb); } }); }
+    function add(wx, wy, h, fn, ky) { var sx = wx - cx - OX, sb = wy - cy; if (sx < -150 || sx > VW + 150 || sb < -10 || sb > VH + h) return; out.push({ y: ky == null ? wy : ky, x: sx, b: sb, f: function () { fn(sx, sb); } }); }
     for (var i = 0; i < OB.length; i++) {
       var o = OB[i], wx = o.x * 2, wy = o.y * 2;
       if (o.a) { (function (o) { var treeState = o.a.indexOf('tree') === 0 && typeof lifeTreeObjectState === 'function' ? lifeTreeObjectState(o) : ''; if (treeState === 'hidden') return; if (o.deco === 'mushroom' && typeof lifeMushState === 'function' && lifeMushState(o) === 'hidden') return; add(wx, wy, 120, function (sx, sb) { if (treeState === 'stump') { g.fillStyle = '#60402a'; g.fillRect(sx-7,sb-8,14,8); g.fillStyle = '#b68b50'; g.fillRect(sx-6,sb-9,12,3); g.fillStyle = '#3c2b1b'; g.fillRect(sx-2,sb-5,4,4); } else { var an = o.a.indexOf('tree') == 0 || o.a.indexOf('mush') == 0; Anim.draw(g, o.a, an ? tm + o.x * 41 : 0, sx, sb, false, 2); } }); })(o); continue; }

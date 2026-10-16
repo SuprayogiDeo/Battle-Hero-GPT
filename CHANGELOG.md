@@ -1,5 +1,12 @@
 # Changelog
 
+## Batch 9B-18 (polish render latar + kebersihan repo) — 0.4.8-rc.1 — gradien di-cache, workflow dipulihkan (cache v73)
+
+- `render.js`: `bg()` tidak lagi membuat 3 gradien statis + 1 gradien radial per obor di setiap frame. Overlay statis (bayangan lantai, vinyet, pita bawah) kini dirender sekali ke kanvas luar-layar (`bgCache`, dibangun ulang hanya saat `VW`/`OX` berubah) dan cahaya obor memakai sprite per tema (`glowSprite`) dengan `globalAlpha` berkedip. Tampilan setara; alokasi objek dan biaya fill per frame turun (angka FPS nyata tetap perlu diukur di HP dengan `?perf=1`).
+- Zoom dunia opt-in `?zoom=0.8` (0.5-0.99; tanpa parameter = 1, tampilan lama tidak berubah): `drawWorld` dipecah menjadi `wDrawLayer` (dunia, diskalakan z) dan `wDrawUI` (joystick, MENU, dialog, minimap; tidak diskalakan). Selama lapisan dunia digambar, `VW`/`OX` ditukar ke ukuran virtual (kanvas/z) dan `VH` (baru, 360/z) menggantikan literal 360 pada culling `world.js`, `tilemap.js`, `life.js`, sehingga area terlihat melebar tanpa mengubah chunk (jendela 5x5 chunk sudah menutupi >2000 px). Kamera di `updWorld` memakai ukuran virtual yang sama. Konversi sentuh `farmWorldCoords` dan overlay dunia di luar lapisan (drop item, pancing) memakai z lewat `wZoomOn/Off` dan `wScrX/wScrY`; interior tidak di-zoom. Catatan kualitas: kanvas tetap 640x360 sehingga z non-bulat (mis. 0.8) membuat pixel art tampak sedikit tidak rata; z=0.5 satu-satunya yang pas-piksel. `tools/test_world_zoom.js` (baru, terdaftar di `run_tests.js`): 48 pemeriksaan parsing, kamera/tile, pemulihan saat galat, dan konversi layar<->dunia.
+- `.github/workflows/ci.yml` dan `pages.yml` dipulihkan (hilang dari repo sehingga `tools/test_release_integrity.js` gagal).
+- Berkas zip sisa (`Hero_Battle_0_4_8-rc_1_full.zip`) dihapus dari akar repo; tes integritas melarang arsip di repositori.
+- `README.md`: versi cache disinkronkan (v56 -> v73).
 ## Batch 9B-17 (audit HUD statis) — 0.4.8-rc.1 — hotbar vs tombol aksi di portrait, area ketuk, toast, dialog gerbang (cache v72)
 
 - `tools/audit_hud_static.js` (baru, sekali pakai, TIDAK di `run_tests.js`): irisan/luar-kanvas HUD, ukuran tap, teks <= 9 px logis, kontras WCAG, teks terpanjang vs wadah, untuk z=.9/1/1.1 pada landscape (s=1,0) dan portrait (s~0,61).

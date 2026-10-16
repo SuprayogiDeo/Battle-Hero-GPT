@@ -25,6 +25,10 @@ h=((h+p[0])%360+360)%360;s=Math.min(1,s*p[1]);l=Math.min(1,l*p[2]);
 if(!s){r=gg=b=l}else{const q=l<.5?l*(1+s):l+s-l*s,pp=2*l-q,f=u=>{u=((u%1)+1)%1;return u<1/6?pp+(q-pp)*6*u:u<.5?q:u<2/3?pp+(q-pp)*(2/3-u)*6:pp};r=f(h/360+1/3);gg=f(h/360);b=f(h/360-1/3)}
 a[i]=r*255;a[i+1]=gg*255;a[i+2]=b*255}x.putImageData(d,0,0);return c}
 KT.onload=()=>{KW=K_W.map(kTint);KF=K_F.map(kTint)};
+/* Cache statis: overlay gradien & sprite glow dibuat sekali (bukan per frame) -> kurangi alokasi/GC & biaya fill di HP */
+let _bgC=null,_bgK='';const _glowS={};
+function bgCache(){const k=VW+'|'+OX;if(_bgC&&_bgK===k)return _bgC;_bgK=k;const mk=()=>{const c=document.createElement('canvas');c.width=VW;c.height=360;const x=c.getContext('2d');x.translate(OX,0);return[c,x]};const[pc,a]=mk(),[qc,b]=mk();a.fillStyle='rgba(10,8,22,.2)';a.fillRect(-OX,0,VW,160);let s=a.createLinearGradient(0,160,0,196);s.addColorStop(0,'rgba(0,0,0,.5)');s.addColorStop(1,'rgba(0,0,0,0)');a.fillStyle=s;a.fillRect(-OX,160,VW,36);s=b.createRadialGradient(320,170,150,320,170,420);s.addColorStop(0,'rgba(0,0,0,0)');s.addColorStop(1,'rgba(0,0,0,.45)');b.fillStyle=s;b.fillRect(-OX,0,VW,320);b.fillStyle='rgba(8,6,16,.62)';b.fillRect(-OX,320,VW,40);return _bgC={pre:pc,post:qc}}
+function glowSprite(th){let c=_glowS[th];if(c)return c;c=document.createElement('canvas');c.width=c.height=240;const x=c.getContext('2d'),r=x.createRadialGradient(120,56,4,120,56,120);r.addColorStop(0,'rgba('+B_G[th]+',1)');r.addColorStop(1,'rgba('+B_G[th]+',0)');x.fillStyle=r;x.fillRect(0,0,240,240);return _glowS[th]=c}
 function bg(){const th=(((stage-1)%6)+6)%6,o=((bgx%32)+32)%32,b=Math.floor(bgx/32),gl=[];g.imageSmoothingEnabled=false;
 const tl=(c,x,y)=>g.drawImage(TS,c*16,th*16,16,16,x,y,32,32);
 if(!KW.length){g.fillStyle='#14101e';g.fillRect(-OX,0,VW,360);return}
@@ -38,10 +42,8 @@ else if(m==3)tl(12,x,32);
 else if(m==5){tl(10,x,32);tl(11,x,64)}
 else if(m==0||m==4){if(q>.5){const pr=K_PR[th];kt(KT,pr[(hh(a,3)*pr.length)|0],x,106)}}
 for(let r=5;r<10;r++){const p=hh(a*7+r,th+3);kt(F,FL[(p*FL.length)|0],x,r*32);if(DC.length&&hh(a*3+r,th+5)>.78)kt(F,DC[(hh(a,r)*DC.length)|0],x,r*32)}}
-g.fillStyle='rgba(10,8,22,.2)';g.fillRect(-OX,0,VW,160);
-let s=g.createLinearGradient(0,160,0,196);s.addColorStop(0,'rgba(0,0,0,.5)');s.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=s;g.fillRect(-OX,160,VW,36);
-g.globalCompositeOperation='lighter';for(const x of gl){const f=.2+.04*Math.sin(t*13+x),r=g.createRadialGradient(x,56,4,x,56,120);r.addColorStop(0,'rgba('+B_G[th]+','+f+')');r.addColorStop(1,'rgba('+B_G[th]+',0)');g.fillStyle=r;g.fillRect(x-120,0,240,240)}g.globalCompositeOperation='source-over';
+const C=bgCache();g.imageSmoothingEnabled=true;g.drawImage(C.pre,-OX,0);g.imageSmoothingEnabled=false;
+if(gl.length){const gs=glowSprite(th),ga=g.globalAlpha;g.globalCompositeOperation='lighter';for(const x of gl){g.globalAlpha=.2+.04*Math.sin(t*13+x);g.drawImage(gs,x-120,0)}g.globalAlpha=ga;g.globalCompositeOperation='source-over'}
 const A=B_A[th];for(let i=0;i<30;i++){let x=(hh(i,7)*640+t*A[1]-bgx*(.4+hh(i,9)*.6)+Math.sin(t*1.5+i)*(th==1?14:3))%640;if(x<0)x+=640;let y=(hh(i,8)*330+t*A[2]+(th==1?Math.sin(t+i*2)*10:0))%330;if(y<0)y+=330;g.fillStyle='rgba('+A[0]+','+(.35+.45*Math.sin(t*2+i*4)**2)+')';g.fillRect(x|0,y|0,A[3],A[3])}
-s=g.createRadialGradient(320,170,150,320,170,420);s.addColorStop(0,'rgba(0,0,0,0)');s.addColorStop(1,'rgba(0,0,0,.45)');g.fillStyle=s;g.fillRect(-OX,0,VW,320);
-g.fillStyle='rgba(8,6,16,.62)';g.fillRect(-OX,320,VW,40)}
+g.imageSmoothingEnabled=true;g.drawImage(C.post,-OX,0);g.imageSmoothingEnabled=false}
 

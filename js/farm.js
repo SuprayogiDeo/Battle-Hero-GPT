@@ -41,7 +41,7 @@ function farmWorldEnsureStarterSeeds(){
  return given.length>0;
 }
 function farmWorldTool(){return typeof hudToolId==='function'?hudToolId():(S.hb&&S.hb.slots&&S.hb.slots[S.hb.sel]||'hand')}
-function farmWorldCoords(x,y){return{x:x+(typeof wcx==='number'?wcx:0)+(typeof OX==='number'?OX:0),y:y+(typeof wcy==='number'?wcy:0)}}
+function farmWorldCoords(x,y){const z=typeof wZoomActive==='function'&&wZoomActive()?WZOOM:1;return{x:(x+(typeof OX==='number'?OX:0))/z+(typeof wcx==='number'?wcx:0),y:y/z+(typeof wcy==='number'?wcy:0)}}
 function farmWorldIndexAt(x,y){
  const d=typeof Tmap!=='undefined'&&Tmap.data?Tmap.data():null,F=d&&d.farm;if(!Array.isArray(F))return-1;
  const q=farmWorldCoords(x,y);let best=-1,bd=Infinity;
