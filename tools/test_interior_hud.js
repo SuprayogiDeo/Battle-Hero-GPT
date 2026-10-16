@@ -13,9 +13,8 @@ const IJ = JSON.parse(fs.readFileSync(path.join(root, 'assets/world/interior.jso
 let n = 0; const ok = (c, m) => { assert.ok(c, m); n++; };
 // 1) setiap bangunan terdaftar cocok dengan objek b_* di index.json (kaki sprite) dan tiap pintu menghadap sel jalan
 const bl = ev('INT_B.map(b=>({id:b.id,tpl:b.tpl,x:b.x,y:b.y}))');
-const objs = I.objects.filter(o => (o.k || '').startsWith('b_') && o.k !== 'b_market');
-ok(objs.length === bl.length, 'jumlah bangunan interior ' + objs.length + ' vs ' + bl.length);
-ok(I.objects.some(o => o.k === 'b_market' && o.serviceType === 'market_cashier'), 'pasar fisik terdaftar sebagai layanan mandiri, bukan interior');
+const objs = I.objects.filter(o => (o.k || '').startsWith('b_'));
+ok(objs.length === bl.length, 'jumlah bangunan ' + objs.length + ' vs ' + bl.length);
 bl.forEach(b => { ok(objs.some(o => o.x === b.x && o.y === b.y), 'bangunan ' + b.id + ' tidak cocok dengan objek di index.json');
   const gx = (b.x >> 4), gy = (b.y >> 4), ch = I.grid[gy][gx]; ok(ch !== '~' && ch !== 'T' && ch !== 'X', 'sel pintu ' + b.id + ' tidak bisa dilalui: ' + ch); });
 // 2) semua sprite yang dipakai ruangan ada di interior.json
@@ -78,4 +77,28 @@ const uiAtlas=path.join(root,'assets/world/ui.png');ok(fs.existsSync(uiAtlas) &&
 ev("S.journal.seenBiomes.stage8b_test=undefined;delete S.journal.seenBiomes.stage8b_test;wMsg={t:0,s:''};jrDiscoverBiome('stage8b_test')");
 ok(ev("wMsg.kind==='discovery' && wMsg.t>0"), 'banner besar hanya ditandai pada penemuan pertama');
 ev("const __banner=wMsg;const __again=jrDiscoverBiome('stage8b_test');");ok(ev("__again===false && wMsg.kind==='discovery'"), 'penemuan biome idempoten dan tidak memicu ulang banner besar');
+// 5) Pasar (9F): interior lengkap + alur nyata masuk -> kasir -> kembali -> pesan dinamis
+{
+  const mk = ev("intCompile(INT_B.find(b=>b.id==='pasar'))"), acts = mk.objs.filter(o => o.act).map(o => o.act);
+  ['market', 'cook', 'village', 'orders', 'storage', 'news', 'msg'].forEach(a => ok(acts.includes(a), 'Pasar punya aksi ' + a));
+  ['vendor', 'scale', 'market_table', 'counter', 'notice', 'pantry', 'chest'].forEach(k => ok(mk.objs.some(o => o.s === k), 'Pasar punya ' + k));
+  ok(mk.w === 17 && mk.h === 10 && IJ.buildingDoors.some(d => d.id === 'pasar' && d.room.w === 17 && d.entry.x === 8), 'registri pintu Pasar cocok dengan templat');
+  ev("sfx=function(){};S.world={x:728*2,y:544*2+20};best=10;st='world';wI=null;wFade=null;wDlg=0;wTalk=null;wNpc=null;hudEnsure()");
+  ok(ev('hudCtx().l') === 'MASUK', 'di depan pintu Pasar tombol aksi = MASUK');
+  ev('wInteract()'); for (let i = 0; i < 40; i++) ev('updWorld(.016)');
+  ok(ev('!!wI && wI.b.id') === 'pasar' || ev('wI.b.id') === 'pasar', 'berada di interior Pasar');
+  const cn = mk.objs.find(o => o.act === 'market');
+  ev(`wI.x=${cn.x}*WS+WS*1.5;wI.y=(${cn.y}+1)*WS+16;wI.near=intNear()`);
+  ok(ev('hudCtx().l') === 'KASIR', 'dekat meja kasir => KASIR'); ev('wInteract()');
+  ok(ev("st==='market'&&marketFrom==='world'"), 'kasir Pasar membuka layar pasar');
+  ev('goBack()'); ok(ev("st==='world'&&!!wI"), 'kembali dari layar pasar tetap di interior');
+  ev("__say='';wSay=function(m){__say=m}");
+  const actAt = (o, dx) => { ev(`wI.x=${o.x}*WS+WS*${dx};wI.y=(${o.y}+1)*WS+16;wI.near=intNear()`); ev('wInteract()'); return ev('__say'); };
+  const price = mk.objs.find(o => o.msg === 'harga'), news = mk.objs.find(o => o.act === 'news'), vend = mk.objs.find(o => o.msg === 'vendor');
+  ok(/telur \d+, susu \d+, truffle \d+, wol \d+/.test(actAt(price, 1)), 'papan harga menampilkan harga jual dari data');
+  ok(/Berita desa: level \d+, rekor stage 10/.test(actAt(news, 1)), 'papan berita menampilkan level desa dan rekor stage');
+  const v1 = actAt(vend, .5), v2 = actAt(vend, .5); ok(v1 && v2 && v1 !== v2, 'pedagang bicara bergiliran');
+  ev("S.set.lang='en'");
+  ok(/Sell prices: egg \d+/.test(actAt(price, 1)) && /Village news: level/.test(actAt(news, 1)), 'pesan Pasar mengikuti bahasa EN'); ev("S.set.lang='id'");
+}
 console.log('PASS: interior + HUD (' + n + ' pemeriksaan)');

@@ -208,6 +208,17 @@ var Tmap = (function () {
     g.fillStyle = '#2a1c12'; g.fillRect(x + 2, y + 3, 1, 1); g.fillRect(x + w - 3, y + 3, 1, 1);
     g.save(); g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = 'bold 8px system-ui'; g.fillStyle = '#2a1c12'; g.fillText(nm, x + w / 2, y + h / 2 + 1); g.restore();
   }
+  /* papan nama di atap (meta sign = kotak papan dalam piksel sprite): teks dari nama tempat, ikut bahasa */
+  function roofSign(g, r, k, x0, y0) {
+    var nm = null, i, p;
+    for (i = 0; V && V.places && i < V.places.length; i++) { p = V.places[i]; if (p.sprite === k) { nm = (S && S.set && S.set.lang === 'en' ? p.name_en : p.name) || p.name; break; } }
+    if (!nm) return; nm = nm.toUpperCase();
+    var bx = x0 + r.sign[0] * 2, by = y0 + r.sign[1] * 2, bw = r.sign[2] * 2, bh = r.sign[3] * 2, fs = 17;
+    g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
+    do { g.font = 'bold ' + fs + 'px system-ui'; fs--; } while (g.measureText(nm).width > bw - 12 && fs > 8);
+    g.fillStyle = '#2a1c12'; g.fillText(nm, bx + bw / 2 + 1, by + bh / 2 + 2); g.fillStyle = '#f6cf5a'; g.fillText(nm, bx + bw / 2, by + bh / 2 + 1);
+    g.restore();
+  }
   function wallName(k) {
     if (!V || !V.places) return null;
     for (var i = 0; i < V.places.length; i++) { var p = V.places[i]; if (WALL[p.type] === k) return (S && S.set && S.set.lang === 'en' ? p.name_en : p.name) || p.name; }
@@ -407,6 +418,7 @@ var Tmap = (function () {
           if (r.win && FX.n > .02) winFx(g, r, o, fx0, fy0);
         }
         if (md != 'l' && r.door) { var wn = wallName(o.k); if (wn) wallSign(g, r, Math.round(sx - r.w), Math.round(sb - r.h * 2), wn); }
+        if (md != 'l' && r.sign) roofSign(g, r, o.k, Math.round(sx - r.w), Math.round(sb - r.h * 2));
         if (o.k == 'lamp' && FX.n > .02) LT.push([sx, Math.round(sb - r.h * 2) + 8, 46, .8]);
         if (o.biomeSign || o.placeSign) {   /* plat biome, atau plat tempat (mis. Hutan Jamur) */
           var wp = S && S.world, d = wp ? Math.hypot(wp.x / 32 - o.x / 16, wp.y / 32 - o.y / 16) : 99;

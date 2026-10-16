@@ -9,6 +9,7 @@ let wI=null,wFade=null,intT=0;
 /* kaki bangunan (px 1x) = objek 'b_*' di index.json; pintu = titik tengah kaki. lv = level desa minimum (place.unlockLevel), stg = stage minimum (WUN) */
 const INT_B=[
 {id:'toko',tpl:'shop',x:320,y:320,n:['TOKO','SHOP']},
+{id:'pasar',tpl:'market',x:728,y:544,n:['PASAR','MARKET']},
 {id:'barak',tpl:'barracks',x:712,y:320,n:['BARAK','BARRACKS'],stg:3},
 {id:'bengkel',tpl:'workshop',x:952,y:736,n:['BENGKEL DESA','VILLAGE WORKSHOP'],lv:2},
 {id:'dapur',tpl:'kitchen',x:952,y:976,n:['DAPUR DESA','VILLAGE KITCHEN'],lv:3},
@@ -37,6 +38,13 @@ const INT_MSG={
  o: [sprite,x,y,fw,fh,aksi,label,pesan] (jejak tabrakan fw x fh tile; kaki sprite = bawah jejak); d: dekor lantai [sprite,cx,cy];
  hg: tempelan dinding [sprite,cx,barisAtas]; win: kolom jendela; gl: cahaya [cx,cy,r] */
 const INT_T={
+/* Pasar (9F): kasir menjual hasil ternak; loket dapur + meja desa + papan pesanan; pedagang, papan harga/berita, timbangan, meja dagang, peti. */
+market:{w:17,h:10,fl:['floor_wood_a','floor_wood_b'],wl:'wall_wood',dx:8,win:[4,12],
+ o:[['shelf_goods',1,2,2,1,'msg','RAK','pot'],['shelf_goods2',3,2,2,1,'msg','RAK','pot'],['notice',6,2,2,1,'msg','HARGA','harga'],['notice',8,2,2,1,'news','BERITA'],['notice',10,2,2,1,'orders','PESANAN'],['pantry',13,2,2,1,'storage','BAHAN'],
+ ['map_table',1,4,3,1,'village','DESA'],['counter',7,4,3,1,'market','KASIR'],['vendor',10,4,1,1,'msg','PEDAGANG','vendor'],['prep_table',13,4,2,1,'cook','DAPUR'],
+ ['market_table',1,6,3,1,'msg','MEJA DAGANG','meja'],['scale',5,6,1,1,'msg','TIMBANGAN','timbangan'],['market_table',11,6,3,1,'msg','MEJA DAGANG','meja'],['chest',15,6,1,1,'storage','PETI'],
+ ['w_crates',1,8,1,1],['w_barrel',2,8,1,1],['w_sack',14,8,1,1],['w_crates',15,8,1,1]],
+ d:[['rug_red',8.5,6.4]],hg:[['banner',3.2,0],['banner',13.6,0]],gl:[[8,5,90]]},
 shop:{w:13,h:9,fl:['floor_wood_a','floor_wood_b'],wl:'wall_wood',dx:6,win:[6],
  o:[['shelf_goods',1,2,2,1],['shelf_goods2',3,2,2,1],['counter',7,3,3,1,'cashier','BELI'],['gacha',10,3,2,1,'gacha','GACHA'],['w_crates',1,6,1,1],['w_barrel',11,7,1,1],['w_sack',2,7,1,1]],
  d:[['rug_red',6.5,6]],hg:[],gl:[]},
@@ -103,11 +111,21 @@ function intNear(){
  r.objs.forEach(o=>{if(!o.act)return;const x0=o.x*WS,x1=(o.x+o.fw)*WS,y0=o.y*WS,y1=(o.y+o.fh)*WS,d=Math.hypot(Math.max(x0-px,0,px-x1),Math.max(y0-py,0,py-y1));if(d<bd){bd=d;best=o}});
  return best;
 }
+/* Pasar: pesan dinamis dari data game (harga jual ternak, level desa, batas jual harian). Aman bila data belum termuat. */
+function intPriceMsg(){const A=typeof RANIM!=='undefined'?RANIM:null;if(!A)return wL('Harga jual hasil ternak ada di kasir.','Livestock sell prices are at the cashier.');
+ return wL('Harga jual: telur '+A.chicken.sell+', susu '+A.cow.sell+', truffle '+A.pig.sell+', wol '+A.sheep.sell+' emas. Jual lewat kasir.','Sell prices: egg '+A.chicken.sell+', milk '+A.cow.sell+', truffle '+A.pig.sell+', wool '+A.sheep.sell+' gold. Sell at the cashier.')}
+function intNewsMsg(){const lv=(S.village&&S.village.level)||1;let sold='',cap='';try{const r=typeof ranchGet==='function'?ranchGet():null;if(r&&typeof RANCH!=='undefined'){sold=r.soldGold;cap=RANCH.dailyGoldCap}}catch(e){}
+ const lim=cap!==''?wL(' Batas jual hari ini '+sold+'/'+cap+' emas.',' Today\'s sales limit '+sold+'/'+cap+' gold.'):'';
+ return wL('Berita desa: level '+lv+', rekor stage '+best+'.'+lim,'Village news: level '+lv+', best stage '+best+'.'+lim)}
+let intVendN=0;
+function intVendorMsg(){const L=[['Selamat datang di Pasar! Hasil ternak dijual di kasir.','Welcome to the Market! Sell your livestock goods at the cashier.'],['Butuh bahan? Loket dapur dan papan pesanan ada di sebelah kanan.','Need ingredients? The kitchen counter and orders board are to the right.'],['Peti di pojok boleh dipakai menitip barang.','Feel free to store things in the chest in the corner.']],m=L[intVendN++%L.length];return wL(m[0],m[1])}
 function intAct(o){
  if(o.exit){intExit();return}
  sfx('click');
  switch(o.act){
   case'cashier':shopTab=2;wGo('shop');break;
+  case'market':marketFrom='world';wGo('market');break;
+  case'news':wSay(intNewsMsg(),5);break;
   case'gacha':shopTab=0;wGo('shop');break;
   case'heroes':wGo('heroes');break;
   case'village':lifeOpenVillage();break;
@@ -116,10 +134,10 @@ function intAct(o){
   case'storage':lifeOpenStorage();break;
   case'workshop':lifeOpenWorkshop();break;
   case'bed':sv();wSay(wL(INT_MSG.bed[0],INT_MSG.bed[1]),3);break;
-  case'msg':{const m=INT_MSG[o.msg]||INT_MSG.books;wSay(wL(m[0],m[1]),4);break}
+  case'msg':{if(o.msg==='harga'){wSay(intPriceMsg(),5);break}if(o.msg==='vendor'){wSay(intVendorMsg(),5);break}const m=INT_MSG[o.msg]||INT_MSG.books;wSay(wL(m[0],m[1]),4);break}
  }
 }
-const INT_LAB={BELI:['BELI','BUY'],GACHA:['GACHA','GACHA'],PERSIAPAN:['HERO','HEROES'],PETI:['PETI','CHEST'],PETA:['LIHAT','LOOK'],DESA:['DESA','VILLAGE'],PESANAN:['PESANAN','ORDERS'],BUKU:['BACA','READ'],TUNGKU:['LIHAT','LOOK'],LANDASAN:['LIHAT','LOOK'],'MEJA KERJA':['MEJA','BENCH'],MASAK:['MASAK','COOK'],BAHAN:['BAHAN','PANTRY'],ISTIRAHAT:['ISTIRAHAT','REST'],API:['LIHAT','LOOK'],KAYU:['LIHAT','LOOK'],JERAMI:['LIHAT','LOOK'],PANCING:['LIHAT','LOOK'],'TEMPAT TIDUR':['TIDUR','REST'],RAK:['LIHAT','LOOK'],KELUAR:['KELUAR','EXIT']};
+const INT_LAB={KASIR:['KASIR','CASHIER'],PEDAGANG:['BICARA','TALK'],HARGA:['LIHAT','LOOK'],BERITA:['BACA','READ'],'MEJA DAGANG':['LIHAT','LOOK'],TIMBANGAN:['LIHAT','LOOK'],DAPUR:['DAPUR','KITCHEN'],BELI:['BELI','BUY'],GACHA:['GACHA','GACHA'],PERSIAPAN:['HERO','HEROES'],PETI:['PETI','CHEST'],PETA:['LIHAT','LOOK'],DESA:['DESA','VILLAGE'],PESANAN:['PESANAN','ORDERS'],BUKU:['BACA','READ'],TUNGKU:['LIHAT','LOOK'],LANDASAN:['LIHAT','LOOK'],'MEJA KERJA':['MEJA','BENCH'],MASAK:['MASAK','COOK'],BAHAN:['BAHAN','PANTRY'],ISTIRAHAT:['ISTIRAHAT','REST'],API:['LIHAT','LOOK'],KAYU:['LIHAT','LOOK'],JERAMI:['LIHAT','LOOK'],PANCING:['LIHAT','LOOK'],'TEMPAT TIDUR':['TIDUR','REST'],RAK:['LIHAT','LOOK'],KELUAR:['KELUAR','EXIT']};
 const intLabel=l=>{const q=INT_LAB[l];return q?wL(q[0],q[1]):l};
 function intCtx(){const n=wI&&intNear();wI&&(wI.near=n);return n?{l:intLabel(n.lab),on:1,f:()=>intAct(n)}:null}
 function intUpdate(dt){

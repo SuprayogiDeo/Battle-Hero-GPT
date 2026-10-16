@@ -45,13 +45,21 @@ ok(rs(52 * 32 + 16, 23 * 32) === undefined && rs(56 * 32, 21 * 32) === undefined
 const feetOk = (x, y) => ![rs(x - 9, y - 8), rs(x + 9, y - 8), rs(x - 9, y), rs(x + 9, y)].includes(true);
 ok(feetOk(60 * 32 + 16, 24 * 32 + 10) && feetOk(57 * 32, 23 * 32 + 16) && feetOk(57 * 32, 22 * 32 + 26), 'pemain bisa berdiri di lantai papan, termasuk dekat tepi');
 ok(!feetOk(57 * 32, 22 * 32 + 10) && !feetOk(57 * 32, 24 * 32 + 28), 'pemain tidak bisa berdiri di atas pagar');
-// 9E + market upgrade: old kiosk footprint is cleared and the new hall occupies the east plaza.
-for (const x of [33, 34, 35]) { ok(col[24 * W + x] === 0 && I.grid[24][x] === ',', 'jalan lama di depan pasar kembali terbuka ' + x); ok(col[25 * W + x] === 0 && I.grid[25][x] !== 'X', 'bekas kios pasar dibersihkan ' + x); }
-const mp = I.places.find(p => p.id === 'village_market'), mo = I.objects.find(o => o.k === 'b_market');
-ok(mp && mp.name === 'Pasar' && mp.x === 44 && mp.y === 34 && mo, 'Pasar baru terpasang di antara pasar lama dan jembatan timur');
-for (let y = 25; y <= 35; y++) for (let x = 37; x <= 51; x++) if (!(x >= 39 && x <= 49 && y >= 25 && y <= 33)) ok(I.grid[y][x] === ',', 'plaza pasar menyatu tanpa sel rumput ' + x + ',' + y);
+// 9F: kios lama diganti Pasar besar (hall b_market, 13x9 tile) di taman timur yang dikosongkan; kasir pindah ke interior
+ok(!I.objects.some(o => o.k === 'stall_red' && (o.serviceId === 'market_cashier' || (o.x === 552 && o.y === 416))), 'kios lama dihapus');
 ok(!I.objects.some(o => o.k === 'board' && !o.serviceId), 'tidak ada papan kosong tanpa fungsi');
 ok(I.objects.some(o => o.serviceId === 'quest_board'), 'papan misi tetap ada');
+const hall = I.objects.find(o => o.k === 'b_market'); ok(!!hall && hall.x === 728 && hall.y === 544, 'hall pasar ada di (728,544)');
+const hm = I.spr.b_market; ok(hm && hm.w === 208 && hm.h === 144 && hm.door && hm.win.length === 4 && hm.sign, 'meta sprite b_market lengkap (pintu, jendela, papan nama)');
+for (let y = 25; y <= 33; y++) for (let x = 39; x <= 51; x++) ok(col[y * W + x] === 1 && I.grid[y][x] === 'X', 'hall padat ' + x + ',' + y);
+for (let x = 44; x <= 46; x++) for (const y of [34, 35]) ok(!col[y * W + x] && !'XT~'.includes(I.grid[y][x]), 'halaman depan pintu bebas ' + x + ',' + y);
+const reg = (x, y) => x >= 36 && x <= 52 && y >= 25 && y <= 35;
+ok(!I.objects.some(o => o !== hall && reg(o.x >> 4, (o.y - 1) >> 4)), 'taman timur dikosongkan: tidak ada objek lain di x36..52,y25..35');
+// jalan dari jalan utama (y=24) ke pintu (45,34) bisa ditempuh lewat jalur barat
+{ const seen = new Set(['37,24']), q = [[37, 24]]; while (q.length) { const [x, y] = q.pop(); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy, k = nx + ',' + ny; if (nx < 0 || ny < 0 || nx >= W || ny >= I.h || seen.has(k) || col[ny * W + nx] || 'XT~'.includes(I.grid[ny][nx])) continue; seen.add(k); q.push([nx, ny]); } }
+  ok(seen.has('45,34') && seen.has('45,35'), 'pintu Pasar terjangkau dari jalan utama'); for (let x = 37; x <= 38; x++) for (let y = 25; y <= 35; y++) ok(I.grid[y][x] === ',', 'jalur barat berupa jalan ' + x + ',' + y); }
+const mp = I.places.find(p => p.id === 'village_market'); ok(mp && mp.sprite === 'b_market' && mp.name === 'Pasar' && mp.name_en === 'Market', 'tempat village_market = bangunan "Pasar"');
+ok(!I.serviceObjects.some(s => s.type === 'market_cashier'), 'kasir tidak lagi layanan luar ruangan');
 // 9C: jamur
 const LIFE = js('life.js'), TM = js('tilemap.js');
 ok(!/T\('E',x,y-29/.test(LIFE), 'ikon E dihapus dari sumber daya');

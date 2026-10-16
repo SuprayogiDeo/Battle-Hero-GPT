@@ -2,7 +2,8 @@
 """Perbaikan peta 9E (polish visual, Step 1).
 
 a. Papan merah kosong (`board` @600,384 -> tile 37,23) dekat Pasar dibuang: bukan papan misi/layanan, tanpa teks.
-b. Bekas kios pasar @ (33..35,24..25) dibersihkan agar jalan utama terbuka; kasir menempel pada gedung Pasar baru.
+b. Kios Pasar (`stall_red` @552,416 = Kasir Pasar) jadi padat: footprint sprite (tumpang tindih >= 6 px) memblokir
+   x=33..35, y=24..25. Baris depan kios (y=26) tetap bebas, jadi kasir tetap terjangkau.
 c. Jembatan timur: hanya pagar (tepi) yang padat, lantai papan tetap bisa dilalui. Collision per pita piksel lewat
    `bridgeRails` di index.json + `Tmap.railSolid` (dipakai `wSolid`). Lantai yang tampak: dari 8 px di baris y=22 sampai 9 px di baris y=24.
 Idempoten. Pakai: python3 tools/fix_map_9e.py [--root DIR]
@@ -23,18 +24,10 @@ def apply(S, tiles, log):
     if n:
         if S.grid[23][37] == 'X': S.grid[23][37] = '.'; S.L['collision'][23 * W + 37] = 0
         msgs.append('papan kosong dibuang')
-    # b. former kiosk footprint: leave main road open and clear the grass row beneath it.
-    legacy = {(x, y) for y in (24, 25) for x in (33, 34, 35)}
-    changed = False
-    for x, y in legacy:
-        i = y * W + x
-        if y == 24:
-            if S.grid[y][x] != ',' or S.L['collision'][i]: changed = True
-            S.grid[y][x] = ','; S.L['ground'][i] = 34; S.L['collision'][i] = 0; S.L['decor'][i] = 0
-        else:
-            if S.grid[y][x] == 'X' or S.L['collision'][i]: changed = True
-            S.grid[y][x] = '.'; S.L['collision'][i] = 0; S.L['decor'][i] = 0; S.L['ground'][i] = ops.grass(x, y)
-    if changed: msgs.append('bekas kios pasar dibersihkan')
+    # b. kios pasar padat (footprint sprite stall_red @552,416 = x 33..35, y 24..25; village.json tidak punya objek kios, jadi petaknya tetap)
+    fresh = {(x, y) for y in (24, 25) for x in (33, 34, 35) if S.grid[y][x] != 'X'}
+    if fresh:
+        ops.set_cells(fresh, grid='X', collision=1); msgs.append(f'kios pasar padat ({len(fresh)} petak)')
     # c. pagar jembatan: collision per pita piksel (js/tilemap.js railSolid), BUKAN per tile penuh. Satu tile baris pagar berisi pagar
     #    di sisi luar dan papan lantai di sisi dalam; memadatkan seluruh tile membuat lantai yang tampak datar tidak bisa dilalui.
     m = 0

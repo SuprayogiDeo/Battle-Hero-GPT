@@ -1,5 +1,16 @@
 # Changelog
 
+## Batch 9B-10 (polish visual, Step 2) — 0.4.8-rc.1 — Pasar besar yang bisa dimasuki, kasir pindah ke dalam (cache v65)
+
+Aset: `tools/build_market_assets.py` (hall `b_market` 208x144 px + sprite interior `vendor`, `scale`, `market_table`). Data peta: `tools/fix_map_9f.py` (idempoten; index.json, chunk, village.json).
+Urutan pipeline setelah rebuild dunia: build_interiors -> build_lights -> fix_map_9a..9e -> build_market_assets -> fix_map_9f.
+
+- Pasar baru: hall besar (13x9 tile) di bekas taman timur (x 39..51, y 25..33), pintu menghadap selatan di (45,34). Papan atap menampilkan "PASAR"/"MARKET" (digambar `tilemap.js` dari meta `sign`, ikut bahasa). Nama tempat diganti dari "Pasar Desa" menjadi "Pasar".
+- Taman timur (x 36..52, y 25..35) dikosongkan seluruhnya atas permintaan; jalan masuk dari jalan utama lewat jalur barat (x 37..38) ke halaman depan (y 34..35).
+- Kios lama dan layanan luar `market_cashier` dihapus. Kasir pindah ke interior baru `market` (17x10): kasir (layar pasar), loket dapur (MASAK), meja desa + papan pesanan, papan harga (harga jual ternak dari data), papan berita (level desa, rekor stage, batas jual harian), pedagang (dialog bergilir), timbangan, meja dagang, rak, bahan, peti penitipan.
+- Judul layar pasar "PASAR DESA" -> "PASAR". `place.village_market` kini bangunan ber-sprite (`b_market`), HUD tidak lagi menampilkan "CARI KASIR"; pintu lewat tombol MASUK seperti bangunan lain.
+- Tes diperbarui: 14 bangunan, 2 layanan luar ruangan, footprint hall, jalan masuk terjangkau, taman timur kosong, interior `market`.
+
 ## Batch 9B-9 (polish visual, Step 1) — 0.4.8-rc.1 — Pasar padat, papan kosong dibuang, tepi jembatan padat per piksel (cache v64)
 
 Data lewat `tools/fix_map_9e.py` (idempoten; menyentuh index.json, chunk c1_0, village.json). Tes 9C diperbarui.
