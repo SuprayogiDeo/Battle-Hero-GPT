@@ -27,7 +27,8 @@ ok(ev("S.gather.items.wood===3 && hudToolId()==='hand'"), 'binding a slot does n
 ev('S.hb.sel=6'); ok(ev("hudToolId()==='wood'"), 'selecting a configured slot returns the assigned item ID');
 ok(ev("hudClearQuickSlot(6)===true && !S.hb.slots[6] && S.gather.items.wood===3"), 'free slot can be cleared without deleting inventory');
 const hud = fs.readFileSync(path.join(root, 'js/hud.js'), 'utf8');
-ok(hud.includes("T(String(count),x+slot-2*L.z,y+slot-2*L.z,'#fff',9,'right')"), 'hotbar renders live stack counts');
+/* v72: ukuran font hitungan kini adaptif lewat hudFs(9,...) (>= 9 logis; naik di layar kecil). Maksud tes sama: hitungan tumpukan tetap digambar di sudut slot. */
+ok(hud.includes("T(String(count),x+slot-2*L.z,y+slot-2*L.z,'#fff',hudFs(9,12,slot-4,String(count)),'right')"), 'hotbar renders live stack counts');
 
 // Swipe switches the world hotbar page without choosing a slot or sending input to the world.
 ev("st='world';S.hb.pg=0;const __L=hudLayout();hudDown(987,__L.left+__L.slot/2,__L.centerY)");

@@ -9,7 +9,7 @@ var Tmap = (function () {
   var pend = 0, bad = false, okf = false, ANT = [], OB = [], CR = [], T = 0, VC = {};
   var CH = {}, CHL = [], CHSIZE = 32, CHMAX = 25, CHSEQ = 0, CHREQ = {}, CHFAIL = {}; // LRU cache; each baked canvas <=512x512
   var MAPC = null, MAPD = null, MAPSIZE = ''; // cached minimap raster; rebuild only when discovery changes
-  var ZONE = '', ZT = 0, DISC_W = 128;
+  var DISC_W = 128;
   var LF = 8, LFT = -9;   /* ukuran font label (px kanvas logis): dijaga >= ~11px layar agar terbaca di HP */
   function labelFont(g) {
     if (T - LFT < 1) return LF; LFT = T;
@@ -99,16 +99,15 @@ var Tmap = (function () {
     return null;
   }
   function explore(px, py, disc) {
-    if (!V) return disc || ''; var tx=Math.floor(px),ty=Math.floor(py),b=biomeAt(tx,ty);
+    if (!V) return disc || ''; var tx=Math.floor(px),ty=Math.floor(py);
     /* '*' = seluruh peta sudah dibuka; status ini hanya satu karakter di save lama hb_s4. */
-    if(disc==='*'){if(b&&b.id!==ZONE){ZONE=b.id;ZT=3.2;}return '*';}
+    if(disc==='*')return '*';
     var total=V.w*V.h, s=(typeof disc==='string'?disc:'');
     if(s.length!==total)s=s.slice(0,total).padEnd(total,'0');
     var changed=false;
     for(var y=Math.max(0,ty-4);y<=Math.min(V.h-1,ty+4);y++)for(var x=Math.max(0,tx-4);x<=Math.min(V.w-1,tx+4);x++){
       if(Math.hypot(x-tx,y-ty)>4.5)continue;var i=y*V.w+x;if(s.charAt(i)!=='1'){s=s.substring(0,i)+'1'+s.substring(i+1);changed=true;}
     }
-    if(b&&b.id!==ZONE){ZONE=b.id;ZT=3.2;}
     return changed?s:(disc||s);
   }
   /* Minimap: jendela 64x48 petak yang mengikuti pemain (~1.5 px/petak, terbaca), dengan jalan, jembatan, bangunan, dan penanda tempat.
@@ -125,7 +124,7 @@ var Tmap = (function () {
     MAPD = V.w + 'x' + V.h + (rd ? 'r' : '');
   }
   function hud(g, disc, px, py, OX, VW, dt) {
-    if (!V) return; ZT = Math.max(0, ZT - (dt || 0));
+    if (!V) return;
     var us = [.9, 1, 1.1][Math.max(0, Math.min(2, Math.round(Number(S && S.set && S.set.ui) || 0)))] || 1, x0 = 4, y0 = 4, w = Math.round(100 * us), h = Math.round(76 * us), VT = 64, HT = 48;
     if (!MAPC || MAPD !== V.w + 'x' + V.h + (V.roads ? 'r' : '')) bakeMini();
     var sx = Math.max(0, Math.min(V.w - VT, px - VT / 2)), sy = Math.max(0, Math.min(V.h - HT, py - HT / 2)), kx = w / VT, ky = h / HT;

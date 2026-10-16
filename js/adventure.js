@@ -126,8 +126,10 @@ function hbMapSelect(tx,ty){const v=hbMapDimensions();tx=Math.max(0,Math.min(v.w
   if(typeof jrEnsure==='function')jrEnsure();S.journal.waypoint={x:p.x,y:p.y,label:(hbBiomeAt(p.x,p.y,v.regions)||{}).name||jrLang('Tujuan','Waypoint'),at:Date.now()};hbMapPick=p;sv();sfx('click');say(jrLang('Penanda tujuan dipasang. Ikuti kompas di dunia.','Waypoint set. Follow the compass in the world.'));return true;
 }
 function hbWorldMapClick(x,y){
-  if(y<42&&x>=530){hbCloseWorldMap();return;}
-  if(x>=416&&x<=620&&y>=300&&y<=328){if(S.journal)delete S.journal.waypoint;hbMapPick=null;sv();sfx('click');return;}
+  const tu=(typeof hudTouchUnit==='function')?hudTouchUnit():44;
+  if(y<Math.max(42,24.5+tu/2)&&x>=530){hbCloseWorldMap();return;}
+  const wl=Math.max(294,313.5-tu/2);
+  if(x>=416&&x<=620&&y>=wl&&y<=Math.min(360,wl+Math.max(tu,34))){if(S.journal)delete S.journal.waypoint;hbMapPick=null;sv();sfx('click');return;}
   if(x>=20&&x<=405&&y>=50&&y<=332){const v=hbMapDimensions(),mx=x-24,my=y-50,scale=Math.min(375/v.w,278/v.h),tx=Math.floor(mx/scale),ty=Math.floor(my/scale);if(mx>=0&&my>=0&&tx>=0&&ty>=0&&tx<v.w&&ty<v.h)hbMapSelect(tx,ty);return;}
   if(x>=426&&x<=624){const v=hbMapDimensions(),regions=v.regions||[],idx=Math.floor((y-79)/43);if(idx>=0&&idx<regions.length){const b=regions[idx],cx=Math.floor(b.x+b.w/2),cy=Math.floor(b.y+b.h/2);if(!hbIsExplored(cx,cy,v)){say(jrLang('Jelajahi wilayah ini di dunia untuk membuka penanda.','Explore this region in the world to unlock a waypoint.'));return;}hbMapSelect(cx,cy);return;}}
   if(y>=320&&x<150){if(S.journal)delete S.journal.waypoint;sv();sfx('click');return;}
@@ -135,7 +137,7 @@ function hbWorldMapClick(x,y){
 function hbMapFont(){let f=11;try{if(self.Tmap&&Tmap.labelFont)f=Tmap.labelFont(g);else{const r=g.canvas.getBoundingClientRect(),k=r.height/360;if(k>0)f=Math.round(11/k)}}catch(e){}return Math.max(8,Math.min(11,f))}
 function hbDrawWorldMap(){
   const v=hbMapDimensions(),en=S.set&&S.set.lang==='en';g.save();g.translate(OX,0);ov(.96);card(10,8,620,344,'#6fbd8a',1);
-  T(en?'WORLD MAP':'PETA DUNIA',22,29,'#fc4',17);T(en?'Main regions are visible; details reveal as you explore.':'Wilayah utama terlihat; detail terbuka saat dijelajahi.',22,43,'#cde',8);btn(538,12,78,25,en?'CLOSE':'TUTUP',1);
+  T(en?'WORLD MAP':'PETA DUNIA',22,29,'#fc4',17);T(en?'Main regions are visible; details reveal as you explore.':'Wilayah utama terlihat; detail terbuka saat dijelajahi.',22,43,'#cde',hudFs(8,10,500,en?'Main regions are visible; details reveal as you explore.':'Wilayah utama terlihat; detail terbuka saat dijelajahi.'));btn(538,12,78,25,en?'CLOSE':'TUTUP',1);
   const x0=24,y0=50,w=375,h=278;g.fillStyle='#263a35';g.fillRect(x0-2,y0-2,w+4,h+4);const c=hbMakeMap();g.imageSmoothingEnabled=false;g.drawImage(c,x0,y0,w,h);
   const scale=Math.min(w/v.w,h/v.h);(v.regions||[]).forEach(b=>{const bx=x0+b.x*scale,by=y0+b.y*scale,bw=b.w*scale,bh=b.h*scale;g.strokeStyle=b.color||'#dce9bd';g.lineWidth=1;g.strokeRect(bx+.5,by+.5,bw-1,bh-1);});
   const places=(v.places||[]).filter(p=>hbIsExplored(p.x,p.y,v));places.slice(0,18).forEach(p=>{const px=x0+(p.x+.5)*scale,py=y0+(p.y+.5)*scale;g.fillStyle=p.type==='mushroom_grove'?'#f8a4f0':'#fff2a8';g.beginPath();g.arc(px,py,2.2,0,Math.PI*2);g.fill();});
@@ -143,9 +145,9 @@ function hbDrawWorldMap(){
   list.forEach(q=>{if(used.length>=18)return;const pri=rank(q)<99;if(!pri&&extra>=6)return;const nm0=en?(q.name_en||q.name):(q.name||q.name_en);if(!nm0)return;const nm=typeof tr==='function'?tr(nm0):nm0,tw=Math.ceil(g.measureText(nm).width)+2,lx=Math.max(x0+2,Math.min(x0+w-tw-2,x0+(q.x+.5)*scale-tw/2)),ly=Math.max(y0+fs+1,y0+(q.y+.5)*scale-4),r=[lx-1,ly-fs-1,tw+2,fs+3];
    if(used.some(u=>r[0]<u[0]+u[2]&&r[0]+r[2]>u[0]&&r[1]<u[1]+u[3]&&r[1]+r[3]>u[1]))return;used.push(r);if(!pri)extra++;T(nm,lx,ly,'#fff6c8',fs);});}
   if(S.world){const px=x0+(S.world.x/WS+.5)*scale,py=y0+(S.world.y/WS+.5)*scale;g.fillStyle='#fff';g.beginPath();g.arc(px,py,4,0,Math.PI*2);g.fill();g.strokeStyle='#342c18';g.lineWidth=1;g.stroke();}
-  card(416,48,202,280,'#507c61',1);T(en?'REGIONS':'WILAYAH',430,67,'#fc4',11);(v.regions||[]).slice(0,5).forEach((b,i)=>{const y=79+i*43,seen=!!(S.journal&&S.journal.seenBiomes&&S.journal.seenBiomes[b.id]);g.fillStyle=b.color||'#6a8';g.fillRect(430,y,12,12);T(en?(b.name_en||b.id):(b.name||b.id),449,y+10,seen?'#fff':'#aab8b1',8);T(seen?(en?'DISCOVERED':'DITEMUKAN'):(en?'EXPLORE':'JELAJAHI'),449,y+23,seen?'#9f9':'#8ca39a',7);});
-  const wp=S.journal&&S.journal.waypoint;if(wp){btn(416,300,202,27,en?'CLEAR WAYPOINT':'HAPUS PENANDA',1);}else{card(416,300,202,27,'#405b4f',0);T(en?'No waypoint set':'Belum ada penanda',517,317,'#afc7b4',8,'center');}
-  T(en?'Tap a discovered tile to set a waypoint.':'Ketuk petak yang ditemukan untuk memasang penanda.',220,343,'#cde',8,'center');g.restore();
+  card(416,48,202,280,'#507c61',1);T(en?'REGIONS':'WILAYAH',430,67,'#fc4',11);(v.regions||[]).slice(0,5).forEach((b,i)=>{const y=79+i*43,seen=!!(S.journal&&S.journal.seenBiomes&&S.journal.seenBiomes[b.id]);g.fillStyle=b.color||'#6a8';g.fillRect(430,y,12,12);T(en?(b.name_en||b.id):(b.name||b.id),449,y+10,seen?'#fff':'#aab8b1',hudFs(8,10,163,en?(b.name_en||b.id):(b.name||b.id)));T(seen?(en?'DISCOVERED':'DITEMUKAN'):(en?'EXPLORE':'JELAJAHI'),449,y+23,seen?'#9f9':'#8ca39a',hudFs(7,9,163,seen?(en?'DISCOVERED':'DITEMUKAN'):(en?'EXPLORE':'JELAJAHI')));});
+  const wp=S.journal&&S.journal.waypoint;if(wp){btn(416,300,202,27,en?'CLEAR WAYPOINT':'HAPUS PENANDA',1);}else{card(416,300,202,27,'#405b4f',0);T(en?'No waypoint set':'Belum ada penanda',517,317,'#afc7b4',hudFs(8,10,190,en?'No waypoint set':'Belum ada penanda'),'center');}
+  T(en?'Tap a discovered tile to set a waypoint.':'Ketuk petak yang ditemukan untuk memasang penanda.',220,343,'#cde',hudFs(8,10,390,en?'Tap a discovered tile to set a waypoint.':'Ketuk petak yang ditemukan untuk memasang penanda.'),'center');g.restore();
 }
 function hbDrawWaypoint(){
   const wp=S.journal&&S.journal.waypoint;if(!wp||!S.world)return;const v=hbMapDimensions(),px=Math.floor(S.world.x/WS),py=Math.floor(S.world.y/WS),field=hbMapRouteField(wp.x|0,wp.y|0,v),pi=py*v.w+px;

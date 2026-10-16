@@ -70,6 +70,8 @@ function worldLeave(){wjid=null;wjx=wjy=0;wFrom=0;wDlg=0;wTalk=null;st='menu';sv
 function wMove(x,y){let dx=(x-JC[0])/JR,dy=(y-JC[1])/JR;const l=Math.hypot(dx,dy);if(l>1){dx/=l;dy/=l}wjx=l<.15?0:dx;wjy=l<.15?0:dy}
 /* bangunan = pintu ke layar lama. wFrom=1 berarti layar dibuka dari dunia, jadi KEMBALI -> goBack() -> dunia. */
 const WGO={S:'shop',R:'heroes',Q:'quests'},WGD=[['MAIN STAGE',190,104,260,30],['DUNGEON',190,142,260,30],['MENARA HARIAN',190,180,260,30],['BATAL',190,218,260,30]],WNR=22;
+/* tata letak dialog gerbang: tombol setinggi satuan sentuh HUD (44 px layar; maks 52 logis agar muat di portrait), kartu menyesuaikan */
+function wgdLayout(){let tu=44;try{if(typeof hudTouchUnit==='function')tu=hudTouchUnit()}catch(e){}const h=Math.min(52,Math.max(30,Math.ceil(tu))),gap=6,y0=108,end=y0+4*h+3*gap;return{h:h,rows:WGD.map((b,i)=>[b[0],b[1],y0+i*(h+gap),b[3],h]),card:[160,62,320,end+12-62]}}
 function wNearB(){const w=S.world;let b=null,bd=WNR;WBLD.forEach(o=>{const dx=Math.max(o.x0*WS-w.x,0,w.x-(o.x1+1)*WS),dy=Math.max(o.y0*WS-w.y,0,w.y-(o.y1+1)*WS),d=Math.hypot(dx,dy);if(d<bd){bd=d;b=o}});return b}
 function wFindPlace(){if(!wVon||!self.Tmap||!Tmap.data())return null;const w=S.world,ps=Tmap.data().places||[];let bestP=null,bd=48;ps.forEach(p=>{const sz=p.footprint||[p.platform&&p.platform.w||p.fence&&p.fence.w||1,p.platform&&p.platform.h||p.fence&&p.fence.h||1],x0=p.x*WS,y0=p.y*WS,x1=x0+sz[0]*WS,y1=y0+sz[1]*WS,dx=Math.max(x0-w.x,0,w.x-x1),dy=Math.max(y0-w.y,0,w.y-y1),d=Math.hypot(dx,dy);if(d<bd){bd=d;bestP=p}});return bestP}
 function wGo(s){wbCheck();wFrom=1;wDlg=0;wTalk=null;wjid=null;wjx=wjy=0;sv();st=s}
@@ -79,7 +81,7 @@ if(wLock(wNear.c)){wSay(wL('Terkunci. Capai stage '+WUN[wNear.c]+' dulu (rekormu
 if(wNear.c=='G'){wDlg=1;return}if(wNear.c=='F')return;if(WGO[wNear.c])wGo(WGO[wNear.c])}
 function worldResume(){wjid=null;wjx=wjy=0;wDlg=0;wTalk=null;wHint=0;st='world';wUnlockCheck();sv()}
 function goBack(){if(wFrom)worldResume();else st='menu'}
-function worldDown(id,x,y){if(wTalk){npcAdv();return}if(wDlg){WGD.forEach((b,i)=>{if(x>=b[1]&&x<=b[1]+b[3]&&y>=b[2]&&y<=b[2]+b[4]){sfx('click');if(i==0)wGo('stages');else if(i==1)hbStartDungeon();else if(i==2)wGo('tower');else wDlg=0}});return}
+function worldDown(id,x,y){if(wTalk){npcAdv();return}if(wDlg){wgdLayout().rows.forEach((b,i)=>{if(x>=b[1]&&x<=b[1]+b[3]&&y>=b[2]&&y<=b[2]+b[4]){sfx('click');if(i==0)wGo('stages');else if(i==1)hbStartDungeon();else if(i==2)wGo('tower');else wDlg=0}});return}
 
 
 if(x>=500&&x<=558&&y>=6&&y<=32){worldLeave();return}if(x<170&&y>180){wjid=id;wMove(x,y)}}
@@ -138,9 +140,9 @@ if(self.lifeDrawWeather)lifeDrawWeather();
 if(!wTalk){g.globalAlpha=.35;g.fillStyle='#000';g.beginPath();g.arc(JC[0],JC[1],JR,0,7);g.fill();g.globalAlpha=.8;g.strokeStyle='#fff';g.lineWidth=2;g.stroke();g.globalAlpha=.85;g.fillStyle='#9cf';g.beginPath();g.arc(JC[0]+wjx*JR*.6,JC[1]+wjy*JR*.6,14,0,7);g.fill();g.strokeStyle='#000';g.lineWidth=1;g.stroke();g.globalAlpha=1}
 btn(500,6,58,26,wL('MENU','MENU'),1);
 if(wHint>0){g.globalAlpha=Math.min(1,wHint);T('Geser joystick kiri atau WASD untuk berjalan',320,296,'#9cf',11,'center');g.globalAlpha=1}
-if(wMsg.t>0){g.globalAlpha=Math.min(1,wMsg.t);g.fillStyle='rgba(0,0,0,.78)';g.strokeStyle='#fc4';g.lineWidth=1;if(wMsg.kind==='discovery'){g.fillRect(122,44,396,24);g.strokeRect(122.5,44.5,395,23);T(wMsg.s,320,61,'#fe8',11,'center')}else{g.fillRect(152,286,336,24);g.strokeStyle='#76678c';g.strokeRect(152.5,286.5,335,23);T(wMsg.s,320,302,'#cde',10,'center')}g.globalAlpha=1}
+if(wMsg.t>0){g.globalAlpha=Math.min(1,wMsg.t);g.fillStyle='rgba(0,0,0,.78)';g.strokeStyle='#fc4';g.lineWidth=1;if(wMsg.kind==='discovery'){g.fillRect(122,44,396,24);g.strokeRect(122.5,44.5,395,23);T(wMsg.s,320,61,'#fe8',11,'center')}else{g.font='bold 10px monospace';const tw=Math.min(420,Math.max(336,Math.ceil(g.measureText(tr(wMsg.s)).width)+28)),tx=Math.round(320-tw/2);g.fillRect(tx,268,tw,24);g.strokeStyle='#76678c';g.strokeRect(tx+.5,268.5,tw-1,23);T(wMsg.s,320,284,'#cde',10,'center')}g.globalAlpha=1}
 
-if(wDlg){ov(.65);card(160,62,320,232,'#fc4',1);T('GERBANG PETUALANGAN',320,88,'#fc4',15,'center');T('Pilih tujuan',320,101,'#cde',10,'center');WGD.forEach((b,i)=>btn(b[1],b[2],b[3],b[4],b[0],i<3))}
+if(wDlg){const WL=wgdLayout();ov(.65);card(WL.card[0],WL.card[1],WL.card[2],WL.card[3],'#fc4',1);T('GERBANG PETUALANGAN',320,88,'#fc4',15,'center');T('Pilih tujuan',320,101,'#cde',10,'center');WL.rows.forEach((b,i)=>btn(b[1],b[2],b[3],b[4],b[0],i<3))}
 if(self.npcUI)npcUI();if(wVon&&Tmap.hud)Tmap.hud(g,S.world.disc||'',w.x/WS,w.y/WS,OX,VW,1/60)}
 addEventListener('pointermove',e=>{if(st=='world'&&e.pointerId===wjid){const r=cv.getBoundingClientRect();wMove((e.clientX-r.left)*VW/r.width-OX,(e.clientY-r.top)*360/r.height)}});
 const wRel=e=>{if(e.pointerId===wjid){wjid=null;wjx=wjy=0}};addEventListener('pointerup',wRel);addEventListener('pointercancel',wRel);addEventListener('blur',()=>{wjid=null;wjx=wjy=0});

@@ -12,7 +12,10 @@ const HB_X=174,HB_Y=316,HB_W=34,HB_G=3,HB_AX=592,HB_AY=298,HB_AR=30;
 let hudNameT=0,hudSw=null;
 function hudUiScale(){return [.9,1,1.1][Math.max(0,Math.min(2,Math.round(Number(S.set.ui)||0))) ]||1}
 function hudTouchUnit(){const r=cv&&cv.getBoundingClientRect?cv.getBoundingClientRect():null,s=r&&r.width?r.width/VW:1;return Math.max(44,44/Math.max(.1,s))}
-function hudLayout(){const z=hudUiScale(),slot=HB_W*z,hit=hudTouchUnit(),step=Math.max((HB_W+HB_G)*z,hit),left=(640-(7*step+slot))/2,y=333-slot/2;return{z,slot,hit,step,left,y,centerY:333}}
+/* ukuran font logis >= n; naik (maks cap) agar ~8 px layar bila layar kecil (portrait), lalu mengecil sampai muat maxW. Landscape s=1 tak berubah untuk n>=8. */
+function hudFs(n,cap,maxW,txt){let s=1;try{const r=cv.getBoundingClientRect();if(r&&r.height>0)s=r.height/360}catch(e){}let f=Math.max(n,Math.min(cap||12,Math.round(8/s)));try{if(maxW&&txt!=null){g.font='bold '+f+'px monospace';while(f>n&&g.measureText(txt).width>maxW){f--;g.font='bold '+f+'px monospace'}}}catch(e){}return f}
+/* hotbar dipusatkan; bila tepi kanannya menabrak lingkaran tombol aksi (portrait: langkah 44 px layar = 72 logis), digeser ke kiri */
+function hudLayout(){const z=hudUiScale(),slot=HB_W*z,hit=hudTouchUnit(),step=Math.max((HB_W+HB_G)*z,hit),w=7*step+slot,y=333-slot/2,r=HB_AR*z,dy=y-HB_AY;let left=(640-w)/2;if(dy<r){const lim=HB_AX-Math.sqrt(r*r-dy*dy)-3;if(left+w>lim)left=Math.max(0,lim-w)}return{z,slot,hit,step,left,y,centerY:333}}
 function hudEnsure(){
  if(!S.hb||typeof S.hb!=='object'||Array.isArray(S.hb))S.hb={sel:0,pg:0,water:0,slots:{}};
  if(!S.hb.slots||typeof S.hb.slots!=='object'||Array.isArray(S.hb.slots))S.hb.slots={};
@@ -68,8 +71,8 @@ function hudCtx(){
   return{l:wL('KANDANG','PEN'),on:1,f:()=>wGo('ranch')}}
  const service=self.Tmap&&Tmap.nearService&&S.world?Tmap.nearService(S.world.x/WS,S.world.y/WS):null;
  if(service){const labels={quest_board:['MISI','QUEST'],animal_trough:['PAKAN','FEED']},q=labels[service.type]||['GUNAKAN','USE'];return{l:wL(q[0],q[1]),on:1,f:()=>hudServiceAct(service)}}
- if(wPlace){const t=wPlace.type;if(t==='animal_pen')return{l:wL('CARI PALUNG','FIND TROUGH'),on:0,f:()=>wSay(wL('Pakan ada di palung samping kandang.','Feed is at the trough beside the pen.'),2.5)};if(t==='orchard'||t==='mushroom_grove')return{l:wL('LIHAT','LOOK'),on:1,f:()=>_hudInteract()}}
- if(wNear){if(wNear.c=='G')return{l:wL('GERBANG','GATE'),on:1,f:()=>_hudInteract()};if(wNear.c=='Q')return{l:wL('PAPAN MISI','QUEST BOARD'),on:0,f:()=>wSay(wL('Papan misinya ada di dekat jalur.','The quest board is near the path.'),2.5)};}
+ if(wPlace){const t=wPlace.type;if(t==='animal_pen')return{l:wL('PALUNG','TROUGH'),on:0,f:()=>wSay(wL('Pakan ada di palung samping kandang.','Feed is at the trough beside the pen.'),2.5)};if(t==='orchard'||t==='mushroom_grove')return{l:wL('LIHAT','LOOK'),on:1,f:()=>_hudInteract()}}
+ if(wNear){if(wNear.c=='G')return{l:wL('GERBANG','GATE'),on:1,f:()=>_hudInteract()};if(wNear.c=='Q')return{l:wL('MISI','QUEST'),on:0,f:()=>wSay(wL('Papan misinya ada di dekat jalur.','The quest board is near the path.'),2.5)};}
  return null;
 }
 const hudIcon=(i,x,y,z,a)=>{if(HUD_IM.complete&&HUD_IM.naturalWidth>0){g.globalAlpha=a==null?1:a;g.drawImage(HUD_IM,i*16,0,16,16,Math.round(x),Math.round(y),16*z,16*z);g.globalAlpha=1}};
@@ -79,18 +82,18 @@ function hudBar(){
   const i=h.pg*8+k,t=HB_TOOLS[i],id=!t?h.slots[i]:null,x=L.left+k*L.step,y=L.y,slot=L.slot,on=h.sel==i,lock=!!t&&!hbUnlocked(t);
   g.fillStyle='rgba(20,16,30,.8)';g.fillRect(x,y,slot,slot);g.strokeStyle=on?'#fc4':'#6b5a8a';g.lineWidth=on?3:1.5;g.strokeRect(x+.5,y+.5,slot-1,slot-1);
   if(t){hudIcon(t.i,x+(slot-32*L.z)/2,y+(slot-32*L.z)/2,2*L.z,lock?.3:1);if(t.id=='can'&&h.water&&!lock){g.fillStyle='#4ab0ff';g.fillRect(x+slot-12*L.z,y+slot-9*L.z,9*L.z,6*L.z);g.strokeStyle='#000';g.lineWidth=1;g.strokeRect(x+slot-11.5*L.z,y+slot-8.5*L.z,8*L.z,5*L.z);T(String(h.water),x+slot-7*L.z,y+slot-3*L.z,'#fff',9,'center')}if(lock){g.fillStyle='#aab';g.fillRect(x+slot-9*L.z,y+3*L.z,5*L.z,2*L.z)}}
-  else if(id&&typeof scItemIcon==='function'){scItemIcon(id,x+(slot-28*L.z)/2,y+(slot-28*L.z)/2,28*L.z);const count=Math.max(0,+S.gather?.items?.[id]||0);T(String(count),x+slot-2*L.z,y+slot-2*L.z,'#fff',9,'right');}
+  else if(id&&typeof scItemIcon==='function'){scItemIcon(id,x+(slot-28*L.z)/2,y+(slot-28*L.z)/2,28*L.z);const count=Math.max(0,+S.gather?.items?.[id]||0);T(String(count),x+slot-2*L.z,y+slot-2*L.z,'#fff',hudFs(9,12,slot-4,String(count)),'right');}
   else if(i>=6){g.strokeStyle='#788';g.strokeRect(x+slot*.31,y+slot*.31,slot*.38,slot*.38)}
   if(on){g.fillStyle='#fc4';g.beginPath();g.moveTo(x+slot/2-4*L.z,y+slot+5*L.z);g.lineTo(x+slot/2+4*L.z,y+slot+5*L.z);g.lineTo(x+slot/2,y+slot+L.z);g.fill()}
  }
- g.fillStyle=h.pg?'#555':'#fc4';g.fillRect(314,L.y-5,4,3);g.fillStyle=h.pg?'#fc4':'#555';g.fillRect(322,L.y-5,4,3);
- if(hudNameT>0){const t=HB_TOOLS[h.sel],m=!t&&SC_MATERIALS.find(q=>q.id===h.slots[h.sel]);if(t||m){g.globalAlpha=Math.min(1,hudNameT);T(t?wL(t.n[0],t.n[1]):(S.set?.lang==='en'?m.en:m.name),320,L.y-10,'#fe8',10,'center');g.globalAlpha=1}}
+ g.fillStyle=h.pg?'#555':'#fc4';const cx=L.left+(7*L.step+L.slot)/2;g.fillRect(cx-6,L.y-5,4,3);g.fillStyle=h.pg?'#fc4':'#555';g.fillRect(cx+2,L.y-5,4,3);
+ if(hudNameT>0){const t=HB_TOOLS[h.sel],m=!t&&SC_MATERIALS.find(q=>q.id===h.slots[h.sel]);if(t||m){g.globalAlpha=Math.min(1,hudNameT);T(t?wL(t.n[0],t.n[1]):(S.set?.lang==='en'?m.en:m.name),cx,L.y-10,'#fe8',10,'center');g.globalAlpha=1}}
 }
 function hudAct(){
  const c=hudCtx(),on=c&&c.on,z=hudUiScale(),r=HB_AR*z;
  g.fillStyle='rgba(30,24,50,.88)';g.beginPath();g.arc(HB_AX,HB_AY,r,0,7);g.fill();g.lineWidth=on?3:2;g.strokeStyle=on?'#fc4':'#777';g.stroke();
  hudIcon(0,HB_AX-16*z,HB_AY-27*z,2*z,on?1:.5);
- T(c?c.l:wL('TANGAN','HAND'),HB_AX,HB_AY+22*z,on?'#fe8':'#99a',9,'center');
+ {const lb=c?c.l:wL('TANGAN','HAND');T(lb,HB_AX,HB_AY+22*z,on?'#fe8':'#99a',hudFs(9,11,2*r-6,tr(lb)),'center')}
 }
 function hudDraw(){
  if(st!=='world')return;
@@ -101,11 +104,15 @@ function hudDraw(){
 }
 function hudDown(id,x,y){
  const L=hudLayout(),r=Math.max(HB_AR*L.z,L.hit/2);
- if((x-HB_AX)*(x-HB_AX)+(y-HB_AY)*(y-HB_AY)<=r*r){const c=hudCtx();if(c&&c.on)c.f();else if(c)c.f();else sfx('click');return true}
- const first=L.left+L.slot/2,last=first+7*L.step;
- if(y>=L.centerY-L.hit/2&&y<=L.centerY+L.hit/2&&x>=first-L.hit/2&&x<=last+L.hit/2){const slot=Math.max(0,Math.min(7,Math.round((x-first)/L.step)));hudSw={id:id,x0:x,slot,moved:0};return true}
+ const first=L.left+L.slot/2,last=first+7*L.step,slotAt=x=>Math.max(0,Math.min(7,Math.round((x-first)/L.step)));
+ const inBar=y>=L.centerY-L.hit/2&&y<=L.centerY+L.hit/2&&x>=first-L.hit/2&&x<=last+L.hit/2;
+ let inBtn=(x-HB_AX)*(x-HB_AX)+(y-HB_AY)*(y-HB_AY)<=r*r;
+ /* area ketuk hotbar & tombol aksi bisa beririsan di portrait: titik di irisan menjadi milik pusat yang lebih dekat */
+ if(inBtn&&inBar){const sx=first+slotAt(x)*L.step;if((x-sx)*(x-sx)+(y-L.centerY)*(y-L.centerY)<(x-HB_AX)*(x-HB_AX)+(y-HB_AY)*(y-HB_AY))inBtn=false}
+ if(inBtn){const c=hudCtx();if(c&&c.on)c.f();else if(c)c.f();else sfx('click');return true}
+ if(inBar){hudSw={id:id,x0:x,slot:slotAt(x),moved:0};return true}
  const z=hudUiScale();if(!wI&&x>=4&&x<=4+100*z&&y>=4&&y<=4+76*z){if(self.hbOpenWorldMap)hbOpenWorldMap();return true}
- if(!wI&&self.jrFocusRect){const f=jrFocusRect();if(x>=f.x&&x<=f.x+f.w&&y>=f.y-2&&y<=f.y+f.h+2){jrToggleFocus();sfx('click');return true}}
+ if(!wI&&self.jrFocusRect){const f=jrFocusRect(),ft=f.y-6,fb=ft+Math.max(f.h+8,Math.min(56,L.hit));if(x>=f.x&&x<=f.x+f.w&&y>=ft&&y<=fb){jrToggleFocus();sfx('click');return true}}
  return false;
 }
 const hudPtr=e=>{const r=cv.getBoundingClientRect();return(e.clientX-r.left)*VW/r.width-OX};

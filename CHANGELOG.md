@@ -1,5 +1,16 @@
 # Changelog
 
+## Batch 9B-17 (audit HUD statis) — 0.4.8-rc.1 — hotbar vs tombol aksi di portrait, area ketuk, toast, dialog gerbang (cache v72)
+
+- `tools/audit_hud_static.js` (baru, sekali pakai, TIDAK di `run_tests.js`): irisan/luar-kanvas HUD, ukuran tap, teks <= 9 px logis, kontras WCAG, teks terpanjang vs wadah, untuk z=.9/1/1.1 pada landscape (s=1,0) dan portrait (s~0,61).
+- `hud.js`: (1) `hudLayout` menggeser hotbar ke kiri bila tepi kanannya menabrak lingkaran tombol aksi (portrait: langkah 72 logis; sebelumnya tumpang 23-30 px, kini 0; landscape tidak berubah); titik halaman/nama alat mengikuti pusat hotbar. (2) `hudDown`: titik di irisan area ketuk hotbar x tombol aksi menjadi milik pusat terdekat. (3) area ketuk FOKUS setinggi satuan sentuh (maks 56 logis), mulai tepat di bawah area minimap. (4) `hudFs()` (font naik ke ~8 px layar di layar kecil, lalu muat wadah) untuk label tombol aksi dan hitungan hotbar. (5) label petunjuk 'CARI PALUNG/FIND TROUGH' -> 'PALUNG/TROUGH', 'PAPAN MISI/QUEST BOARD' -> 'MISI/QUEST' (sebelumnya melebihi lingkaran tombol).
+- `world.js`: toast biasa dipindah y 286 -> 268 (tak lagi menimpa nama alat hotbar) dan melebar mengikuti teks (336..420; teks EN 62 karakter sebelumnya 372 px di kotak 336); dialog gerbang: tombol setinggi satuan sentuh (30 -> 44 landscape, maks 52 portrait), kartu menyesuaikan.
+- `adventure.js`: area ketuk TUTUP dan HAPUS PENANDA diperluas ke satuan sentuh (tampilan tidak berubah); teks kecil peta memakai `hudFs`.
+- `tilemap.js`: hapus kode mati `ZONE`/`ZT` (tidak pernah dibaca).
+- `tools/test_inventory_storage.js`: asersi string hitungan hotbar diperbarui (font kini `hudFs(9,...)`; maksud tes sama).
+- Ditunda (butuh keputusan/cek perangkat): papan dinding portrait (fs turun ke 10 logis = 6,1 px layar), baris wilayah peta, tombol tutorial, minimap z=.9 portrait (41,7 px).
+- `sw.js` v72, `VERSION`, `tools/test_7defg.py` diselaraskan.
+
 ## Batch 9B-16 (data peta, skrip fix_map_10a) — 0.4.8-rc.1 — jalan Balai Desa, jalan timur jembatan, semak b_res5 (cache v71)
 
 - `tools/fix_map_10a.py` (baru, idempoten; memanggil `build_minimap_roads.py`): (1) tangga diagonal menuju Balai Desa diganti jalur L 1 petak: (77,44) turun ke (77,47), lalu ke barat sampai jalan x=65; 9 petak tangga yang tak terpakai kembali jadi rumput. Jalan di luar desa lama memang polos (ground 34, tanpa tepi), jalur baru mengikuti itu. (2) Jalan timur jembatan: 3 petak (y 22..24) di x 61..62, 2 petak (y 23..24) di x=63, lalu 1 petak; tepi rumput memakai tile tepi yang sama dengan sisi barat (S 35, N 40, SE 49, NE 48, SW 42, S+W 46 yang sudah ada di tiles.png). (3) `bush_c` (50,14) -> (50,16), >= 3 petak dari pintu b_res5 dan dari jalan; sel padat lama dibuka, yang baru ditutup.
