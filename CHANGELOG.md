@@ -1,5 +1,13 @@
 # Changelog
 
+## Batch 9B-12 (polish UI interaksi Pasar, Step 2) — 0.4.8-rc.1 — umpan balik interior, transisi layar, Desa/Toko, paging Gudang (cache v67)
+
+- `interior.js`: objek fungsional berkilau halus; objek terdekat disorot dengan siku sudut + tag nama (ID/EN); fade singkat saat layar dibuka dari / ditutup ke interior.
+- `life.js`: layar Desa menampilkan chip bahan (ikon + punya/butuh, hijau/merah); status level maks berisi ringkasan; ikon kunci diganti penanda yang konsisten.
+- `screens.js`: kartu penawaran Toko menampilkan kekurangan emas / ajakan beli.
+- `ranch.js`: ikon `gold` pada `itemIcon()`.
+- `storagecraft.js`: daftar bahan Gudang dipaging 6 baris x 24px (tombol ◀ n/m ▶), teks 11px.
+
 ## Batch 9B-11 (polish UI interaksi Pasar) — 0.4.8-rc.1 — panel/tombol seragam, ikon item, perbaikan layout (cache v66)
 
 - `render.js`: outline teks memakai `lineJoin='round'` (hilangkan artefak "duri" pada huruf).

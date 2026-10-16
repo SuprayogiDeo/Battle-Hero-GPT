@@ -60,9 +60,9 @@ ok(ev("__names[0]==='Bata batu'"), 'name sort uses item names');
 
 // Exercise the actual select-then-destination controls and quick-transfer transaction.
 ev("S.village={level:1,story:0};S.gather.items={wood:10,stone:0,herb:0,mushroom:0,fruit:0,plank:0,stone_brick:0,rope:0,forest_tonic:0};S.materialStorage={level:1,items:{wood:0,stone:0,herb:0,mushroom:0,fruit:0,plank:0,stone_brick:0,rope:0,forest_tonic:0}};scOrder=SC_MATERIALS.map(m=>m.id);scSelectedId=null;scSelectedSide='bag';scAmountMode='all';st='storage';var __woodRow=scOrder.indexOf('wood')");
-ev("lifeStorageClick(40,100+__woodRow*19+2)");ok(ev("scSelectedId==='wood'&&scSelectedSide==='bag'"), 'tap bag row selects without moving');
+ev("scRowPage=Math.floor(__woodRow/SC_ROWS);lifeStorageClick(40,112+(__woodRow%SC_ROWS)*SC_ROWH+4)");ok(ev("scSelectedId==='wood'&&scSelectedSide==='bag'"), 'tap bag row selects without moving');
 ev("lifeStorageClick(80,280);lifeStorageClick(400,280)");ok(ev("S.gather.items.wood===5&&S.materialStorage.items.wood===5"), 'split-half then destination button transfers the requested half');
-ev("lifeStorageClick(400,100+__woodRow*19+2);lifeStorageClick(160,280);lifeStorageClick(550,280)");ok(ev("S.gather.items.wood===10&&S.materialStorage.items.wood===0"), 'take-all requires selecting the chest row then destination');
+ev("scRowPage=Math.floor(__woodRow/SC_ROWS);lifeStorageClick(400,112+(__woodRow%SC_ROWS)*SC_ROWH+4);lifeStorageClick(160,280);lifeStorageClick(550,280)");ok(ev("S.gather.items.wood===10&&S.materialStorage.items.wood===0"), 'take-all requires selecting the chest row then destination');
 ev("S.gather.items.wood=2;S.gather.items.stone=1;scQuickMove('store')");ok(ev("S.gather.items.wood===0&&S.gather.items.stone===0&&S.materialStorage.items.wood===2&&S.materialStorage.items.stone===1"), 'quick-store moves several stacks without loss');
 ev("scQuickMove('take')");ok(ev("S.gather.items.wood===2&&S.gather.items.stone===1&&S.materialStorage.items.wood===0&&S.materialStorage.items.stone===0"), 'quick-take transfers the stacks back');
 ev("lifeDrawStorage()");ok(true, 'dual-panel storage draw path completes');

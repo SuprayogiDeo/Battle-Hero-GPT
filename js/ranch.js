@@ -105,6 +105,7 @@ function itemIcon(id,x,y,s){
  const tri=(p,f)=>{g.beginPath();g.moveTo(x+p[0]*u,y+p[1]*u);g.lineTo(x+p[2]*u,y+p[3]*u);g.lineTo(x+p[4]*u,y+p[5]*u);g.closePath();g.fillStyle=f;g.fill();g.strokeStyle=o;g.lineWidth=L;g.stroke()};
  g.save();
  switch(id){
+  case'gold':ell(8,8,6.5,6.5,'#f4c542');ell(8,8,3.8,3.8,'#d99a1e');rect(7.3,5.8,1.4,4.4,'#f9e08a');break;
   case'egg':ell(8,9,5,6.2,'#f6e3b4');ell(6.4,7,1.4,2,'rgba(255,255,255,.7)',-.4);break;
   case'milk':rect(5,3,6,2.5,'#c9d6e8');rect(4,5.5,8,9,'#f4f4ee');rect(4,8,8,3.5,'#7fb4e6');g.strokeStyle=o;g.lineWidth=L;g.strokeRect(x+4*u,y+3*u,8*u,11.5*u);break;
   case'truffle':ell(8,9.5,6,5,'#5a3b2a');ell(6,8,1,1,'#8a6246');ell(10,10.5,1,1,'#8a6246');ell(8,12,.9,.9,'#8a6246');break;

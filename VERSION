@@ -1,4 +1,4 @@
 Hero Battle repository bundle: 0.4.8-rc.1
-Runtime service-worker cache: v66
+Runtime service-worker cache: v67
 Implementation baseline: Tahap 9A — jembatan kayu, gapura dihapus, tanpa penumpukan bangunan, panel FOKUS minimize, minimap terbuka
 Release state: RC1; npm test includes tutorial milestone/save regressions and section-13 consistency gates. Performance overlay is opt-in via ?perf=1; numerical FPS/heap measurements remain unverified because Chromium headless timed out. HP real-device QA and asset-license review are blocking gates. Values not finalized remain PLACEHOLDER. Project remains private; do not deploy publicly.

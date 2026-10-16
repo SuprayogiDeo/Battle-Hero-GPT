@@ -139,6 +139,11 @@ function intAct(o){
 }
 const INT_LAB={KASIR:['KASIR','CASHIER'],PEDAGANG:['BICARA','TALK'],HARGA:['LIHAT','LOOK'],BERITA:['BACA','READ'],'MEJA DAGANG':['LIHAT','LOOK'],TIMBANGAN:['LIHAT','LOOK'],DAPUR:['DAPUR','KITCHEN'],BELI:['BELI','BUY'],GACHA:['GACHA','GACHA'],PERSIAPAN:['HERO','HEROES'],PETI:['PETI','CHEST'],PETA:['LIHAT','LOOK'],DESA:['DESA','VILLAGE'],PESANAN:['PESANAN','ORDERS'],BUKU:['BACA','READ'],TUNGKU:['LIHAT','LOOK'],LANDASAN:['LIHAT','LOOK'],'MEJA KERJA':['MEJA','BENCH'],MASAK:['MASAK','COOK'],BAHAN:['BAHAN','PANTRY'],ISTIRAHAT:['ISTIRAHAT','REST'],API:['LIHAT','LOOK'],KAYU:['LIHAT','LOOK'],JERAMI:['LIHAT','LOOK'],PANCING:['LIHAT','LOOK'],'TEMPAT TIDUR':['TIDUR','REST'],RAK:['LIHAT','LOOK'],KELUAR:['KELUAR','EXIT']};
 const intLabel=l=>{const q=INT_LAB[l];return q?wL(q[0],q[1]):l};
+const INT_NAME={KASIR:'CASHIER',PEDAGANG:'VENDOR',HARGA:'PRICE BOARD',BERITA:'NEWS BOARD','MEJA DAGANG':'MARKET STALL',TIMBANGAN:'SCALE',DAPUR:'KITCHEN COUNTER',BELI:'SHOP COUNTER',GACHA:'GACHA',PERSIAPAN:'HERO PREP',PETI:'CHEST',PETA:'MAP',DESA:'VILLAGE TABLE',PESANAN:'ORDERS BOARD',BUKU:'BOOKS',TUNGKU:'FORGE',LANDASAN:'ANVIL','MEJA KERJA':'WORKBENCH',MASAK:'STOVE',BAHAN:'PANTRY',ISTIRAHAT:'BED',API:'FIREPLACE',KAYU:'LOGS',JERAMI:'HAY',PANCING:'FISHING RODS','TEMPAT TIDUR':'BED',RAK:'SHELF'};
+const INT_NAME_ID={BAHAN:'LEMARI BAHAN',DAPUR:'LOKET DAPUR',BELI:'KASIR TOKO',PERSIAPAN:'PERSIAPAN HERO',DESA:'MEJA DESA',PESANAN:'PAPAN PESANAN',HARGA:'PAPAN HARGA',BERITA:'PAPAN BERITA',MASAK:'KOMPOR'};
+const intObjName=l=>wL(INT_NAME_ID[l]||l,INT_NAME[l]||l);
+const INT_FUN={cashier:1,market:1,gacha:1,heroes:1,village:1,orders:1,cook:1,storage:1,workshop:1,bed:1,news:1};
+function intSpark(x,y,a){g.save();g.globalAlpha=a;g.fillStyle='#ffe88a';g.fillRect(x-1,y-4,2,8);g.fillRect(x-4,y-1,8,2);g.fillStyle='#fff';g.fillRect(x-1,y-1,2,2);g.restore()}
 function intCtx(){const n=wI&&intNear();wI&&(wI.near=n);return n?{l:intLabel(n.lab),on:1,f:()=>intAct(n)}:null}
 function intUpdate(dt){
  const w=wI;intT+=dt;if(wMsg.t>0)wMsg.t-=dt;if(self.wFx)wFx(dt);
@@ -185,9 +190,19 @@ function intDraw(){
  const fl=.82+.18*Math.sin(intT*9);
  if(T0.gl.length){const old=g.globalCompositeOperation;g.globalCompositeOperation='lighter';T0.gl.forEach(a=>{const cx=ox+a[0]*WS,cy=oy+a[1]*WS,q=g.createRadialGradient(cx,cy,2,cx,cy,a[2]*fl);q.addColorStop(0,'rgba(255,170,80,.34)');q.addColorStop(1,'rgba(255,120,40,0)');g.fillStyle=q;g.fillRect(cx-a[2],cy-a[2],a[2]*2,a[2]*2)});g.globalCompositeOperation=old}
  const vg=g.createRadialGradient(320,160,120,320,160,420);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.38)');g.fillStyle=vg;g.fillRect(-OX,0,VW,312);
- const n=w.near;if(n&&!n.exit){const q=n,cx=ox+(q.x+q.fw/2)*WS,cy=oy+q.y*WS-18+Math.sin(intT*6)*2;T('▼',cx,cy,'#fc4',12,'center')}
+ r.objs.forEach((o,k)=>{if(!o.act||!INT_FUN[o.act]||o===w.near)return;intSpark(ox+(o.x+o.fw)*WS-4,oy+o.y*WS+2,.3+.5*Math.max(0,Math.sin(intT*3+k*1.7)))});
+ const n=w.near;if(n&&!n.exit){const q=n,sp=INT_SPR&&INT_SPR[q.s],sw=(sp?sp.w:q.fw*16)*2,sh=(sp?sp.h:28)*2,cx=ox+(q.x+q.fw/2)*WS,bot=oy+(q.y+q.fh)*WS,x0=Math.round(cx-sw/2)-3,y0=Math.round(bot-sh)-3,x1=x0+sw+6,y1=Math.round(bot)+3,pa=.6+.35*Math.sin(intT*8);
+  g.strokeStyle='rgba(255,226,120,'+pa.toFixed(2)+')';g.lineWidth=2;[[x0,y0,1,1],[x1,y0,-1,1],[x0,y1,-1*-1,-1],[x1,y1,-1,-1]].forEach(c=>{g.beginPath();g.moveTo(c[0],c[1]+c[3]*8);g.lineTo(c[0],c[1]);g.lineTo(c[0]+c[2]*8,c[1]);g.stroke()});
+  const nm=intObjName(q.lab);g.font='bold 10px monospace';const tw=Math.ceil(g.measureText(nm).width)+14,ty=Math.max(40,y0-16+Math.sin(intT*5)),tx=Math.max(4,Math.min(636-tw,Math.round(cx-tw/2)));
+  g.fillStyle='rgba(10,8,18,.9)';g.fillRect(tx,ty,tw,15);g.strokeStyle='#e6c45a';g.lineWidth=1;g.strokeRect(tx+.5,ty+.5,tw-1,14);T(nm,tx+tw/2,ty+11,'#fe8',10,'center');
+  g.fillStyle='#e6c45a';g.beginPath();g.moveTo(cx-4,ty+15);g.lineTo(cx+4,ty+15);g.lineTo(cx,ty+20);g.fill()}
  g.fillStyle='rgba(8,6,16,.78)';g.fillRect(6,6,150,22);g.strokeStyle='#e6c45a';g.lineWidth=1;g.strokeRect(6.5,6.5,149,21);T(wL(w.b.n[0],w.b.n[1]),81,21,'#fe8',10,'center');
  if(wMsg.t>0){g.globalAlpha=Math.min(1,wMsg.t);g.font='bold 11px monospace';const tw=Math.min(620,Math.ceil(g.measureText(tr(wMsg.s)).width)+28),tx0=Math.round(320-tw/2);g.fillStyle='rgba(0,0,0,.78)';g.fillRect(tx0,44,tw,24);g.strokeStyle='#fc4';g.lineWidth=1;g.strokeRect(tx0+.5,44.5,tw-1,23);T(wMsg.s,320,61,'#fe8',11,'center');g.globalAlpha=1}
  if(!wTalk){g.globalAlpha=.35;g.fillStyle='#000';g.beginPath();g.arc(JC[0],JC[1],JR,0,7);g.fill();g.globalAlpha=.8;g.strokeStyle='#fff';g.lineWidth=2;g.stroke();g.globalAlpha=.85;g.fillStyle='#9cf';g.beginPath();g.arc(JC[0]+wjx*JR*.6,JC[1]+wjy*JR*.6,14,0,7);g.fill();g.strokeStyle='#000';g.lineWidth=1;g.stroke();g.globalAlpha=1}
  btn(500,6,58,26,wL('MENU','MENU'),1);
 }
+/* Fade singkat saat layar (kasir, peti, dapur, dst) dibuka dari interior atau ditutup kembali ke interior. */
+let intScrT=0,intScrLast=null,intScrTs=0;const _intDrawTop=draw;
+draw=function(){_intDrawTop();const now=performance.now(),dt=Math.min(.1,(now-intScrTs)/1000);intScrTs=now;
+ if(intScrLast!==null&&st!==intScrLast&&wI&&(st==='world'||intScrLast==='world'))intScrT=.3;intScrLast=st;
+ if(intScrT>0){g.fillStyle='rgba(8,6,16,'+Math.min(1,intScrT/.3).toFixed(3)+')';g.fillRect(-OX,0,VW,360);intScrT-=dt}};
