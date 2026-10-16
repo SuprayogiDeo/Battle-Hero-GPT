@@ -320,14 +320,6 @@ var Tmap = (function () {
       add((p.gateCols[0] + p.gateCols[1] + 1) * 16, (p.gateRow + 1) * 32, 40, function (sx, sb) { drawPenGate(g, sx, sb, GO[p.id] || 0); });
     });
   }
-  /* plat nama: tiang ikut urutan kedalaman, papan + teks digambar di lapisan atas agar tidak tertutup pohon */
-  function drawPlate(g, sx, sb, text, fill) {
-    var fs = LF; g.save(); g.font = 'bold ' + fs + 'px system-ui'; var tw = Math.ceil(g.measureText(text).width); g.restore();
-    var w = Math.max(30, tw + 12), h = fs + 8;
-    g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(sx - 6, sb - 1, 12, 3);
-    g.fillStyle = '#3f2815'; g.fillRect(sx - 3, sb - 22, 6, 22); g.fillStyle = '#8a5a33'; g.fillRect(sx - 2, sb - 21, 4, 21);
-    LBL.push({ k: 'plate', x: Math.round(sx - w / 2), y: Math.round(sb - 20 - h), w: w, h: h, fill: fill, text: text, cx: Math.round(sx), fs: fs });
-  }
   /* lapisan atas: plat dulu, lalu label melayang. Label yang bertabrakan dengan plat/label lain digeser ke atas (maks 4x) */
   function overlay(g) {
     if (!LBL.length) return;

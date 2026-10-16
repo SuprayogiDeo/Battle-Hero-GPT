@@ -127,12 +127,11 @@ function hbMapSelect(tx,ty){const v=hbMapDimensions();tx=Math.max(0,Math.min(v.w
 }
 function hbWorldMapClick(x,y){
   const tu=(typeof hudTouchUnit==='function')?hudTouchUnit():44;
-  if(y<Math.max(42,24.5+tu/2)&&x>=530){hbCloseWorldMap();return;}
+  if(y<Math.max(42,tu)&&x>=530){hbCloseWorldMap();return;}
   const wl=Math.max(294,313.5-tu/2);
   if(x>=416&&x<=620&&y>=wl&&y<=Math.min(360,wl+Math.max(tu,34))){if(S.journal)delete S.journal.waypoint;hbMapPick=null;sv();sfx('click');return;}
   if(x>=20&&x<=405&&y>=50&&y<=332){const v=hbMapDimensions(),mx=x-24,my=y-50,scale=Math.min(375/v.w,278/v.h),tx=Math.floor(mx/scale),ty=Math.floor(my/scale);if(mx>=0&&my>=0&&tx>=0&&ty>=0&&tx<v.w&&ty<v.h)hbMapSelect(tx,ty);return;}
   if(x>=426&&x<=624){const v=hbMapDimensions(),regions=v.regions||[],idx=Math.floor((y-79)/43);if(idx>=0&&idx<regions.length){const b=regions[idx],cx=Math.floor(b.x+b.w/2),cy=Math.floor(b.y+b.h/2);if(!hbIsExplored(cx,cy,v)){say(jrLang('Jelajahi wilayah ini di dunia untuk membuka penanda.','Explore this region in the world to unlock a waypoint.'));return;}hbMapSelect(cx,cy);return;}}
-  if(y>=320&&x<150){if(S.journal)delete S.journal.waypoint;sv();sfx('click');return;}
 }
 function hbMapFont(){let f=11;try{if(self.Tmap&&Tmap.labelFont)f=Tmap.labelFont(g);else{const r=g.canvas.getBoundingClientRect(),k=r.height/360;if(k>0)f=Math.round(11/k)}}catch(e){}return Math.max(8,Math.min(11,f))}
 function hbDrawWorldMap(){

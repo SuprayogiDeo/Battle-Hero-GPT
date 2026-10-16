@@ -71,8 +71,8 @@ for (const prof of Object.keys(PROF)) { const s = sOf(prof); for (const z of ZS)
     [prof, zz, 'hud: minimap -> peta', 100 * zz, 76 * zz], [prof, zz, 'hud: FOKUS (penuh)', fr.w, Math.max(fr.h + 8, Math.min(56, L.hit))]);
   ev('S.journal.fmin=1'); const fm = ev('jrFocusRect()'); ev('S.journal.fmin=0'); taps.push([prof, zz, 'hud: FOKUS (mini)', fm.w, Math.max(fm.h + 8, Math.min(56, L.hit))]); } }
 for (const prof of Object.keys(PROF)) { const zz = 1; setProfile(prof); const tu = ev('hudTouchUnit()'), wl = Math.max(294, 313.5 - tu / 2), dh = ev('wgdLayout().h');
-  // v72: area ketuk TUTUP = x>=530, y<max(42,24.5+tu/2); HAPUS PENANDA = y dari max(294,313.5-tu/2) setinggi max(tu,34) (dipotong 360); tombol dialog = wgdLayout().h
-  taps.push([prof, zz, 'adv: TUTUP peta (area ketuk)', 90, Math.max(42, 24.5 + tu / 2)], [prof, zz, 'adv: TUTUP (kotak tampak 78x25, tidak diubah)', 78, 25],
+  // v72: area ketuk TUTUP = x>=530, y<max(42,tu); HAPUS PENANDA = y dari max(294,313.5-tu/2) setinggi max(tu,34) (dipotong 360); tombol dialog = wgdLayout().h
+  taps.push([prof, zz, 'adv: TUTUP peta (area ketuk)', 90, Math.max(42, tu)], [prof, zz, 'adv: TUTUP (kotak tampak 78x25, tidak diubah)', 78, 25],
     [prof, zz, 'adv: HAPUS PENANDA (area ketuk)', 204, Math.min(360, wl + Math.max(tu, 34)) - wl], [prof, zz, 'adv: baris wilayah (198x43; pitch tetap, DITUNDA)', 198, 43],
     [prof, zz, 'adv: petak peta (375/128 per petak; pilih terdekat; DITUNDA)', 375 / 128, 375 / 128],
     [prof, zz, 'dialog gerbang: tombol (wgdLayout)', 260, dh],
