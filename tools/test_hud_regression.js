@@ -49,4 +49,12 @@ ok(labs.size >= 20, 'label tombol aksi ditemukan: ' + labs.size);
 labs.forEach(l => ok(l.length * 9 * .6 <= 2 * 30 * .9 - 6, 'label tombol aksi "' + l + '" muat lingkaran terkecil (z=.9, 9 px)'));
 ['Pick the fishing rod on the hotbar first (unlocks at stage 6).', 'The quest board is locked for now. Try again later.'].forEach(t => ok(t.length * 6 <= 420 - 28, 'toast "' + t.slice(0, 24) + '..." muat toast maks 420'));
 const wsrc = fs.readFileSync(path.join(root, 'js/world.js'), 'utf8'); ok(wsrc.includes('268') && !wsrc.includes('fillRect(152,286'), 'toast biasa tidak kembali ke y=286');
+// (4) save lama (tanpa S.hb, S.journal, S.set.ui, disc): HUD, FOKUS, minimap, dialog tetap valid tanpa melempar galat
+setS(1);
+ev("delete S.hb;delete S.journal;delete S.set.ui;S.world={x:444,y:555};st='world';wDlg=0;wTalk=null;wI=null;wFade=null");
+ok([.9, 1, 1.1].includes(ev('hudUiScale()')), 'save tanpa set.ui tetap menghasilkan skala UI valid (settings.js menyanitasi ke 1 saat memuat)');
+let L0 = ev('hudLayout()'); ok(L0.left >= 0 && L0.left + 7 * L0.step + L0.slot <= 640, 'hotbar save lama di dalam kanvas');
+ok(ev('(()=>{try{hudEnsure();jrEnsure();const f=jrFocusRect();hudDown(1,5,5);hudDown(1,300,333);hudDown(1,592,298);hudDraw();return f.w>0}catch(e){return String(e)}})()') === true, 'HUD/FOKUS/minimap/aksi tidak melempar galat pada save lama');
+ok(ev('wgdLayout().rows.length') === 4, 'dialog gerbang menghasilkan 4 tombol');
+ok(ev('S.hb.sel') === 0 && ev('!!S.journal'), 'S.hb dan S.journal dipulihkan');
 console.log(`PASS: regresi HUD landscape — tanpa irisan visual, area ketuk >= 44 px (hotbar, aksi, FOKUS, minimap, dialog, TUTUP, HAPUS), label/toast muat (${n} pemeriksaan)`);

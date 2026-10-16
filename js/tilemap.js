@@ -327,13 +327,6 @@ var Tmap = (function () {
     g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
     for (i = 0; i < LBL.length; i++) { l = LBL[i]; if (l.k !== 'sign') continue; if (l.s) roofSign(g, l.r, l.o, l.x, l.y); else wallSign(g, l.r, l.x, l.y, l.nm); }
     g.textAlign = 'center'; g.textBaseline = 'middle';
-    for (i = 0; i < LBL.length; i++) {
-      l = LBL[i]; if (l.k !== 'plate') continue;
-      g.fillStyle = '#2a1c12'; g.fillRect(l.x - 1, l.y - 1, l.w + 2, l.h + 2); g.fillStyle = l.fill; g.fillRect(l.x, l.y, l.w, l.h);
-      g.fillStyle = 'rgba(255,255,255,.25)'; g.fillRect(l.x, l.y, l.w, 2); g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(l.x, l.y + l.h - 2, l.w, 2);
-      g.font = 'bold ' + (l.fs || 8) + 'px system-ui'; g.fillStyle = '#2a1c12'; g.fillText(l.text, l.cx, l.y + l.h / 2 + 1);
-      P.push([l.x - 1, l.y - 1, l.w + 2, l.h + 2]);
-    }
     g.textBaseline = 'bottom'; g.font = 'bold ' + (fs + 1) + 'px system-ui'; g.lineWidth = 3; g.strokeStyle = 'rgba(16,24,17,.94)'; g.lineJoin = 'round';
     for (i = 0; i < LBL.length; i++) {
       l = LBL[i]; if (l.k !== 'label') continue;

@@ -9,6 +9,7 @@
 - `tilemap.js`: hapus kode mati `ZONE`/`ZT` (tidak pernah dibaca).
 - `tools/test_hud_regression.js` (baru, terdaftar di `run_tests.js`): irisan visual HUD = 0 dan di dalam 640x360, area ketuk >= 44 px (hotbar, aksi, FOKUS, minimap, dialog gerbang, TUTUP, HAPUS PENANDA; diukur dengan menyentuh), label/toast muat; profil s=.85/1/1.2 x ui 0/1/2. Tes ini menemukan area TUTUP hanya 42,9 px di s=.85, rumus diperbaiki menjadi `y<max(42,tu)`.
 - `journal.js`: dua teks 7 px ("Berikutnya/Max bond" di kartu hubungan, catatan bonus tier di dasar layar) dinaikkan ke 8 px; lebar terpanjang (EN, 91 krc) 437 px dari 640 dan 144 px dari 296 kartu, jadi muat.
+- `tilemap.js`: loop gambar `plate` di `overlay()` dihapus (tak ada lagi yang mengisi `LBL` berjenis `plate` sejak `drawPlate` dihapus). `test_hud_regression.js` juga menguji save lama (tanpa `S.hb`/`S.journal`/`S.set.ui`).
 - Kode mati dihapus: `drawPlate` (tilemap.js, tak pernah dipanggil) dan cabang hapus-penanda tersembunyi `y>=320&&x<150` di `hbWorldMapClick` (tanpa tombol terlihat; ketukan tak sengaja di teks petunjuk menghapus penanda).
 - `tools/test_inventory_storage.js`: asersi string hitungan hotbar diperbarui (font kini `hudFs(9,...)`; maksud tes sama).
 - Ditunda (butuh keputusan/cek perangkat): papan dinding portrait (fs turun ke 10 logis = 6,1 px layar), baris wilayah peta, tombol tutorial, minimap z=.9 portrait (41,7 px).
