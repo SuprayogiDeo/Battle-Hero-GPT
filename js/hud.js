@@ -9,7 +9,7 @@ const HB_TOOLS=[
  {id:'hand',i:0,n:['Tangan','Hand']},{id:'hoe',i:1,n:['Cangkul','Hoe']},{id:'can',i:2,n:['Ember','Bucket']},
  {id:'axe',i:3,n:['Kapak','Axe']},{id:'pick',i:4,n:['Beliung','Pickaxe']},{id:'rod',i:5,n:['Pancing','Fishing rod']}];
 const HB_X=174,HB_Y=316,HB_W=34,HB_G=3,HB_AX=592,HB_AY=298,HB_AR=30;
-let hudNameT=0,hudSw=null,hudMM=null;
+let hudNameT=0,hudSw=null;
 function hudUiScale(){return [.9,1,1.1][Math.max(0,Math.min(2,Math.round(Number(S.set.ui)||0))) ]||1}
 function hudTouchUnit(){const r=cv&&cv.getBoundingClientRect?cv.getBoundingClientRect():null,s=r&&r.width?r.width/VW:1;return Math.max(44,44/Math.max(.1,s))}
 function hudLayout(){const z=hudUiScale(),slot=HB_W*z,hit=hudTouchUnit(),step=Math.max((HB_W+HB_G)*z,hit),left=(640-(7*step+slot))/2,y=333-slot/2;return{z,slot,hit,step,left,y,centerY:333}}
@@ -73,19 +73,6 @@ function hudCtx(){
  return null;
 }
 const hudIcon=(i,x,y,z,a)=>{if(HUD_IM.complete&&HUD_IM.naturalWidth>0){g.globalAlpha=a==null?1:a;g.drawImage(HUD_IM,i*16,0,16,16,Math.round(x),Math.round(y),16*z,16*z);g.globalAlpha=1}};
-function hudMini(){
- const V=self.Tmap&&Tmap.data&&Tmap.data();if(!V||!V.grid||!S.world)return;
- if(!hudMM){hudMM=document.createElement('canvas');hudMM.width=V.w;hudMM.height=V.h;const x=hudMM.getContext('2d');
- const col={'~':'#3f86c4',',':'#d3b27a','T':'#2e6a3a','.':'#6fb552','p':'#8a5a38','F':'#b08a52','f':'#b08a52','X':'#7e9a62','d':'#d3b27a','S':'#e0a050','R':'#e0a050','G':'#c0c8d8','Q':'#e0a050'};
- for(let yy=0;yy<V.h;yy++){const row=V.grid[yy];for(let xx=0;xx<V.w;xx++){x.fillStyle=col[row[xx]]||'#6fb552';x.fillRect(xx,yy,1,1)}}
- INT_B.forEach(b=>{x.fillStyle='#c9784a';x.fillRect((b.x>>4)-2,(b.y>>4)-3,4,3);x.fillStyle='#f0c48a';x.fillRect((b.x>>4)-2,(b.y>>4)-3,4,1)});
- (V.places||[]).forEach(p=>{x.fillStyle='#ffd24a';x.fillRect(p.x,p.y,1,1)});
- }
- const z=hudUiScale(),mw=100*z,mh=76*z,tx=S.world.x/WS,ty=S.world.y/WS,sx=Math.max(0,Math.min(V.w-64,tx-32)),sy=Math.max(0,Math.min(V.h-48,ty-24));
- g.fillStyle='rgba(10,8,18,.9)';g.fillRect(4,4,mw,mh);g.strokeStyle='#e6c45a';g.lineWidth=1;g.strokeRect(4.5,4.5,mw-1,mh-1);
- g.imageSmoothingEnabled=false;g.drawImage(hudMM,sx,sy,64,48,6,6,mw-4,mh-4);
- const px=6+(tx-sx)*(mw-4)/64,py=6+(ty-sy)*(mh-4)/48;g.fillStyle='#000';g.fillRect(px-3*z,py-3*z,6*z,6*z);g.fillStyle=Math.sin(performance.now()/220)>0?'#ffe44a':'#fff';g.fillRect(px-2*z,py-2*z,4*z,4*z);
-}
 function hudBar(){
  const h=hudEnsure(),L=hudLayout();
  for(let k=0;k<8;k++){
@@ -110,7 +97,7 @@ function hudDraw(){
  if(wFade){const a=intFadeAlpha();g.fillStyle='rgba(0,0,0,'+a.toFixed(3)+')';g.fillRect(-OX,0,VW,360)}
  if(lifeWorldQuick||wDlg||wTalk)return;
  hudEnsure();if(hudNameT>0)hudNameT-=1/60;
- if(!wI&&!wVon)hudMini();hudBar();hudAct();
+ hudBar();hudAct();
 }
 function hudDown(id,x,y){
  const L=hudLayout(),r=Math.max(HB_AR*L.z,L.hit/2);

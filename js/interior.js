@@ -96,6 +96,9 @@ function intLockMsg(b){
  return '';
 }
 function intFade(fn){wFade={t:0,fn:fn,done:0};wjid=null;wjx=wjy=0}
+/* Kotak nama ruangan: lebar mengikuti teks terpanjang antara ID dan EN (tetap saat ganti bahasa), padding 12, batas 150..260.
+   Bila melebihi 260 font dikecilkan 10 -> 8 px, lalu baru dipotong dengan "…". mw(teks,ukuran) = lebar teks (monospace tebal). */
+function intNameBox(n0,n1,cur,mw){const PAD=12,MIN=150,MAX=260;let fs=10;const wd=f=>Math.max(mw(n0,f),mw(n1,f));while(wd(fs)+PAD>MAX&&fs>8)fs--;let t=cur;if(mw(t,fs)+PAD>MAX){while(t.length>1&&mw(t+'\u2026',fs)+PAD>MAX)t=t.slice(0,-1);t+='\u2026'}return{w:Math.max(MIN,Math.min(MAX,Math.ceil(wd(fs))+PAD)),fs:fs,text:t}}
 function intEnter(b){
  const room=intCompile(b),back={x:S.world.x,y:S.world.y,tool:S.hb&&Number.isFinite(S.hb.sel)?S.hb.sel:0};
  intFade(()=>{wI={b:b,room:room,x:room.sx,y:room.sy,near:null,cx:null,cy:null,returnPos:back};wjid=null;wjx=wjy=0;wNear=null;wNpc=null;wPlace=null;sv();sfx('click')});
@@ -199,7 +202,7 @@ function intDraw(){
   const nm=intObjName(q.lab);g.font='bold 10px monospace';const tw=Math.ceil(g.measureText(nm).width)+14,ty=Math.max(40,y0-16+Math.sin(intT*5)),tx=Math.max(4,Math.min(636-tw,Math.round(cx-tw/2)));
   g.fillStyle='rgba(10,8,18,.9)';g.fillRect(tx,ty,tw,15);g.strokeStyle='#e6c45a';g.lineWidth=1;g.strokeRect(tx+.5,ty+.5,tw-1,14);T(nm,tx+tw/2,ty+11,'#fe8',10,'center');
   g.fillStyle='#e6c45a';g.beginPath();g.moveTo(cx-4,ty+15);g.lineTo(cx+4,ty+15);g.lineTo(cx,ty+20);g.fill()}
- g.fillStyle='rgba(8,6,16,.78)';g.fillRect(6,6,150,22);g.strokeStyle='#e6c45a';g.lineWidth=1;g.strokeRect(6.5,6.5,149,21);T(wL(w.b.n[0],w.b.n[1]),81,21,'#fe8',10,'center');
+ {const nb=intNameBox(w.b.n[0],w.b.n[1],wL(w.b.n[0],w.b.n[1]),(t,f)=>{g.font='bold '+f+'px monospace';return g.measureText(tr(t)).width});g.fillStyle='rgba(8,6,16,.78)';g.fillRect(6,6,nb.w,22);g.strokeStyle='#e6c45a';g.lineWidth=1;g.strokeRect(6.5,6.5,nb.w-1,21);T(nb.text,6+nb.w/2,21,'#fe8',nb.fs,'center')}
  if(wMsg.t>0){g.globalAlpha=Math.min(1,wMsg.t);g.font='bold 11px monospace';const tw=Math.min(620,Math.ceil(g.measureText(tr(wMsg.s)).width)+28),tx0=Math.round(320-tw/2);g.fillStyle='rgba(0,0,0,.78)';g.fillRect(tx0,44,tw,24);g.strokeStyle='#fc4';g.lineWidth=1;g.strokeRect(tx0+.5,44.5,tw-1,23);T(wMsg.s,320,61,'#fe8',11,'center');g.globalAlpha=1}
  if(!wTalk){g.globalAlpha=.35;g.fillStyle='#000';g.beginPath();g.arc(JC[0],JC[1],JR,0,7);g.fill();g.globalAlpha=.8;g.strokeStyle='#fff';g.lineWidth=2;g.stroke();g.globalAlpha=.85;g.fillStyle='#9cf';g.beginPath();g.arc(JC[0]+wjx*JR*.6,JC[1]+wjy*JR*.6,14,0,7);g.fill();g.strokeStyle='#000';g.lineWidth=1;g.stroke();g.globalAlpha=1}
  btn(500,6,58,26,wL('MENU','MENU'),1);

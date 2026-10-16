@@ -68,7 +68,7 @@ function hbDungeonResultClick(x,y){if(y<42&&x<100){worldResume();return;}if(y>=2
 let hbMapCanvas=null,hbMapDiscRef=null,hbMapW=0,hbMapH=0,hbMapPick=null;
 const HB_BIOME_COLORS={meadow:'#78ad58',forest:'#326b42',lake:'#438fb3',coast:'#c7b36e',mountain:'#858e7b'};
 function hbMapData(){return self.Tmap&&Tmap.data&&Tmap.data()||null;}
-function hbMapDimensions(){const v=hbMapData();return v&&v.grid?{w:v.w||128,h:v.h||96,grid:v.grid,regions:v.biomeRegions||[],places:v.places||[]}: {w:WW||40,h:WH||30,grid:WMAP.map(r=>r.join('')),regions:[],places:[]};}
+function hbMapDimensions(){const v=hbMapData();return v&&v.grid?{w:v.w||128,h:v.h||96,grid:v.grid,regions:v.biomeRegions||[],places:v.places||[],roads:v.roads||[]}: {w:WW||40,h:WH||30,grid:WMAP.map(r=>r.join('')),regions:[],places:[],roads:[]};}
 function hbIsExplored(x,y,v){const disc=S.world&&S.world.disc||'';if(disc==='*')return true;if(!disc)return false;const ix=y*v.w+x;return disc.charAt(ix)==='1';}
 function hbBiomeAt(x,y,regions){return regions.find(b=>x>=b.x&&y>=b.y&&x<b.x+b.w&&y<b.y+b.h)||null;}
 function hbMakeMap(){
@@ -78,7 +78,7 @@ function hbMakeMap(){
   for(let y=0;y<v.h;y++)for(let x=0;x<v.w;x++){
     const ch=(v.grid[y]||'').charAt(x)||'.',b=hbBiomeAt(x,y,v.regions),seen=hbIsExplored(x,y,v),base=b&&b.color||HB_BIOME_COLORS[b&&b.id]||'#6e9955';
     let col=base;
-    if(seen){if(ch==='~')col='#3b8fbe';else if(ch===',')col='#b7a071';else if(ch==='X'||ch==='T')col='#3c4c36';else if(ch==='S'||ch==='R'||ch==='G'||ch==='Q'||ch==='F'||ch==='p'||ch==='f')col='#d8c78b';else if(ch==='+')col='#b9a9c8';}
+    if(seen){const rd=v.roads[y];if(ch==='~')col='#3b8fbe';else if(ch===',')col='#b7a071';else if(ch==='X'||ch==='T')col='#3c4c36';else if(ch==='S'||ch==='R'||ch==='G'||ch==='Q'||ch==='F'||ch==='p'||ch==='f')col='#d8c78b';else if(ch==='+')col='#e0a85a';if(ch!=='~'&&ch!=='+'&&rd&&rd.charAt(x)==='1')col='#c98f55';}
     else col=base;
     cx.fillStyle=col;cx.fillRect(x*3,y*3,3,3);
     if(!seen){cx.fillStyle='rgba(20,29,28,.55)';cx.fillRect(x*3,y*3,3,3);}
@@ -132,12 +132,16 @@ function hbWorldMapClick(x,y){
   if(x>=426&&x<=624){const v=hbMapDimensions(),regions=v.regions||[],idx=Math.floor((y-79)/43);if(idx>=0&&idx<regions.length){const b=regions[idx],cx=Math.floor(b.x+b.w/2),cy=Math.floor(b.y+b.h/2);if(!hbIsExplored(cx,cy,v)){say(jrLang('Jelajahi wilayah ini di dunia untuk membuka penanda.','Explore this region in the world to unlock a waypoint.'));return;}hbMapSelect(cx,cy);return;}}
   if(y>=320&&x<150){if(S.journal)delete S.journal.waypoint;sv();sfx('click');return;}
 }
+function hbMapFont(){let f=11;try{if(self.Tmap&&Tmap.labelFont)f=Tmap.labelFont(g);else{const r=g.canvas.getBoundingClientRect(),k=r.height/360;if(k>0)f=Math.round(11/k)}}catch(e){}return Math.max(8,Math.min(11,f))}
 function hbDrawWorldMap(){
   const v=hbMapDimensions(),en=S.set&&S.set.lang==='en';g.save();g.translate(OX,0);ov(.96);card(10,8,620,344,'#6fbd8a',1);
   T(en?'WORLD MAP':'PETA DUNIA',22,29,'#fc4',17);T(en?'Main regions are visible; details reveal as you explore.':'Wilayah utama terlihat; detail terbuka saat dijelajahi.',22,43,'#cde',8);btn(538,12,78,25,en?'CLOSE':'TUTUP',1);
   const x0=24,y0=50,w=375,h=278;g.fillStyle='#263a35';g.fillRect(x0-2,y0-2,w+4,h+4);const c=hbMakeMap();g.imageSmoothingEnabled=false;g.drawImage(c,x0,y0,w,h);
   const scale=Math.min(w/v.w,h/v.h);(v.regions||[]).forEach(b=>{const bx=x0+b.x*scale,by=y0+b.y*scale,bw=b.w*scale,bh=b.h*scale;g.strokeStyle=b.color||'#dce9bd';g.lineWidth=1;g.strokeRect(bx+.5,by+.5,bw-1,bh-1);});
   const places=(v.places||[]).filter(p=>hbIsExplored(p.x,p.y,v));places.slice(0,18).forEach(p=>{const px=x0+(p.x+.5)*scale,py=y0+(p.y+.5)*scale;g.fillStyle=p.type==='mushroom_grove'?'#f8a4f0':'#fff2a8';g.beginPath();g.arc(px,py,2.2,0,Math.PI*2);g.fill();});
+  {const fs=hbMapFont(),PR=['market','village_hall','workshop','kitchen','pier'],rank=q=>{const i=PR.indexOf(q.type);return i<0?99:i},list=places.slice().sort((a,b)=>rank(a)-rank(b)),used=[];let extra=0;g.font='bold '+fs+'px monospace';
+  list.forEach(q=>{if(used.length>=18)return;const pri=rank(q)<99;if(!pri&&extra>=6)return;const nm0=en?(q.name_en||q.name):(q.name||q.name_en);if(!nm0)return;const nm=typeof tr==='function'?tr(nm0):nm0,tw=Math.ceil(g.measureText(nm).width)+2,lx=Math.max(x0+2,Math.min(x0+w-tw-2,x0+(q.x+.5)*scale-tw/2)),ly=Math.max(y0+fs+1,y0+(q.y+.5)*scale-4),r=[lx-1,ly-fs-1,tw+2,fs+3];
+   if(used.some(u=>r[0]<u[0]+u[2]&&r[0]+r[2]>u[0]&&r[1]<u[1]+u[3]&&r[1]+r[3]>u[1]))return;used.push(r);if(!pri)extra++;T(nm,lx,ly,'#fff6c8',fs);});}
   if(S.world){const px=x0+(S.world.x/WS+.5)*scale,py=y0+(S.world.y/WS+.5)*scale;g.fillStyle='#fff';g.beginPath();g.arc(px,py,4,0,Math.PI*2);g.fill();g.strokeStyle='#342c18';g.lineWidth=1;g.stroke();}
   card(416,48,202,280,'#507c61',1);T(en?'REGIONS':'WILAYAH',430,67,'#fc4',11);(v.regions||[]).slice(0,5).forEach((b,i)=>{const y=79+i*43,seen=!!(S.journal&&S.journal.seenBiomes&&S.journal.seenBiomes[b.id]);g.fillStyle=b.color||'#6a8';g.fillRect(430,y,12,12);T(en?(b.name_en||b.id):(b.name||b.id),449,y+10,seen?'#fff':'#aab8b1',8);T(seen?(en?'DISCOVERED':'DITEMUKAN'):(en?'EXPLORE':'JELAJAHI'),449,y+23,seen?'#9f9':'#8ca39a',7);});
   const wp=S.journal&&S.journal.waypoint;if(wp){btn(416,300,202,27,en?'CLEAR WAYPOINT':'HAPUS PENANDA',1);}else{card(416,300,202,27,'#405b4f',0);T(en?'No waypoint set':'Belum ada penanda',517,317,'#afc7b4',8,'center');}
@@ -152,4 +156,4 @@ function hbDrawWaypoint(){
 const hbBaseDrawWorld=drawWorld;drawWorld=function(){hbBaseDrawWorld();hbDrawWaypoint();};
 const hbBaseDraw=draw;draw=function(){hbBaseDraw();if(st==='worldmap')hbDrawWorldMap();else if(st==='dungeonres')hbDrawDungeonResult();};
 function hbDrawDungeonResult(){const d=hbEnsureAdventure(),r=d.lastResult||{},en=S.set&&S.set.lang==='en';g.save();g.translate(OX,0);ov(.93);card(112,52,416,262,'#76c896',1);T(en?'DUNGEON CLEARED':'DUNGEON SELESAI',320,83,'#fc4',22,'center');T(en?'Forest Ruins · 3 rooms':'Reruntuhan Hutan · 3 ruangan',320,108,'#d8e9df',11,'center');T(r.firstClear?(en?'Primary reward unlocked!':'Hadiah utama berhasil dibuka!'):(en?'Repeat rewards are reduced.':'Hadiah pengulangan lebih kecil.'),320,140,r.firstClear?'#8f9':'#cde',12,'center');T((en?'Gold earned: ':'Emas didapat: ')+(r.gold||d.currentGold||0),320,167,'#fc4',12,'center');T((en?'Essence earned: ':'Esensi didapat: ')+(r.essence||d.currentEssence||0),320,187,'#9cf',11,'center');btn(48,272,252,32,en?'REPLAY DUNGEON':'ULANGI DUNGEON',1);btn(334,272,258,32,en?'RETURN TO VILLAGE':'KEMBALI KE DESA',0);g.restore();}
-addEventListener('keydown',e=>{if(e.repeat)return;if(st==='worldmap'&&e.key==='Escape'){hbCloseWorldMap();e.preventDefault();}else if(st==='dungeonres'&&e.key==='Escape'){worldResume();e.preventDefault();}});
+addEventListener('keydown',e=>{if(e.repeat)return;const mk=(e.key==='m'||e.key==='M')&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!/^(INPUT|TEXTAREA|SELECT)$/.test((e.target&&e.target.tagName)||'');if(mk&&st==='worldmap'){hbCloseWorldMap();e.preventDefault();return;}if(mk&&st==='world'&&!wI&&!wDlg&&!wTalk&&!wFade&&!lifeWorldQuick&&self.Tmap&&Tmap.ready&&Tmap.ready()){hbOpenWorldMap();e.preventDefault();return;}if(st==='worldmap'&&e.key==='Escape'){hbCloseWorldMap();e.preventDefault();}else if(st==='dungeonres'&&e.key==='Escape'){worldResume();e.preventDefault();}});

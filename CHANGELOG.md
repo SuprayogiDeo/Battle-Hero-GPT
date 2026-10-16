@@ -1,5 +1,27 @@
 # Changelog
 
+## Batch 9B-16 (data peta, skrip fix_map_10a) — 0.4.8-rc.1 — jalan Balai Desa, jalan timur jembatan, semak b_res5 (cache v71)
+
+- `tools/fix_map_10a.py` (baru, idempoten; memanggil `build_minimap_roads.py`): (1) tangga diagonal menuju Balai Desa diganti jalur L 1 petak: (77,44) turun ke (77,47), lalu ke barat sampai jalan x=65; 9 petak tangga yang tak terpakai kembali jadi rumput. Jalan di luar desa lama memang polos (ground 34, tanpa tepi), jalur baru mengikuti itu. (2) Jalan timur jembatan: 3 petak (y 22..24) di x 61..62, 2 petak (y 23..24) di x=63, lalu 1 petak; tepi rumput memakai tile tepi yang sama dengan sisi barat (S 35, N 40, SE 49, NE 48, SW 42, S+W 46 yang sudah ada di tiles.png). (3) `bush_c` (50,14) -> (50,16), >= 3 petak dari pintu b_res5 dan dari jalan; sel padat lama dibuka, yang baru ditutup.
+- Aset berubah: `assets/world/index.json` (grid, objects, roads), `chunks/c1_0.json`, `chunks/c2_1.json`. `tiles.png` tidak berubah (tidak ada tile baru; ID maks < 160).
+- `tools/test_map_10a.js` (baru, terdaftar di `run_tests.js`): BFS pintu Balai Desa -> x=65, bekas tangga bukan jalan, jalan timur jembatan berjalan dan bukan air, jarak bush_c >= 3, semua ID tile < 160.
+- `sw.js` v71, `VERSION`, `tools/test_7defg.py` diselaraskan.
+
+## Batch 9B-15 (keterbacaan papan, nama peta, kotak nama interior) — 0.4.8-rc.1 — papan terbaca malam, font adaptif peta, kotak nama selebar teks (cache v70)
+
+- `tilemap.js`: papan dinding (`wallSign`) dan papan atap (`roofSign`) kini masuk antrean `LBL` berjenis `sign` dan digambar di `overlay()` (sesudah tint malam) dengan posisi sama persis; diredupkan halus `0,35*FX.n` hanya pada papan (kotak untuk papan dinding, warna teks untuk papan atap). Siang/salju: `FX.n < 0,02` -> redupan 0, tampilan sama. Varian terkunci (`md=='l'`) tetap tanpa papan. Cache lebar `WSC` dan jepitan lebar sprite tidak berubah. Konsekuensi diterima: pohon di depan pintu tidak lagi menutupi papan. `Tmap.labelFont` diekspos.
+- `adventure.js` peta penuh: font nama tempat adaptif (`Tmap.labelFont`, dijepit 8..11 px), tabrakan memakai kotak teks sebenarnya, prioritas market > village_hall > workshop > kitchen > pier, maks 6 nama non-prioritas, tanpa bayangan ganda (outline dari `T()`).
+- `interior.js`: `intNameBox()` — lebar kotak nama ruangan mengikuti teks terpanjang ID/EN (padding 12, 150..260 px; font 10 -> 8 px lalu dipotong "…"). Durasi fade tidak berubah. `sfx('click')` pada pintu dipertahankan (tidak ada efek pintu di audio).
+- `tools/test_interior_name_box.js` (baru, terdaftar di `run_tests.js`): semua ruangan `INT_B` x 2 bahasa.
+- `sw.js` v70, `VERSION`, `tools/test_7defg.py` diselaraskan.
+
+## Batch 9B-14 (peta penuh, bersih-bersih HUD) — 0.4.8-rc.1 — tombol M, jalan/jembatan/nama tempat di peta dunia, hapus hudMini (cache v69)
+
+- `adventure.js`: peta dunia (state `worldmap`, dibuka dengan mengetuk minimap) kini juga dibuka/ditutup dengan tombol M (Esc dan TUTUP tetap); jalan `V.roads` dan jembatan `+` tergambar di petak yang sudah dijelajahi; nama tempat (ID/EN) ditulis di samping penanda tanpa saling menimpa. Skala tetap mengikuti ukuran kartu (~2,9 px/petak) karena tinggi kanvas logis 360.
+- `hud.js`: `hudMini()` dan `hudMM` dihapus (hanya dipanggil saat `!wVon`; minimap dunia bertilemap digambar `Tmap.hud`).
+- Banner zona: tidak ada kode baru; toast `discovery` (`jrDiscoverBiome`, journal.js) sudah menampilkan nama wilayah saat pertama kali masuk.
+- `sw.js` v69, `VERSION`, `tools/test_7defg.py` diselaraskan.
+
 ## Batch 9B-13 (polish visual dunia) — 0.4.8-rc.1 — minimap, label bangunan, transisi interior (cache v68)
 
 - `tilemap.js` minimap: jendela 64x48 petak mengikuti pemain (sebelumnya seluruh peta 128x96 dikecilkan ke 100x76 = <1 px/petak, jalan dan jembatan tak terlihat); jembatan `+`, jalan (`V.roads`), bangunan berbingkai, ladang, penanda tempat (emas) dan gerbang (biru), penanda pemain berkedip 5px berbingkai. Noise petak `X` diredam. Posisi/ukuran HUD tidak berubah.

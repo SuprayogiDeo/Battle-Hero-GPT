@@ -224,7 +224,10 @@ var Tmap = (function () {
     g.fillStyle = 'rgba(255,255,255,.28)'; g.fillRect(x, y, w, 2); g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(x, y + h - 2, w, 2);
     g.fillStyle = '#2a1c12'; g.fillRect(x + 2, y + 3, 1, 1); g.fillRect(x + w - 3, y + 3, 1, 1);
     g.save(); g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = 'bold ' + fs + 'px system-ui'; g.fillStyle = '#2a1c12'; g.fillText(nm, x + w / 2, y + h / 2 + 1); g.restore();
+    var dk = signDim(); if (dk) { g.fillStyle = 'rgba(0,0,0,' + dk.toFixed(3) + ')'; g.fillRect(x - 1, y - 1, w + 2, h + 2); }
   }
+  /* Papan digambar di overlay() (sesudah tint malam). Redup halus 0.35*FX.n hanya di papan; siang (FX.n < .02) = 0, tampilan identik. */
+  function signDim() { return FX.n < .02 ? 0 : .35 * FX.n; }
   /* papan nama di atap (meta sign = kotak papan dalam piksel sprite): teks dari nama tempat, ikut bahasa */
   function roofSign(g, r, k, x0, y0) {
     var nm = null, i, p;
@@ -233,7 +236,8 @@ var Tmap = (function () {
     var bx = x0 + r.sign[0] * 2, by = y0 + r.sign[1] * 2, bw = r.sign[2] * 2, bh = r.sign[3] * 2, fs = 17;
     g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
     do { g.font = 'bold ' + fs + 'px system-ui'; fs--; } while (g.measureText(nm).width > bw - 12 && fs > 8);
-    g.fillStyle = '#2a1c12'; g.fillText(nm, bx + bw / 2 + 1, by + bh / 2 + 2); g.fillStyle = '#f6cf5a'; g.fillText(nm, bx + bw / 2, by + bh / 2 + 1);
+    var dk = signDim(), m = 1 - dk;
+    g.fillStyle = '#2a1c12'; g.fillText(nm, bx + bw / 2 + 1, by + bh / 2 + 2); g.fillStyle = dk ? 'rgb(' + Math.round(246 * m) + ',' + Math.round(207 * m) + ',' + Math.round(90 * m) + ')' : '#f6cf5a'; g.fillText(nm, bx + bw / 2, by + bh / 2 + 1);
     g.restore();
   }
   function wallName(k) {
@@ -330,6 +334,8 @@ var Tmap = (function () {
     if (!LBL.length) return;
     var P = [], i, j, k, l, w, h, y, hit, fs = LF;
     g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
+    for (i = 0; i < LBL.length; i++) { l = LBL[i]; if (l.k !== 'sign') continue; if (l.s) roofSign(g, l.r, l.o, l.x, l.y); else wallSign(g, l.r, l.x, l.y, l.nm); }
+    g.textAlign = 'center'; g.textBaseline = 'middle';
     for (i = 0; i < LBL.length; i++) {
       l = LBL[i]; if (l.k !== 'plate') continue;
       g.fillStyle = '#2a1c12'; g.fillRect(l.x - 1, l.y - 1, l.w + 2, l.h + 2); g.fillStyle = l.fill; g.fillRect(l.x, l.y, l.w, l.h);
@@ -339,7 +345,7 @@ var Tmap = (function () {
     }
     g.textBaseline = 'bottom'; g.font = 'bold ' + (fs + 1) + 'px system-ui'; g.lineWidth = 3; g.strokeStyle = 'rgba(16,24,17,.94)'; g.lineJoin = 'round';
     for (i = 0; i < LBL.length; i++) {
-      l = LBL[i]; if (l.k === 'plate') continue;
+      l = LBL[i]; if (l.k !== 'label') continue;
       w = Math.ceil(g.measureText(l.text).width) + 4; h = fs + 4; y = l.y;
       for (k = 0; k < 4; k++) {
         hit = false;
@@ -445,8 +451,8 @@ var Tmap = (function () {
           if (r.door && dp > .02) doorFx(g, r.door, fx0, fy0, dp);
           if (r.win && FX.n > .02) winFx(g, r, o, fx0, fy0);
         }
-        if (md != 'l' && r.door) { var wn = wallName(o.k); if (wn) wallSign(g, r, Math.round(sx - r.w), Math.round(sb - r.h * 2), wn); }
-        if (md != 'l' && r.sign) roofSign(g, r, o.k, Math.round(sx - r.w), Math.round(sb - r.h * 2));
+        if (md != 'l' && r.door) { var wn = wallName(o.k); if (wn) LBL.push({ k: 'sign', s: 0, r: r, x: Math.round(sx - r.w), y: Math.round(sb - r.h * 2), nm: wn }); }
+        if (md != 'l' && r.sign) LBL.push({ k: 'sign', s: 1, r: r, o: o.k, x: Math.round(sx - r.w), y: Math.round(sb - r.h * 2) });
         if (o.k == 'lamp' && FX.n > .02) LT.push([sx, Math.round(sb - r.h * 2) + 8, 46, .8]);
         if (o.biomeSign || o.placeSign) {   /* plat biome, atau plat tempat (mis. Hutan Jamur) */
           var wp = S && S.world, d = wp ? Math.hypot(wp.x / 32 - o.x / 16, wp.y / 32 - o.y / 16) : 99;
@@ -479,6 +485,6 @@ var Tmap = (function () {
     add(w.x * 2, w.y * 2, 140, function (sx, sb) { Anim.draw(g, 'windmill', tm, sx, sb, false, 2); }, tw ? tw.y * 2 + 1 : null);
     return out;
   }
-  return { init: init, ready: ready, data: data, update: update, draw: draw, tall: tall, fx: fx, lights: lights, farm: farm, explore: explore, hud: hud, collisionAt: collisionAt, railSolid: railSolid, hasTag: hasTag, nearService: nearService, nearPen: nearPen, overlay: overlay };
+  return { init: init, ready: ready, data: data, update: update, draw: draw, tall: tall, fx: fx, lights: lights, farm: farm, explore: explore, hud: hud, collisionAt: collisionAt, railSolid: railSolid, hasTag: hasTag, nearService: nearService, nearPen: nearPen, overlay: overlay, labelFont: labelFont };
 })();
 try { Tmap.init(); } catch (e) { }
