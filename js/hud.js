@@ -107,7 +107,7 @@ function hudAct(){
 }
 function hudDraw(){
  if(st!=='world')return;
- if(wFade){const a=wFade.t<.2?wFade.t/.2:Math.max(0,(.4-wFade.t)/.2);g.fillStyle='rgba(0,0,0,'+a.toFixed(3)+')';g.fillRect(-OX,0,VW,360)}
+ if(wFade){const a=intFadeAlpha();g.fillStyle='rgba(0,0,0,'+a.toFixed(3)+')';g.fillRect(-OX,0,VW,360)}
  if(lifeWorldQuick||wDlg||wTalk)return;
  hudEnsure();if(hudNameT>0)hudNameT-=1/60;
  if(!wI&&!wVon)hudMini();hudBar();hudAct();

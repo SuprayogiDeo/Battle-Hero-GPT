@@ -22,7 +22,7 @@ ok(Object.values(BT.ids).some(i => tileAt('decor', x0, top - 1) === i || tileAt(
 ok(Math.max(...ids) < 32 * 5, 'id tile jembatan dalam sheet 5 baris');
 ok(!I.objects.some(o => o.biomeSign && (o.x >> 4) >= x0 && (o.x >> 4) <= x1 && ((o.y >> 4) - 1) >= top - 1 && ((o.y >> 4) - 1) <= top + 3), 'papan biome tidak menutupi jembatan');
 // 4) minimap terbuka penuh; tanpa popup memancing/E-KETUK saat dekat air
-const tm = fs.readFileSync(path.join(root, 'js/tilemap.js'), 'utf8'); ok(/seen=true;/.test(tm) && !/seen=discKey/.test(tm), 'minimap langsung terbuka penuh');
+const tm = fs.readFileSync(path.join(root, 'js/tilemap.js'), 'utf8'); ok(!/seen=discKey/.test(tm) && !/rgba\(18,26,29/.test(tm) && /function bakeMini/.test(tm), 'minimap langsung terbuka penuh (tanpa fog)');
 for (const f of fs.readdirSync(path.join(root, 'js'))) { if (f === 'i18n.js') continue; const s = fs.readFileSync(path.join(root, 'js', f), 'utf8'); ok(!/'E \/ KETUK|MEMANCING|GIGITAN!/.test(s), 'popup memancing/E-KETUK tersisa di ' + f); }
 // 5) panel FOKUS: di bawah minimap, ketuk meminimalkan, status tersimpan di S.journal.fmin
 const src = fs.readFileSync(path.join(root, 'tools/test_browser_smoke.js'), 'utf8');

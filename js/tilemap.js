@@ -10,6 +10,12 @@ var Tmap = (function () {
   var CH = {}, CHL = [], CHSIZE = 32, CHMAX = 25, CHSEQ = 0, CHREQ = {}, CHFAIL = {}; // LRU cache; each baked canvas <=512x512
   var MAPC = null, MAPD = null, MAPSIZE = ''; // cached minimap raster; rebuild only when discovery changes
   var ZONE = '', ZT = 0, DISC_W = 128;
+  var LF = 8, LFT = -9;   /* ukuran font label (px kanvas logis): dijaga >= ~11px layar agar terbaca di HP */
+  function labelFont(g) {
+    if (T - LFT < 1) return LF; LFT = T;
+    try { var r = g.canvas.getBoundingClientRect(), k = r.height / 360; if (k > 0) LF = Math.max(8, Math.min(13, Math.round(11 / k))); } catch (e) { }
+    return LF;
+  }
   var BLK = Object.create(null), PENCNT = {}, LBL = []; /* BLK = tile padat tambahan (batu), PENCNT = jumlah hewan per kandang, LBL = plat/label yang digambar di lapisan atas */
   var FX = { n: 0, door: {} }, LT = [], GL = null, g_ = null;   /* n = tingkat malam 0..1, door = {huruf: 0..1}, LT = cahaya tampak frame ini */
   function glow() { if (GL) return GL; GL = cv(64, 64); var x = GL.getContext('2d'), q = x.createRadialGradient(32, 32, 0, 32, 32, 32); q.addColorStop(0, 'rgba(255,214,120,.85)'); q.addColorStop(.35, 'rgba(255,180,80,.35)'); q.addColorStop(1, 'rgba(255,150,50,0)'); x.fillStyle = q; x.fillRect(0, 0, 64, 64); return GL; }
@@ -105,21 +111,32 @@ var Tmap = (function () {
     if(b&&b.id!==ZONE){ZONE=b.id;ZT=3.2;}
     return changed?s:(disc||s);
   }
-  function hud(g, disc, px, py, OX, VW, dt) {
-    if(!V)return;ZT=Math.max(0,ZT-(dt||0));var uiScale=[.9,1,1.1][Math.max(0,Math.min(2,Math.round(Number(S&&S.set&&S.set.ui)||0))) ]||1,x0=4,y0=4,w=100*uiScale,h=76*uiScale,size=V.w+'x'+V.h,discKey=disc||'';
-    /* Minimap terbuka penuh sejak awal (tanpa penemuan); penemuan biome hanya memicu banner.
- Cache the raster so the phone HUD does not redraw 12k map tiles every animation frame. */
-    if(!MAPC||MAPD!==discKey||MAPSIZE!==size){
-      MAPC=cv(V.w,V.h);var mg=MAPC.getContext('2d');mg.imageSmoothingEnabled=false;
-      for(var ty=0;ty<V.h;ty++)for(var tx=0;tx<V.w;tx++){
-        var b=biomeAt(tx,ty),col=b&&b.color||'#6f9b58',ch=V.grid&&V.grid[ty]?V.grid[ty].charAt(tx):'.',seen=true;
-        if(seen){if(ch==='~')col='#398ec0';else if(ch===',')col='#b7a071';else if(ch==='X'||ch==='T')col='#3c4c36';else if(ch==='S'||ch==='R'||ch==='G'||ch==='Q'||ch==='F'||ch==='p'||ch==='f')col='#d4bf7b';}
-        mg.fillStyle=col;mg.fillRect(tx,ty,1,1);if(!seen){mg.fillStyle='rgba(18,26,29,.58)';mg.fillRect(tx,ty,1,1);}
-      }
-      MAPD=discKey;MAPSIZE=size;
+  /* Minimap: jendela 64x48 petak yang mengikuti pemain (~1.5 px/petak, terbaca), dengan jalan, jembatan, bangunan, dan penanda tempat.
+     Raster dasar di-cache; penanda dan pemain digambar tiap frame. Jalan dari V.roads (tools/build_minimap_roads.py). */
+  function bakeMini() {
+    MAPC = cv(V.w, V.h); var mg = MAPC.getContext('2d'), tx, ty, b, col, ch, rd = V.roads;
+    for (ty = 0; ty < V.h; ty++) for (tx = 0; tx < V.w; tx++) {
+      b = biomeAt(tx, ty); col = b && b.color || '#6f9b58'; ch = V.grid && V.grid[ty] ? V.grid[ty].charAt(tx) : '.';
+      if (ch === '~') col = '#398ec0'; else if (ch === ',') col = '#c7b27f'; else if (ch === '+') col = '#e0a85a'; else if (ch === 'X') col = '#5c8a4a'; else if (ch === 'T') col = '#2f5a35';
+      if (rd && rd[ty] && rd[ty].charAt(tx) === '1' && ch !== '~') col = '#c98f55';
+      mg.fillStyle = col; mg.fillRect(tx, ty, 1, 1);
     }
-    g.save();g.globalAlpha=.94;g.fillStyle='#17251d';g.fillRect(x0-3,y0-3,w+6,h+6);g.fillStyle='#304c37';g.fillRect(x0,y0,w,h);g.drawImage(MAPC,x0,y0,w,h);
-    g.fillStyle='#f7f0d0';g.fillRect(x0+px/V.w*w-1.5,y0+py/V.h*h-1.5,4,4);g.strokeStyle='#d8e8d5';g.lineWidth=1;g.strokeRect(x0+.5,y0+.5,w-1,h-1);g.restore();
+    var B = V.bld || {}, k; for (k in B) { var r = B[k], f = k === 'F'; mg.fillStyle = f ? '#6a5530' : '#4a2c14'; mg.fillRect(r[0], r[1], r[2] - r[0] + 1, r[3] - r[1] + 1); mg.fillStyle = f ? '#b9a064' : '#e8a95a'; mg.fillRect(r[0] + (f ? 0 : .35), r[1] + (f ? 0 : .35), r[2] - r[0] + 1 - (f ? 0 : .7), r[3] - r[1] + 1 - (f ? 0 : .7)); }
+    MAPD = V.w + 'x' + V.h + (rd ? 'r' : '');
+  }
+  function hud(g, disc, px, py, OX, VW, dt) {
+    if (!V) return; ZT = Math.max(0, ZT - (dt || 0));
+    var us = [.9, 1, 1.1][Math.max(0, Math.min(2, Math.round(Number(S && S.set && S.set.ui) || 0)))] || 1, x0 = 4, y0 = 4, w = Math.round(100 * us), h = Math.round(76 * us), VT = 64, HT = 48;
+    if (!MAPC || MAPD !== V.w + 'x' + V.h + (V.roads ? 'r' : '')) bakeMini();
+    var sx = Math.max(0, Math.min(V.w - VT, px - VT / 2)), sy = Math.max(0, Math.min(V.h - HT, py - HT / 2)), kx = w / VT, ky = h / HT;
+    g.save(); g.globalAlpha = .96; g.fillStyle = '#17251d'; g.fillRect(x0 - 3, y0 - 3, w + 6, h + 6);
+    g.beginPath(); g.rect(x0, y0, w, h); g.clip(); g.imageSmoothingEnabled = false; g.drawImage(MAPC, sx, sy, VT, HT, x0, y0, w, h);
+    var mk = function (tx, ty, c, r) { var mx = x0 + (tx - sx) * kx, my = y0 + (ty - sy) * ky; if (mx < x0 - 4 || my < y0 - 4 || mx > x0 + w + 4 || my > y0 + h + 4) return; g.fillStyle = '#17251d'; g.fillRect(mx - r - 1, my - r - 1, r * 2 + 2, r * 2 + 2); g.fillStyle = c; g.fillRect(mx - r, my - r, r * 2, r * 2); };
+    (V.places || []).forEach(function (p) { if (p.type !== 'animal_pen' || true) mk(p.x + .5, p.y + .5, '#ffd24a', 1.5); });
+    (V.labels || []).forEach(function (l) { mk(l.x, l.y, '#7fd8ff', 1.5); });
+    mk(px, py, Math.sin(Date.now() / 220) > 0 ? '#ffffff' : '#ff5a4a', 2.5 * us);
+    g.restore();
+    g.save(); g.strokeStyle = '#e6c45a'; g.lineWidth = 1; g.strokeRect(x0 - .5, y0 - .5, w + 1, h + 1); g.restore();
   }
   function chunkKey(x,y){return x+'_'+y;}
   /* Jembatan: hanya pagar (tepi) yang padat. Baris atas padat di y-lokal < topSolid, baris bawah di y-lokal >= botSolid (piksel dunia),
@@ -199,14 +216,14 @@ var Tmap = (function () {
   }
   /* papan nama menempel di dinding, tepat di atas bingkai pintu (posisi dihitung dari data door sprite) */
   function wallSign(g, r, x0, y0, nm) {
-    var d = r.door, w = WSC[nm];
-    if (!w) { g.save(); g.font = 'bold 8px system-ui'; w = WSC[nm] = Math.ceil(g.measureText(nm).width) + 8; g.restore(); }
-    var h = 12, x = Math.round(x0 + (d[0] + d[2] / 2) * 2 - w / 2), y = y0 + d[1] * 2 - 3 - h;
+    var d = r.door, key = nm + '|' + LF, c = WSC[key], fs, w;
+    if (!c) { fs = LF; g.save(); for (;;) { g.font = 'bold ' + fs + 'px system-ui'; w = Math.ceil(g.measureText(nm).width) + 8; if (w <= r.w * 2 - 6 || fs <= 7) break; fs--; } g.restore(); c = WSC[key] = { w: w, fs: fs }; }
+    w = c.w; fs = c.fs; var h = fs + 4, x = Math.round(x0 + (d[0] + d[2] / 2) * 2 - w / 2), y = y0 + d[1] * 2 - 3 - h;
     g.fillStyle = 'rgba(0,0,0,.28)'; g.fillRect(x + 1, y + 2, w, h);
     g.fillStyle = '#2a1c12'; g.fillRect(x - 1, y - 1, w + 2, h + 2); g.fillStyle = '#d9b982'; g.fillRect(x, y, w, h);
     g.fillStyle = 'rgba(255,255,255,.28)'; g.fillRect(x, y, w, 2); g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(x, y + h - 2, w, 2);
     g.fillStyle = '#2a1c12'; g.fillRect(x + 2, y + 3, 1, 1); g.fillRect(x + w - 3, y + 3, 1, 1);
-    g.save(); g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = 'bold 8px system-ui'; g.fillStyle = '#2a1c12'; g.fillText(nm, x + w / 2, y + h / 2 + 1); g.restore();
+    g.save(); g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = 'bold ' + fs + 'px system-ui'; g.fillStyle = '#2a1c12'; g.fillText(nm, x + w / 2, y + h / 2 + 1); g.restore();
   }
   /* papan nama di atap (meta sign = kotak papan dalam piksel sprite): teks dari nama tempat, ikut bahasa */
   function roofSign(g, r, k, x0, y0) {
@@ -302,26 +319,37 @@ var Tmap = (function () {
   }
   /* plat nama: tiang ikut urutan kedalaman, papan + teks digambar di lapisan atas agar tidak tertutup pohon */
   function drawPlate(g, sx, sb, text, fill) {
-    g.save(); g.font = 'bold 8px system-ui'; var tw = Math.ceil(g.measureText(text).width); g.restore();
-    var w = Math.max(30, tw + 12), h = 16;
+    var fs = LF; g.save(); g.font = 'bold ' + fs + 'px system-ui'; var tw = Math.ceil(g.measureText(text).width); g.restore();
+    var w = Math.max(30, tw + 12), h = fs + 8;
     g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(sx - 6, sb - 1, 12, 3);
     g.fillStyle = '#3f2815'; g.fillRect(sx - 3, sb - 22, 6, 22); g.fillStyle = '#8a5a33'; g.fillRect(sx - 2, sb - 21, 4, 21);
-    LBL.push({ k: 'plate', x: Math.round(sx - w / 2), y: Math.round(sb - 20 - h), w: w, h: h, fill: fill, text: text, cx: Math.round(sx) });
+    LBL.push({ k: 'plate', x: Math.round(sx - w / 2), y: Math.round(sb - 20 - h), w: w, h: h, fill: fill, text: text, cx: Math.round(sx), fs: fs });
   }
+  /* lapisan atas: plat dulu, lalu label melayang. Label yang bertabrakan dengan plat/label lain digeser ke atas (maks 4x) */
   function overlay(g) {
     if (!LBL.length) return;
+    var P = [], i, j, k, l, w, h, y, hit, fs = LF;
     g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
-    for (var i = 0; i < LBL.length; i++) {
-      var l = LBL[i];
-      if (l.k === 'plate') {
-        g.fillStyle = '#2a1c12'; g.fillRect(l.x - 1, l.y - 1, l.w + 2, l.h + 2); g.fillStyle = l.fill; g.fillRect(l.x, l.y, l.w, l.h);
-        g.fillStyle = 'rgba(255,255,255,.25)'; g.fillRect(l.x, l.y, l.w, 2); g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(l.x, l.y + l.h - 2, l.w, 2);
-        g.font = 'bold 8px system-ui'; g.fillStyle = '#2a1c12'; g.fillText(l.text, l.cx, l.y + l.h / 2 + 1);
-      } else {
-        g.globalAlpha = l.a; g.font = 'bold 9px system-ui'; g.textBaseline = 'bottom'; g.lineWidth = 3; g.strokeStyle = 'rgba(16,24,17,.94)'; g.strokeText(l.text, l.x, l.y); g.fillStyle = '#fff0b0'; g.fillText(l.text, l.x, l.y); g.globalAlpha = 1; g.textBaseline = 'middle';
-      }
+    for (i = 0; i < LBL.length; i++) {
+      l = LBL[i]; if (l.k !== 'plate') continue;
+      g.fillStyle = '#2a1c12'; g.fillRect(l.x - 1, l.y - 1, l.w + 2, l.h + 2); g.fillStyle = l.fill; g.fillRect(l.x, l.y, l.w, l.h);
+      g.fillStyle = 'rgba(255,255,255,.25)'; g.fillRect(l.x, l.y, l.w, 2); g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(l.x, l.y + l.h - 2, l.w, 2);
+      g.font = 'bold ' + (l.fs || 8) + 'px system-ui'; g.fillStyle = '#2a1c12'; g.fillText(l.text, l.cx, l.y + l.h / 2 + 1);
+      P.push([l.x - 1, l.y - 1, l.w + 2, l.h + 2]);
     }
-    g.restore(); LBL.length = 0;
+    g.textBaseline = 'bottom'; g.font = 'bold ' + (fs + 1) + 'px system-ui'; g.lineWidth = 3; g.strokeStyle = 'rgba(16,24,17,.94)'; g.lineJoin = 'round';
+    for (i = 0; i < LBL.length; i++) {
+      l = LBL[i]; if (l.k === 'plate') continue;
+      w = Math.ceil(g.measureText(l.text).width) + 4; h = fs + 4; y = l.y;
+      for (k = 0; k < 4; k++) {
+        hit = false;
+        for (j = 0; j < P.length; j++) if (l.x - w / 2 < P[j][0] + P[j][2] && l.x + w / 2 > P[j][0] && y - h < P[j][1] + P[j][3] && y > P[j][1]) { hit = true; y = Math.min(y, P[j][1]) - 1; break; }
+        if (!hit) break;
+      }
+      P.push([l.x - w / 2, y - h, w, h]);
+      g.globalAlpha = l.a; g.strokeText(l.text, l.x, y); g.fillStyle = '#fff0b0'; g.fillText(l.text, l.x, y);
+    }
+    g.globalAlpha = 1; g.restore(); LBL.length = 0;
   }
   function requestChunk(cx,cy){
     if(cx<0||cy<0||cx*CHSIZE>=V.w||cy*CHSIZE>=V.h)return;
@@ -398,7 +426,7 @@ var Tmap = (function () {
   }
   /* daftar objek tampak, siap diurutkan oleh world.js: {y,x,b,f} (y = kaki dunia, x/b = posisi layar) */
   function tall(g, cx, cy, OX, VW, snow, lockFn) {
-    var out = []; LBL.length = 0; if (!okf) return out; var tm = T * 1000;
+    var out = []; LBL.length = 0; if (!okf) return out; labelFont(g); var tm = T * 1000;
     function add(wx, wy, h, fn, ky) { var sx = wx - cx - OX, sb = wy - cy; if (sx < -150 || sx > VW + 150 || sb < -10 || sb > 360 + h) return; out.push({ y: ky == null ? wy : ky, x: sx, b: sb, f: function () { fn(sx, sb); } }); }
     for (var i = 0; i < OB.length; i++) {
       var o = OB[i], wx = o.x * 2, wy = o.y * 2;

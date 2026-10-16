@@ -102,7 +102,10 @@ function intEnter(b){
 }
 function intTryEnter(b){const m=intLockMsg(b);if(m){wSay(m,3);sfx('click');return}intEnter(b)}
 function intExit(){const back=wI&&wI.returnPos;intFade(()=>{wI=null;if(back&&S.world){S.world.x=back.x;S.world.y=back.y;if(S.hb)S.hb.sel=back.tool}wjid=null;wjx=wjy=0;wHint=0;sv();sfx('click')})}
-function intFadeStep(dt){if(!wFade)return;wFade.t+=dt;if(!wFade.done&&wFade.t>=.2){wFade.done=1;wFade.fn()}if(wFade.t>=.4)wFade=null}
+/* transisi pintu: gelap halus 0..FADE_SWAP, tahan hitam sebentar (adegan ditukar), lalu terang halus sampai FADE_END (total 0,52 dtk) */
+const FADE_SWAP=.24,FADE_HOLD=.30,FADE_END=.52;
+function intFadeAlpha(){if(!wFade)return 0;const t=wFade.t,e=t<FADE_SWAP?t/FADE_SWAP:t<FADE_HOLD?1:Math.max(0,(FADE_END-t)/(FADE_END-FADE_HOLD));return e*e*(3-2*e)}
+function intFadeStep(dt){if(!wFade)return;wFade.t+=dt;if(!wFade.done&&wFade.t>=FADE_SWAP){wFade.done=1;wFade.fn()}if(wFade.t>=FADE_END)wFade=null}
 /* objek interaktif terdekat / zona keluar */
 function intNear(){
  if(!wI)return null;const r=wI.room,px=wI.x,py=wI.y;

@@ -1,5 +1,13 @@
 # Changelog
 
+## Batch 9B-13 (polish visual dunia) — 0.4.8-rc.1 — minimap, label bangunan, transisi interior (cache v68)
+
+- `tilemap.js` minimap: jendela 64x48 petak mengikuti pemain (sebelumnya seluruh peta 128x96 dikecilkan ke 100x76 = <1 px/petak, jalan dan jembatan tak terlihat); jembatan `+`, jalan (`V.roads`), bangunan berbingkai, ladang, penanda tempat (emas) dan gerbang (biru), penanda pemain berkedip 5px berbingkai. Noise petak `X` diredam. Posisi/ukuran HUD tidak berubah.
+- `tilemap.js` label: ukuran font adaptif (`labelFont`, target >=11 px layar, 8-13 px logis) untuk papan dinding, plat, dan label melayang; papan dinding dijepit selebar sprite bangunan; label melayang yang bertabrakan digeser ke atas (maks 4x) dan plat digambar lebih dulu.
+- `interior.js`/`hud.js` transisi pintu: 0,52 dtk (sebelumnya 0,4), ease smoothstep, tahan hitam 0,06 dtk saat adegan ditukar (`intFadeAlpha`).
+- `tools/build_minimap_roads.py`: menambahkan `roads` ke `assets/world/index.json` (jalankan setelah `build_world.py`).
+- `tools/test_stage_9a.js`: asersi minimap menguji perilaku (tanpa fog), bukan string sumber.
+
 ## Batch 9B-12 (polish UI interaksi Pasar, Step 2) — 0.4.8-rc.1 — umpan balik interior, transisi layar, Desa/Toko, paging Gudang (cache v67)
 
 - `interior.js`: objek fungsional berkilau halus; objek terdekat disorot dengan siku sudut + tag nama (ID/EN); fade singkat saat layar dibuka dari / ditutup ke interior.
