@@ -85,9 +85,24 @@ fx.forEach(f=>{const q=f.t/f.d;if(f.k=='ring'){g.globalAlpha=1-q;g.strokeStyle=f
 tx.forEach(f=>T(f.s,f.x,f.y,f.c,f.big?16:11,'center'));
 if(inB()){const vg=g.createRadialGradient(320,180,150,320,180,420);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.45)');g.fillStyle=vg;g.fillRect(-OX,0,VW,360)}if(flash>0){g.fillStyle='rgba(255,255,255,'+Math.min(1,flash)+')';g.fillRect(-OX,0,VW,360)}
 g.restore();g.save();g.translate(OX,0);ui();g.restore()}
-function btn(x,y,w,h,s,on){g.fillStyle=on?'#2a7a4a':'#4a4a55';g.fillRect(x,y,w,h);g.strokeStyle='#000';g.lineWidth=1;g.strokeRect(x,y,w,h);T(s,x+w/2,y+h/2+4,'#fff',10,'center')}
+function btn(x,y,w,h,s,on){
+ const c=on?['#4aa56c','#2a7a4a','#1c5434']:['#6a6a7a','#4a4a55','#30303a'];
+ g.fillStyle='#07050d';g.fillRect(x,y,w,h);
+ g.fillStyle=c[1];g.fillRect(x+1,y+1,w-2,h-2);
+ g.fillStyle=c[0];g.fillRect(x+1,y+1,w-2,2);g.fillRect(x+1,y+1,2,h-2);
+ g.fillStyle=c[2];g.fillRect(x+1,y+h-3,w-2,2);g.fillRect(x+w-3,y+1,2,h-2);
+ g.fillStyle='rgba(255,255,255,.06)';g.fillRect(x+3,y+3,w-6,Math.floor((h-6)/2));
+ let z=10;const lab=tr(s);g.font='bold 10px monospace';const tw=g.measureText(lab).width;if(tw>w-8)z=Math.max(7,Math.floor(10*(w-8)/tw));
+ T(s,x+w/2,y+h/2+(z>=10?4:3),'#fff',z,'center')}
 function ov(a){g.fillStyle='rgba(8,6,16,'+a+')';g.fillRect(-OX,0,VW,360)}
-function card(x,y,w,h,col,ok){g.fillStyle='#2b2545';g.fillRect(x,y,w,h);g.strokeStyle=ok?col:'#444';g.lineWidth=2;g.strokeRect(x,y,w,h)}
+function card(x,y,w,h,col,ok){
+ const b=ok?col:'#444';
+ g.fillStyle='#2b2545';g.fillRect(x,y,w,h);
+ g.fillStyle='rgba(255,255,255,.05)';g.fillRect(x+2,y+2,w-4,Math.min(14,h-4));
+ g.fillStyle='rgba(0,0,0,.18)';g.fillRect(x+2,y+h-4,w-4,2);
+ g.strokeStyle=b;g.lineWidth=2;g.strokeRect(x,y,w,h);
+ g.strokeStyle='rgba(0,0,0,.45)';g.lineWidth=1;g.strokeRect(x+2.5,y+2.5,w-5,h-5);
+ if(w>40&&h>24){g.fillStyle=b;[[x-1,y-1],[x+w-3,y-1],[x-1,y+h-3],[x+w-3,y+h-3]].forEach(p=>g.fillRect(p[0],p[1],4,4))}}
 function menuB(){dayRefresh();const a=[];let y=62;if(S.run){a.push(['LANJUT STAGE '+S.run.stage,'cont',380,y,250,44]);y+=48;a.push(['MULAI BARU','play',380,y,250,30]);y+=34}else{a.push(['MULAI','play',380,y,250,50]);y+=54}
 [['STAGE','stages'],['PAHLAWAN','heroes'],['TOKO'+((S.ft>0||S.fe>0)?' (gratis!)':''),'shop'],['HADIAH','daily'],['MENARA HARIAN','tower'],['BOSS MINGGUAN','boss'],['ARENA','arena'],['EVENT SERBUAN','event']].forEach((m,i)=>a.push([m[0],m[1],380+(i%2)*128,y+Math.floor(i/2)*38,122,34]));a.push(['MISI & PENCAPAIAN'+(qClaimable()?' (!)':''),'quests',380,y+4*38,250,26]);a.push(['PENGATURAN','settings',380,y+4*38+30,250,26]);a.push(['?','howto',596,10,34,26]);a.push(['DUNIA (PROTOTIPE)','world',380,24,210,30]);return a}
 const STG=()=>{const a=[1];for(let v=5;v<=Math.max(20,best+10);v+=5)a.push(v);return a.slice(0,15)};

@@ -1,5 +1,14 @@
 # Changelog
 
+## Batch 9B-11 (polish UI interaksi Pasar) — 0.4.8-rc.1 — panel/tombol seragam, ikon item, perbaikan layout (cache v66)
+
+- `render.js`: outline teks memakai `lineJoin='round'` (hilangkan artefak "duri" pada huruf).
+- `screens.js`: `btn()` dan `card()` bergaya bevel/berpaku; label tombol mengecil otomatis bila kepanjangan.
+- `ranch.js`: ikon item prosedural `itemIcon()`; layar Pasar memakai ikon, panel tidak ditimpa tombol, petunjuk saat stok kosong.
+- `journal.js` / `life.js`: Dapur dan Pesanan memakai nama bahan berbahasa Indonesia/Inggris dan ikon; bahan cukup hijau, kurang merah; teks lebih besar.
+- `storagecraft.js`: label TAS/petunjuk tidak menimpa tombol; kolom Peti menampilkan nama bahan; nama bahan di daftar bengkel.
+- `interior.js`: lebar toast mengikuti teks.
+
 ## Batch 9B-10 (polish visual, Step 2) — 0.4.8-rc.1 — Pasar besar yang bisa dimasuki, kasir pindah ke dalam (cache v65)
 
 Aset: `tools/build_market_assets.py` (hall `b_market` 208x144 px + sprite interior `vendor`, `scale`, `market_table`). Data peta: `tools/fix_map_9f.py` (idempoten; index.json, chunk, village.json).

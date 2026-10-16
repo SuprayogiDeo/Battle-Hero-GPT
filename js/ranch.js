@@ -97,6 +97,27 @@ function ranchCollect(){
 }
 function ranchOpenMarket(){ranchSync(true);marketFrom='ranch';st='market';sfx('click');}
 let marketFrom='world';
+/* Ikon item kecil (telur, susu, ikan, dst). Bahan mentah memakai items.png lewat scItemIcon; sisanya digambar kode. s = ukuran px. */
+function itemIcon(id,x,y,s){
+ s=s||16;const u=s/16,o='#1a1220',L=Math.max(1,u*.9);
+ const ell=(cx,cy,rx,ry,f,rot)=>{g.beginPath();g.ellipse(x+cx*u,y+cy*u,rx*u,ry*u,rot||0,0,7);g.fillStyle=f;g.fill();g.strokeStyle=o;g.lineWidth=L;g.stroke()};
+ const rect=(a,b,w,h,f)=>{g.fillStyle=f;g.fillRect(x+a*u,y+b*u,w*u,h*u)};
+ const tri=(p,f)=>{g.beginPath();g.moveTo(x+p[0]*u,y+p[1]*u);g.lineTo(x+p[2]*u,y+p[3]*u);g.lineTo(x+p[4]*u,y+p[5]*u);g.closePath();g.fillStyle=f;g.fill();g.strokeStyle=o;g.lineWidth=L;g.stroke()};
+ g.save();
+ switch(id){
+  case'egg':ell(8,9,5,6.2,'#f6e3b4');ell(6.4,7,1.4,2,'rgba(255,255,255,.7)',-.4);break;
+  case'milk':rect(5,3,6,2.5,'#c9d6e8');rect(4,5.5,8,9,'#f4f4ee');rect(4,8,8,3.5,'#7fb4e6');g.strokeStyle=o;g.lineWidth=L;g.strokeRect(x+4*u,y+3*u,8*u,11.5*u);break;
+  case'truffle':ell(8,9.5,6,5,'#5a3b2a');ell(6,8,1,1,'#8a6246');ell(10,10.5,1,1,'#8a6246');ell(8,12,.9,.9,'#8a6246');break;
+  case'wool':ell(5.5,9,3.6,3.6,'#f2efe6');ell(10.5,9,3.6,3.6,'#f2efe6');ell(8,6.2,3.8,3.6,'#fbf9f2');ell(8,11,4,3,'#e8e4d8');break;
+  case'fish':tri([11,8,15.5,3.5,15.5,12.5],'#5c8fb8');ell(7,8,6,3.8,'#8bc2e4');ell(5,7,.9,.9,'#101018');rect(8,6.5,1,3,'rgba(255,255,255,.45)');break;
+  case'carrot':rect(7,1.5,2,3,'#58a84a');rect(9,2.5,2,2,'#58a84a');tri([4.5,5,11.5,5,8,15],'#ee8b2e');rect(6,7.5,3,1,'#c96a1c');break;
+  case'pumpkin':rect(7.3,2,1.6,3,'#4d8a3c');ell(5.5,9.5,3.8,5,'#e58a2c');ell(10.5,9.5,3.8,5,'#e58a2c');ell(8,9.5,2.4,5.2,'#f2a040');break;
+  case'moonflower':[[8,4.2],[12,7.2],[10.6,12],[5.4,12],[4,7.2]].forEach(p=>ell(p[0],p[1],2.8,2.8,'#cfe2ff'));ell(8,8.5,2.6,2.6,'#ffd96a');break;
+  default:if(typeof scItemIcon==='function'&&typeof SC_MATERIALS!=='undefined'&&SC_MATERIALS.some(m=>m.id===id))scItemIcon(id,x,y,s);
+ }
+ g.restore();
+}
+
 function ranchSellAll(){
  const r=ranchGet();ranchSync(false);let gold=0,units=0,left=RANCH.dailyGoldCap-r.soldGold;
  RPRODUCT.forEach(p=>{const id=p[0],val=RANIM[({egg:'chicken',milk:'cow',truffle:'pig',wool:'sheep'})[id]].sell,n=Math.min(r.stock[id],Math.floor(left/val));if(n>0){r.stock[id]-=n;gold+=n*val;left-=n*val;units+=n;}});
@@ -151,9 +172,9 @@ function ranchClick(x,y){const r=ranchGet();
 }
 function drawMarket(){
  const r=ranchGet();ranchSync(true);ov(.95);btn(6,5,76,28,'KEMBALI');T('PASAR',96,25,'#fc4',17);T('Emas: '+S.g,632,24,'#fc4',12,'right');
- card(28,47,584,222,'#b28b59',true);T('HASIL PETERNAKAN',46,68,'#fc4',12);
- RPRODUCT.forEach((p,i)=>{const y=83+i*42,cfg=RANIM[({egg:'chicken',milk:'cow',truffle:'pig',wool:'sheep'})[p[0]]];g.fillStyle='#29253b';g.fillRect(42,y,556,34);g.strokeStyle='#55455a';g.strokeRect(42.5,y+.5,555,33);g.fillStyle=cfg.color;g.fillRect(52,y+8,18,18);T(p[S.set.lang==='en'?2:1],82,y+14,'#fff',11);T('Stok: '+r.stock[p[0]],290,y+14,'#cde',10);T('Harga '+cfg.sell+' G',422,y+14,'#fc4',10);T(r.stock[p[0]]?'SIAP':'KOSONG',570,y+14,r.stock[p[0]]?'#8f8':'#777',9,'center')});
- const left=Math.max(0,RANCH.dailyGoldCap-r.soldGold);T('Batas penjualan hari ini: '+r.soldGold+'/'+RANCH.dailyGoldCap+' emas',320,267,'#fc4',10,'center');T('Produksi offline dibatasi maksimal 24 jam.',320,284,'#9cf',9,'center');btn(190,299,260,36,'JUAL SEMUA HASIL ('+left+' G TERSISA)',left>0&&RPRODUCT.some(p=>r.stock[p[0]]>0));
+ card(28,47,584,204,'#b28b59',true);T('HASIL PETERNAKAN',46,68,'#fc4',12);
+ RPRODUCT.forEach((p,i)=>{const y=83+i*42,cfg=RANIM[({egg:'chicken',milk:'cow',truffle:'pig',wool:'sheep'})[p[0]]];g.fillStyle='#29253b';g.fillRect(42,y,556,34);g.strokeStyle='#55455a';g.strokeRect(42.5,y+.5,555,33);g.fillStyle='#1a1630';g.fillRect(48,y+3,28,28);g.strokeStyle='#55455a';g.strokeRect(48.5,y+3.5,27,27);itemIcon(p[0],50,y+5,24);T(p[S.set.lang==='en'?2:1],86,y+21,'#fff',12);T('Stok: '+r.stock[p[0]],290,y+21,r.stock[p[0]]?'#fff':'#9ab',11);T('Harga '+cfg.sell+' G',422,y+21,'#fc4',11);T(r.stock[p[0]]?'SIAP':'KOSONG',570,y+21,r.stock[p[0]]?'#8f8':'#8a8aa0',10,'center')});
+ const left=Math.max(0,RANCH.dailyGoldCap-r.soldGold);T('Batas penjualan hari ini: '+r.soldGold+'/'+RANCH.dailyGoldCap+' emas',320,274,'#fc4',10,'center');T('Produksi offline dibatasi maksimal 24 jam.',320,291,'#9cf',9,'center');if(!RPRODUCT.some(p=>r.stock[p[0]]>0)){const hl=r.level?[ranchL('Belum ada hasil.','Nothing to sell yet.'),ranchL('Rawat hewan di kandang','Tend your animals at'),ranchL('lalu kembali ke sini.','the pen, then return.')]:[ranchL('Belum punya kandang.','No pen yet.'),ranchL('Bangun kandang & beli','Build a pen and buy'),ranchL('hewan untuk mulai.','animals to start.')];hl.forEach((t,i)=>T(t,34,296+i*13,'#9cf',10))}btn(190,299,260,36,'JUAL SEMUA HASIL ('+left+' G TERSISA)',left>0&&RPRODUCT.some(p=>r.stock[p[0]]>0));
 }
 function marketClick(x,y){if(y<34&&x<85){if(marketFrom==='ranch')st='ranch';else goBack();sfx('click');return}if(y>=298&&y<=340&&x>=185&&x<=455){ranchSellAll();return}}
 
